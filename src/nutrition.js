@@ -4,6 +4,7 @@
 
 import { NUTRITION, getDailyNutritionTargets } from './data.js';
 import { storage } from './storage.js';
+import { estimateTSS } from './fitness.js';
 
 let isEditSupplementsMode = false;
 let customSupplements = null;
@@ -20,12 +21,21 @@ export function renderNutritionPage() {
     const dailyLog = storage.getDailyLog(currentDate);
     const supplementsLog = storage.getSupplements(currentDate);
     
-    // Calculate active calories from workouts on this date
+    // Calculate active calories and TSS from workouts on this date
     const workouts = storage.getWorkoutLog(currentDate) || [];
     const activeCalories = workouts.reduce((sum, w) => sum + (parseInt(w.calories) || 0), 0);
+    const totalTSS = workouts.reduce((sum, w) => sum + (w.isSkipped ? 0 : estimateTSS(w)), 0);
     
     // Get dynamic targets
-    const targets = getDailyNutritionTargets(activeCalories);
+    const targets = getDailyNutritionTargets(activeCalories, totalTSS);
+
+    const dayTypeLabel = targets.dayType === 'high' ? 'High Carb Day' : targets.dayType === 'low' ? 'Low Carb Day' : 'Moderate Day';
+    const dayTypeDesc = targets.dayType === 'high' 
+      ? 'Ai avut un antrenament lung sau intens (TSS ridicat). Targetul tău de carbohidrați este la maximum pentru a reface glicogenul.'
+      : targets.dayType === 'low'
+      ? 'Zi de refacere sau antrenament ușor. Targetul tău de carbohidrați e scăzut, proteinele și grăsimile sunt ridicate pentru sațietate.'
+      : 'Echilibru clasic pentru susținerea unui efort moderat.';
+    const dayTypeColor = targets.dayType === 'high' ? 'var(--danger)' : targets.dayType === 'low' ? 'var(--success)' : 'var(--warning)';
 
     page.innerHTML = `
       <div class="page-body">
@@ -36,15 +46,14 @@ export function renderNutritionPage() {
           <button class="btn btn-ghost btn-sm" id="next-day">Mâine →</button>
         </div>
 
-        ${activeCalories > 0 ? `
-          <div style="background: rgba(139, 92, 246, 0.1); border: 1px solid var(--accent); padding: var(--space-md); border-radius: var(--radius-md); margin-top: var(--space-lg); display: flex; align-items: center; gap: var(--space-md);">
-            <div style="font-size: 24px;">🔥</div>
-            <div>
-              <div style="font-weight: 600; color: var(--accent);">Te-ai antrenat azi! (${activeCalories} kcal arse)</div>
-              <div style="font-size: 13px; color: var(--text-secondary);">Obiectivele tale de calorii și carbohidrați au fost ajustate automat pentru a-ți asigura recuperarea.</div>
-            </div>
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid ${dayTypeColor}; padding: var(--space-md); border-radius: var(--radius-md); margin-top: var(--space-lg); display: flex; align-items: center; gap: var(--space-md);">
+          <div style="font-size: 24px;">${targets.dayType === 'high' ? '🔥' : targets.dayType === 'low' ? '🥑' : '⚖️'}</div>
+          <div>
+            <div style="font-weight: 600; color: ${dayTypeColor};">${dayTypeLabel}</div>
+            <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">${dayTypeDesc}</div>
+            ${activeCalories > 0 ? `<div style="font-size: 11px; margin-top: 4px; color: var(--text-tertiary);">Calorii active din antrenamente: +${activeCalories} kcal | TSS estimat: ${totalTSS}</div>` : ''}
           </div>
-        ` : ''}
+        </div>
 
         <div class="grid-2" style="margin-top: var(--space-lg)">
           <!-- Macros -->

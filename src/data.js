@@ -305,22 +305,39 @@ export function getBMR() {
   return Math.round(10 * p.weightKg + 6.25 * p.heightCm - 5 * p.age + 5);
 }
 
-// Get dynamic nutrition targets based on daily active calories (from Coros)
-export function getDailyNutritionTargets(activeCalories = 0) {
+// Get dynamic nutrition targets based on daily active calories (from Coros) and TSS
+export function getDailyNutritionTargets(activeCalories = 0, totalTSS = 0) {
   const bmr = getBMR();
   const neat = bmr * 1.2; // Sedentary/office multiplier for base day
   const targetCalories = Math.round(neat + activeCalories);
+  
+  let dayType = 'moderate';
+  if (totalTSS >= 100) dayType = 'high';
+  else if (totalTSS < 40 && activeCalories < 300) dayType = 'low';
 
-  // Macros (Protein fixed at ~2g/kg, Fat fixed at 0.8g/kg)
-  const protein = Math.round(USER_PROFILE.weightKg * 2); // 190g
-  const fat = Math.round(USER_PROFILE.weightKg * 0.8); // 76g
+  let protein, fat, carbs;
+
+  if (dayType === 'high') {
+    // High Carb Day (Long bike/run): prioritize carbs, keep fat lower
+    protein = Math.round(USER_PROFILE.weightKg * 2.0); // 190g
+    fat = Math.round(USER_PROFILE.weightKg * 0.8); // 76g
+  } else if (dayType === 'low') {
+    // Low Carb Day (Rest/Gym): prioritize protein & fat for satiety, low carbs
+    protein = Math.round(USER_PROFILE.weightKg * 2.2); // 209g
+    fat = Math.round(USER_PROFILE.weightKg * 1.2); // 114g
+  } else {
+    // Moderate Day (Standard training)
+    protein = Math.round(USER_PROFILE.weightKg * 2.1); // 200g
+    fat = Math.round(USER_PROFILE.weightKg * 1.0); // 95g
+  }
   
   // Remaining calories go to Carbs
   // Protein = 4 kcal/g, Fat = 9 kcal/g, Carbs = 4 kcal/g
   const remainingCals = targetCalories - (protein * 4) - (fat * 9);
-  const carbs = Math.max(100, Math.round(remainingCals / 4));
+  carbs = Math.max(80, Math.round(remainingCals / 4));
 
   return {
+    dayType,
     bmr,
     targetCalories,
     protein,
