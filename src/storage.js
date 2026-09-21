@@ -208,10 +208,14 @@ export const storage = {
   // Export all data
   exportAll() {
     const data = {};
+    const legacyKeys = ['workouts', 'gear', 'daily', 'benchmarks', 'equipment', 'gym', 'customGymPrograms', 'intervalsSettings', 'customSupplements', 'supplements', 'gutTraining', 'week_schedule_1', 'week_schedule_2', 'week_schedule_3', 'week_schedule_4', 'week_schedule_5', 'week_schedule_6', 'week_schedule_7', 'week_schedule_8', 'week_schedule_9', 'week_schedule_10'];
+
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
       if (key.startsWith(STORAGE_PREFIX)) {
         data[key.replace(STORAGE_PREFIX, '')] = JSON.parse(localStorage.getItem(key));
+      } else if (legacyKeys.includes(key) || key.startsWith('week_schedule_')) {
+        data[key] = JSON.parse(localStorage.getItem(key));
       }
     }
     return data;
