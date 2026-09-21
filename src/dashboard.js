@@ -21,6 +21,16 @@ export function renderDashboard() {
   const weekVolume = getWeekVolume(weekNum);
   const deload = isDeloadWeek(weekNum);
 
+  const weekScheduleKey = `week_schedule_${weekNum}`;
+  const weekSchedule = storage.get(weekScheduleKey) || getDynamicWeekSchedule(weekNum);
+  
+  let scheduledGymSessions = 0;
+  weekSchedule.forEach(day => {
+    day.sessions.forEach(s => {
+      if (s.type === 'gym' || s.type === 'conditioning') scheduledGymSessions++;
+    });
+  });
+
   // Calculate actual completed volume from logs
   const weekStartDate = new Date(PLAN_START);
   weekStartDate.setDate(PLAN_START.getDate() + (weekNum - 1) * 7);
@@ -138,8 +148,8 @@ export function renderDashboard() {
         <div class="stat-card gym">
           <div class="stat-label">🏋️ Sală / Săpt</div>
           <div class="stat-value">
-            <span style="color: ${actualGym >= weekVolume.gym ? 'var(--success)' : 'inherit'}">${actualGym}x</span> 
-            <span style="font-size: 16px; color: var(--text-tertiary); font-weight: 400">/ ${weekVolume ? weekVolume.gym + 'x' : '—'}</span>
+            <span style="color: ${actualGym >= scheduledGymSessions ? 'var(--success)' : 'inherit'}">${actualGym}x</span> 
+            <span style="font-size: 16px; color: var(--text-tertiary); font-weight: 400">/ ${scheduledGymSessions}x</span>
           </div>
           <div class="stat-subtext">sesiuni</div>
         </div>
@@ -190,11 +200,7 @@ export function renderDashboard() {
           <div class="card-badge">${phase.description}</div>
         </div>
         <div class="week-schedule">
-          ${(() => {
-            const weekScheduleKey = `week_schedule_${weekNum}`;
-            const currentSchedule = storage.get(weekScheduleKey) || getDynamicWeekSchedule(weekNum);
-
-            return currentSchedule.map((day, dayIdx) => {
+          ${weekSchedule.map((day, dayIdx) => {
               const isToday = day.day === todayName;
               const dayDate = new Date(weekStartDate);
               dayDate.setDate(dayDate.getDate() + dayIdx);
@@ -332,8 +338,7 @@ export function renderDashboard() {
 
               html += `</div>`;
               return html;
-            }).join('');
-          })()}
+            }).join('')}
         </div>
       </div>
 
