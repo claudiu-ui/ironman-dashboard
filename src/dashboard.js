@@ -5,12 +5,17 @@
 import { getCurrentWeek, getDaysUntilRace, getCurrentPhase, getWeekVolume, getDynamicWeekSchedule, BENCHMARKS, RACE_TARGETS, PHASES, PLAN_START, isDeloadWeek, HR_ZONES } from './data.js';
 import { storage } from './storage.js';
 import { getFitnessMetrics } from './fitness.js';
+import { renderCurrentRoute } from './router.js';
+
+let viewingWeek = null;
 
 export function renderDashboard() {
   const page = document.createElement('div');
   page.className = 'dashboard-page';
 
-  const weekNum = getCurrentWeek();
+  if (!viewingWeek) viewingWeek = getCurrentWeek();
+  const weekNum = viewingWeek;
+  const currentRealWeek = getCurrentWeek();
   const phase = getCurrentPhase(weekNum);
   const daysLeft = getDaysUntilRace();
   const weekVolume = getWeekVolume(weekNum);
@@ -175,8 +180,13 @@ export function renderDashboard() {
 
       <!-- Week Schedule with COMPLETED STATUS -->
       <div class="card animate-in animate-in-delay-2" style="margin-top: var(--space-lg)">
-        <div class="card-header">
-          <div class="card-title">📅 Programul Săptămânii ${weekNum} ${deload ? '(🔄 Deload)' : ''}</div>
+        <div class="card-header" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button class="btn btn-ghost btn-sm" onclick="window.__changeWeek(-1)" style="padding: 4px 8px; font-size: 14px;">◀</button>
+            <div class="card-title">📅 Săptămâna ${weekNum} ${deload ? '(🔄 Deload)' : ''}</div>
+            <button class="btn btn-ghost btn-sm" onclick="window.__changeWeek(1)" style="padding: 4px 8px; font-size: 14px;">▶</button>
+            ${weekNum !== currentRealWeek ? `<button class="btn btn-ghost btn-sm" onclick="window.__resetWeek()" style="font-size: 11px; padding: 4px 8px; margin-left: 8px;">Azi</button>` : ''}
+          </div>
           <div class="card-badge">${phase.description}</div>
         </div>
         <div class="week-schedule">
@@ -810,6 +820,20 @@ async function loadAndRenderFitnessWidget(page) {
           </div>
         </div>
       </div>`;
+
+  // Attach global nav functions if not already present
+  if (!window.__changeWeek) {
+    window.__changeWeek = (offset) => {
+      viewingWeek += offset;
+      if (viewingWeek < 1) viewingWeek = 1;
+      if (viewingWeek > 48) viewingWeek = 48;
+      renderCurrentRoute();
+    };
+    window.__resetWeek = () => {
+      viewingWeek = null;
+      renderCurrentRoute();
+    };
+  }
 
     // Wire refresh button
     window._refreshFitnessWidget = async () => {
