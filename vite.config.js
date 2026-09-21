@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  base: '/ironman-dashboard/',
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
