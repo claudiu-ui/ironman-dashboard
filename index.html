@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="Ironman Training Dashboard — Claudiu Iordache | Pregătire Ironman 2027" />
+  <meta name="theme-color" content="#0a0a0f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Ironman Dashboard — Claudiu Iordache</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+</head>
+<body>
+  
+  <div id="app">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <div class="logo-icon">M</div>
+          <div class="logo-text">
+            <span>IRONMAN</span>
+            <span class="logo-subtext">Vitoria-Gasteiz 2027</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="sidebar-nav">
+        <div class="nav-section">Dashboard</div>
+        <a href="#/" class="nav-item active" data-route="/">
+          <span class="nav-icon">📊</span>
+          Overview
+        </a>
+        <a href="#/analytics" class="nav-item" data-route="/analytics">
+          <span class="nav-icon">📈</span>
+          Analytics (Load)
+        </a>
+        
+        <div class="nav-section">Antrenament</div>
+        <a href="#/gym" class="nav-item" data-route="/gym">
+          <span class="nav-icon">🏋️</span>
+          Program Sală
+        </a>
+        <a href="#/gear" class="nav-item" data-route="/gear">
+          <span class="nav-icon">👟</span>
+          Echipament
+        </a>
+        <a href="#/fueling" class="nav-item" data-route="/fueling">
+          <span class="nav-icon">🚀</span>
+          Nutriție Cursă
+        </a>
+        <a href="#/nutrition" class="nav-item" data-route="/nutrition">
+          <span class="nav-icon">🍏</span>
+          Lifestyle
+        </a>
+      </div>
+      
+      <div class="sidebar-footer">
+        <button id="log-workout-btn" class="btn btn-primary" style="width: 100%; justify-content: center; margin-bottom: 12px;">
+          + Loghează
+        </button>
+        <div class="user-profile">
+          <div class="avatar">CI</div>
+          <div class="user-info">
+            <div class="user-name">Claudiu Iordache</div>
+            <a href="#/settings" class="user-settings" data-route="/settings">⚙️ Setări Profil</a>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main id="main-content">
+      <!-- Injected by router -->
+    </main>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

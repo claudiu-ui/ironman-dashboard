@@ -1,0 +1,696 @@
+/* ============================================
+   Custom Overrides & Enhancements
+   ============================================ */
+
+/* --- Drag & Drop --- */
+.day-column.drag-over {
+  background: rgba(139, 92, 246, 0.08);
+  border-radius: var(--radius-md);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.session-block.dragging {
+  opacity: 0.4;
+  transform: scale(0.95);
+  border: 1px dashed var(--accent);
+}
+
+/* --- Layout --- */
+.page-body {
+  padding-bottom: 100px; /* space for mobile nav */
+}
+
+/* ============================================
+   Extra Component Styles
+   ============================================ */
+
+/* --- Fatigue Indicator --- */
+.fatigue-indicator {
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: var(--space-md);
+  border: 1px solid;
+}
+.fatigue-indicator.low { background: rgba(34, 197, 94, 0.1); border-color: rgba(34, 197, 94, 0.3); color: var(--success); }
+.fatigue-indicator.medium { background: rgba(234, 179, 8, 0.1); border-color: rgba(234, 179, 8, 0.3); color: var(--warning); }
+.fatigue-indicator.high { background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); color: var(--danger); }
+
+/* --- Workout Details Modal --- */
+.wd-section-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-tertiary);
+  margin-bottom: var(--space-sm);
+  font-weight: 600;
+}
+.wd-targets-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.wd-targets-list li {
+  background: var(--surface-light);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  border-left: 3px solid var(--primary);
+}
+.wd-structure-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.wd-step {
+  background: rgba(0,0,0,0.2);
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+.wd-step-name {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+.wd-step-desc {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* --- Phase Progress --- */
+.phase-progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.phase-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  padding: var(--space-sm) 0;
+}
+
+.phase-row.current {
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-glass);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+}
+
+.phase-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-width: 200px;
+}
+
+.phase-icon {
+  font-size: 16px;
+}
+
+.phase-name {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.phase-weeks {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+}
+
+.phase-bar-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.phase-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--bg-input);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.phase-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.phase-pct {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  min-width: 35px;
+  text-align: right;
+}
+
+/* --- Volume Details --- */
+.volume-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.volume-row {
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  border-left: 3px solid;
+}
+
+.volume-row.swim { background: var(--swim-bg); border-color: var(--swim); }
+.volume-row.run { background: var(--run-bg); border-color: var(--run); }
+.volume-row.bike { background: var(--bike-bg); border-color: var(--bike); }
+.volume-row.gym { background: var(--gym-bg); border-color: var(--gym); }
+
+.volume-row-label {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: var(--space-sm);
+}
+
+.volume-row-values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+}
+
+.volume-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.volume-item-label {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.volume-item-value {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* --- Race Targets --- */
+.race-targets-grid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-lg);
+  padding: var(--space-lg) 0;
+}
+
+.race-target {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-lg) var(--space-xl);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-glass);
+  transition: all var(--transition-base);
+  min-width: 160px;
+}
+
+.race-target:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-medium);
+}
+
+.swim-target { border-color: rgba(6, 182, 212, 0.2); }
+.swim-target:hover { border-color: var(--swim); box-shadow: 0 8px 24px var(--swim-glow); }
+.bike-target { border-color: rgba(34, 197, 94, 0.2); }
+.bike-target:hover { border-color: var(--bike); box-shadow: 0 8px 24px var(--bike-glow); }
+.run-target { border-color: rgba(249, 115, 22, 0.2); }
+.run-target:hover { border-color: var(--run); box-shadow: 0 8px 24px var(--run-glow); }
+
+.race-target-icon { font-size: 32px; }
+
+.race-target-distance {
+  font-size: 18px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+
+.race-target-time {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.race-target-arrow {
+  font-size: 24px;
+  color: var(--text-tertiary);
+}
+
+/* --- Gym Exercises --- */
+.gym-exercises {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.gym-exercise-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  background: var(--bg-glass);
+  border: 1px solid var(--border-subtle);
+  transition: all var(--transition-fast);
+  cursor: default;
+}
+
+.gym-exercise-row:hover {
+  border-color: var(--border-medium);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.gym-exercise-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--gym-bg);
+  color: var(--gym);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.gym-exercise-info {
+  flex: 1;
+}
+
+.gym-exercise-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.gym-exercise-meta {
+  display: flex;
+  gap: var(--space-md);
+  font-size: 12px;
+}
+
+.gym-sets {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.gym-rest {
+  color: var(--text-tertiary);
+}
+
+.gym-exercise-notes {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* --- Conditioning --- */
+.conditioning-variants {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.conditioning-variant {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  overflow: hidden;
+}
+
+.conditioning-variant-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-md);
+  background: var(--conditioning-bg);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.conditioning-variant-name {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--conditioning);
+}
+
+.conditioning-variant-format {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+}
+
+.conditioning-stations {
+  display: flex;
+  flex-direction: column;
+}
+
+.conditioning-station {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: 8px var(--space-md);
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 13px;
+  transition: background var(--transition-fast);
+}
+
+.conditioning-station:last-child { border-bottom: none; }
+.conditioning-station:hover { background: rgba(255, 255, 255, 0.02); }
+
+.station-num {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--conditioning-bg);
+  color: var(--conditioning);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.station-name {
+  color: var(--text-secondary);
+}
+
+/* --- Supplements --- */
+.supplements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: var(--space-sm);
+}
+
+.supplement-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  background: var(--bg-glass);
+  border: 1px solid var(--border-subtle);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.supplement-item:hover {
+  border-color: var(--border-medium);
+}
+
+.supplement-item.taken {
+  border-color: rgba(34, 197, 94, 0.3);
+  background: rgba(34, 197, 94, 0.06);
+}
+
+.supplement-check {
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--border-medium);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+}
+
+.supplement-item.taken .supplement-check {
+  background: var(--success);
+  border-color: var(--success);
+  color: white;
+}
+
+.supplements-edit-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.supplement-name {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.supplement-dose {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+/* --- Date Picker Bar --- */
+.date-picker-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+}
+
+/* --- Toast --- */
+.toast {
+  position: fixed;
+  bottom: var(--space-xl);
+  right: var(--space-xl);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all var(--transition-base);
+}
+
+.toast.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* --- Responsive overrides --- */
+@media (max-width: 768px) {
+  .race-targets-grid {
+    flex-direction: column;
+  }
+  .race-target-arrow {
+    transform: rotate(90deg);
+  }
+  .phase-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-sm);
+  }
+  .phase-bar-container {
+    width: 100%;
+  }
+  .phase-info {
+    min-width: auto;
+  }
+  .supplements-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================
+   Completed Workout Indicators (Dashboard)
+   ============================================ */
+
+.session-block.completed {
+  position: relative;
+}
+
+.session-completed-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.session-actual-data {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.actual-metric {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--success);
+  background: rgba(34, 197, 94, 0.1);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+
+/* ============================================
+   Gym Progressive Overload Tracking
+   ============================================ */
+
+.gym-last-session {
+  margin-top: 6px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  background: rgba(139, 92, 246, 0.06);
+  border: 1px solid rgba(139, 92, 246, 0.15);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.last-session-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-tertiary);
+  font-weight: 600;
+  width: 100%;
+}
+
+.last-session-set {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--accent);
+  background: rgba(139, 92, 246, 0.1);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.last-session-volume {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-tertiary);
+  margin-left: auto;
+}
+
+.gym-today-session {
+  margin-top: 6px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  background: rgba(34, 197, 94, 0.06);
+  border: 1px solid rgba(34, 197, 94, 0.15);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.today-session-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--success);
+  font-weight: 600;
+  width: 100%;
+}
+
+.today-session-set {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--success);
+  background: rgba(34, 197, 94, 0.1);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.today-session-set.improved {
+  background: rgba(34, 197, 94, 0.2);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  font-weight: 700;
+}
+
+.today-session-volume {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  color: var(--text-tertiary);
+  margin-left: auto;
+}
+
+/* ============================================
+   Gym Logging Modal
+   ============================================ */
+
+.gym-log-exercise {
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-lg);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.gym-log-exercise:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.gym-log-exercise-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gym);
+  margin-bottom: var(--space-sm);
+}
+
+.gym-log-sets {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.gym-log-sets-header {
+  display: flex;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 4px;
+}
+
+.gym-log-set-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gym-log-set-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--gym-bg);
+  color: var(--gym);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
