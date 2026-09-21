@@ -45,6 +45,7 @@ export function renderSettingsPage() {
           <button class="btn btn-ghost" id="sync-intervals-btn" ${!settings.athleteId || !settings.apiKey ? 'disabled' : ''}>
             🔄 Sincronizează Acum
           </button>
+          <span id="sync-status" style="font-size: 13px; font-weight: 500;"></span>
         </div>
       </div>
       </div>
