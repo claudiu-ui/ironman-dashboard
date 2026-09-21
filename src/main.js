@@ -86,6 +86,11 @@ function buildApp() {
           <span class="nav-icon">💾</span>
           Exportă Date
         </a>
+        <a class="sidebar-link" id="import-data-btn" onclick="event.preventDefault()">
+          <span class="nav-icon">📂</span>
+          Importă Date
+        </a>
+        <input type="file" id="import-data-file" accept=".json" style="display: none;" />
       </nav>
 
       <div class="sidebar-footer">
@@ -720,6 +725,32 @@ function buildApp() {
       URL.revokeObjectURL(url);
       showToast('💾 Date exportate!');
     });
+  });
+
+  // Import data
+  const importInput = document.getElementById('import-data-file');
+  document.getElementById('import-data-btn')?.addEventListener('click', () => {
+    importInput?.click();
+  });
+
+  importInput?.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const data = JSON.parse(event.target.result);
+        const { storage } = await import('./storage.js');
+        storage.importAll(data);
+        showToast('📂 Date importate cu succes! Se reîncarcă...');
+        setTimeout(() => location.reload(), 1500);
+      } catch (err) {
+        showToast('❌ Eroare la citirea fișierului: ' + err.message);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = ''; // reset
   });
 
   // Init router
