@@ -133,6 +133,33 @@ export function renderNutritionPage() {
             </button>
           ` : ''}
         </div>
+
+        <!-- Injury & Niggles Tracker -->
+        <div class="card animate-in animate-in-delay-4" style="margin-top: var(--space-lg)">
+          <div class="card-header">
+            <div class="card-title">🩺 Sănătate & Accidentări (Niggles)</div>
+          </div>
+          <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: var(--space-md);">
+            Urmărește micile dureri pentru a preveni accidentările serioase.
+          </p>
+          <div id="niggles-list" style="display: flex; flex-direction: column; gap: var(--space-sm); margin-bottom: var(--space-md);">
+            <!-- Rendered via JS -->
+          </div>
+          <form id="niggle-form" style="background: rgba(255,255,255,0.02); padding: var(--space-md); border-radius: var(--radius-md); border: 1px dashed rgba(255,255,255,0.1);">
+            <div style="font-size: 13px; font-weight: bold; margin-bottom: 8px;">Adaugă / Actualizează Durere</div>
+            <div class="grid-2" style="gap: 12px; margin-bottom: 12px;">
+              <input type="text" id="niggle-part" class="form-input" placeholder="Zonă (ex: Genunchi Stâng)" required />
+              <input type="number" id="niggle-pain" class="form-input" min="1" max="10" placeholder="Durere (1-10)" required />
+              <select id="niggle-trend" class="form-input" required>
+                <option value="stable">➡️ Stabil (Nu se schimbă)</option>
+                <option value="worse">📈 În creștere (Mai rău)</option>
+                <option value="better">📉 În scădere (Mai bine)</option>
+              </select>
+              <input type="text" id="niggle-notes" class="form-input" placeholder="Notițe scurte..." />
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm" style="width: 100%; justify-content: center;">Salvează Durere</button>
+          </form>
+        </div>
       </div>
     `;
 
@@ -240,6 +267,52 @@ export function renderNutritionPage() {
       isEditSupplementsMode = false;
       render();
     });
+
+    // Niggles logic
+    const renderNigglesList = () => {
+      const niggles = storage.getNiggles();
+      const container = page.querySelector('#niggles-list');
+      if (!container) return;
+      if (niggles.length === 0) {
+        container.innerHTML = '<div style="font-size: 13px; color: var(--text-tertiary);">Nicio durere activă. Ești blindat! 🛡️</div>';
+        return;
+      }
+      container.innerHTML = niggles.map(n => {
+        let trendIcon = n.trend === 'worse' ? '📈' : n.trend === 'better' ? '📉' : '➡️';
+        let painColor = n.pain >= 7 ? 'var(--danger)' : n.pain >= 4 ? 'var(--warning)' : 'var(--success)';
+        return `
+          <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; border-left: 3px solid ${painColor}; margin-bottom: 8px;">
+            <div>
+              <div style="font-weight: 500; font-size: 14px;">${n.part}</div>
+              <div style="font-size: 12px; color: var(--text-secondary);">${trendIcon} Durere: ${n.pain}/10 ${n.notes ? `• ${n.notes}` : ''}</div>
+              <div style="font-size: 10px; color: var(--text-tertiary); margin-top: 4px;">Adăugat: ${n.date}</div>
+            </div>
+            <button class="btn btn-ghost btn-sm text-danger" onclick="window._deleteNiggle(${n.id})">❌</button>
+          </div>
+        `;
+      }).join('');
+    };
+
+    window._deleteNiggle = (id) => {
+      storage.deleteNiggle(id);
+      renderNigglesList();
+    };
+
+    const niggleForm = page.querySelector('#niggle-form');
+    niggleForm?.addEventListener('submit', (e) => {
+      e.preventDefault();
+      storage.addNiggle({
+        part: page.querySelector('#niggle-part').value,
+        pain: parseInt(page.querySelector('#niggle-pain').value),
+        trend: page.querySelector('#niggle-trend').value,
+        notes: page.querySelector('#niggle-notes').value,
+        date: new Date().toLocaleDateString('ro-RO')
+      });
+      niggleForm.reset();
+      renderNigglesList();
+    });
+
+    renderNigglesList();
   }
 
   function saveSupplementsEdits() {

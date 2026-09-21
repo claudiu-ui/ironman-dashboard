@@ -67,6 +67,10 @@ function buildApp() {
           <span class="nav-icon">📈</span>
           Analytics
         </a>
+        <a class="sidebar-link" data-route="/fueling" onclick="event.preventDefault()">
+          <span class="nav-icon">🚀</span>
+          Race & Fueling
+        </a>
         <a class="sidebar-link" data-route="/gear" onclick="event.preventDefault()">
           <span class="nav-icon">👟</span>
           Echipament

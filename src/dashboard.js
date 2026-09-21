@@ -97,12 +97,16 @@ export function renderDashboard() {
   // Fitness Metrics Widget — renders async with real data
   const fitnessWidgetHtml = renderFitnessWidgetPlaceholder();
   // Async update after DOM renders
-  setTimeout(() => loadAndRenderFitnessWidget(page), 0);
+  setTimeout(() => {
+    loadAndRenderFitnessWidget(page);
+    loadWeatherWidget(page.querySelector('#weather-widget-container'));
+  }, 0);
 
   page.innerHTML = `
     <div class="page-body">
       <!-- Hero Stats & Fatigue -->
       <div id="fitness-widget-container">${fitnessWidgetHtml}</div>
+      <div id="weather-widget-container" style="margin-top: var(--space-md)"></div>
       <div class="stats-grid animate-in" style="margin-top: var(--space-md)">
         <div class="stat-card" style="display: flex; flex-direction: column; justify-content: space-between;">
           <div>
@@ -850,5 +854,81 @@ async function loadAndRenderFitnessWidget(page) {
   } catch (e) {
     console.error('Fitness widget error:', e);
     container.innerHTML = `<div style="padding:12px;color:var(--text-tertiary);font-size:12px;">⚠️ Eroare la încărcarea metricilor: ${e.message}</div>`;
+  }
+  }
+}
+
+// ============================================
+// Weather Widget
+// ============================================
+async function loadWeatherWidget(container) {
+  if (!container) return;
+  
+  // Placeholder while loading
+  container.innerHTML = `
+    <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: var(--space-sm) var(--space-md); border-radius: var(--radius-md); display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-tertiary);">
+      <span>⏳</span> Se încarcă prognoza meteo...
+    </div>
+  `;
+
+  try {
+    // Defaulting to Bucharest coordinates
+    const url = 'https://api.open-meteo.com/v1/forecast?latitude=44.4323&longitude=26.1063&daily=weathercode,temperature_2m_max,temperature_2m_min,windspeed_10m_max&timezone=Europe%2FBucharest&forecast_days=3';
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Vreme indisponibilă');
+    const data = await res.json();
+    
+    if (!data.daily || !data.daily.time) throw new Error('Format date greșit');
+    
+    const days = data.daily;
+    const dayNames = ['Duminică', 'Luni', 'Marți', 'Miercuri', 'Joi', 'Vineri', 'Sâmbătă'];
+    
+    function getWeatherEmoji(code) {
+      if (code === 0) return '☀️';
+      if (code >= 1 && code <= 3) return '⛅';
+      if (code >= 45 && code <= 48) return '🌫️';
+      if (code >= 51 && code <= 67) return '🌧️';
+      if (code >= 71 && code <= 77) return '❄️';
+      if (code >= 80 && code <= 82) return '🌦️';
+      if (code >= 95 && code <= 99) return '⛈️';
+      return '☁️';
+    }
+
+    let forecastHtml = days.time.map((dateStr, i) => {
+      const dateObj = new Date(dateStr);
+      let dayName = i === 0 ? 'Azi' : dayNames[dateObj.getDay()];
+      const tMax = Math.round(days.temperature_2m_max[i]);
+      const tMin = Math.round(days.temperature_2m_min[i]);
+      const wind = Math.round(days.windspeed_10m_max[i]);
+      const emoji = getWeatherEmoji(days.weathercode[i]);
+      
+      return `
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 8px; flex: 1;">
+          <span style="font-size: 11px; color: var(--text-tertiary); text-transform: uppercase;">${dayName}</span>
+          <span style="font-size: 20px; margin: 4px 0;">${emoji}</span>
+          <span style="font-size: 13px; font-weight: 500;">${tMax}° <span style="color: var(--text-tertiary); font-weight: 400;">${tMin}°</span></span>
+          <span style="font-size: 10px; color: #60a5fa; margin-top: 2px;">💨 ${wind} km/h</span>
+        </div>
+      `;
+    }).join('');
+
+    container.innerHTML = `
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: var(--space-md); border-radius: var(--radius-md); display: flex; flex-direction: column; gap: var(--space-sm);">
+        <div style="font-size: 12px; font-weight: 500; color: var(--text-secondary); display: flex; justify-content: space-between;">
+          <span>☁️ Vremea (București)</span>
+          <span style="color: var(--text-tertiary); font-weight: normal;">Următoarele 3 zile</span>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          ${forecastHtml}
+        </div>
+      </div>
+    `;
+
+  } catch (err) {
+    container.innerHTML = `
+      <div style="background: rgba(239,68,68,0.05); border: 1px solid rgba(239,68,68,0.2); padding: var(--space-sm) var(--space-md); border-radius: var(--radius-md); font-size: 12px; color: var(--text-secondary);">
+        ⚠️ Nu s-a putut încărca vremea: ${err.message}
+      </div>
+    `;
   }
 }

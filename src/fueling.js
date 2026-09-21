@@ -1,3 +1,5 @@
+import { storage } from './storage.js';
+
 export function renderFuelingPage() {
   const page = document.createElement('div');
   page.className = 'page animate-in';
@@ -101,6 +103,60 @@ export function renderFuelingPage() {
           </div>
         </div>
       </div>
+      </div> <!-- /fueling-results -->
+
+      <div class="card animate-in animate-in-delay-1" style="margin-top: var(--space-lg);">
+        <div class="card-header">
+          <div class="card-title">📖 Jurnal Gut Training</div>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: var(--space-md);">
+          Notează testele de nutriție din antrenamentele lungi (Long Ride / Long Run). Antrenează-ți stomacul să tolereze 90g+ carbohidrați/oră.
+        </p>
+        
+        <form id="gut-form" class="grid-2" style="gap: var(--space-md); margin-bottom: var(--space-lg);">
+          <div class="form-group">
+            <label class="form-label">Data</label>
+            <input type="date" id="gut-date" class="form-input" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tip Antrenament</label>
+            <select id="gut-type" class="form-input" required>
+              <option value="Long Ride">🚴 Long Ride</option>
+              <option value="Long Run">🏃 Long Run</option>
+              <option value="Brick">🧱 Brick (Bike+Run)</option>
+              <option value="Cursă">🏁 Cursă Pregătitoare</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Durată (ore)</label>
+            <input type="number" id="gut-duration" class="form-input" step="0.1" placeholder="ex: 3.5" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Carbohidrați Totali (g)</label>
+            <input type="number" id="gut-carbs" class="form-input" placeholder="ex: 300" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Lichide Totale (litri)</label>
+            <input type="number" id="gut-fluid" class="form-input" step="0.1" placeholder="ex: 2.5" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confort Stomacal (1=Groaznic, 10=Perfect)</label>
+            <input type="number" id="gut-rpe" class="form-input" min="1" max="10" value="8" required />
+          </div>
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label class="form-label">Notițe (Ce ai consumat?)</label>
+            <textarea id="gut-notes" class="form-input" rows="2" placeholder="ex: 4x geluri Maurten, 2x bidoane 750ml..."></textarea>
+          </div>
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">Salvează Test Nutriție</button>
+          </div>
+        </form>
+
+        <h3 style="font-size: 16px; margin-bottom: var(--space-md); color: var(--text-secondary);">Istoric Teste:</h3>
+        <div id="gut-list" style="display: flex; flex-direction: column; gap: var(--space-sm);">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
     </div>
   `;
 
@@ -151,6 +207,56 @@ export function renderFuelingPage() {
       // Scroll to results
       page.querySelector('#fueling-results').scrollIntoView({ behavior: 'smooth' });
     });
+
+    const renderGutList = () => {
+      const logs = storage.getGutTraining();
+      const listEl = page.querySelector('#gut-list');
+      if (logs.length === 0) {
+        listEl.innerHTML = '<div style="color: var(--text-tertiary); font-size: 14px;">Niciun test înregistrat încă.</div>';
+        return;
+      }
+      // Shallow copy and reverse for descending order
+      const reversedLogs = [...logs].reverse();
+      listEl.innerHTML = reversedLogs.map(log => {
+        const carbsPerHour = Math.round(log.carbs / log.duration);
+        const fluidPerHour = (log.fluid / log.duration).toFixed(2);
+        const statusColor = log.rpe >= 8 ? 'var(--success)' : log.rpe >= 5 ? 'var(--warning)' : 'var(--danger)';
+        return `
+          <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: var(--space-md); border-radius: var(--radius-sm);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <strong style="color: var(--text-primary);">${log.type} (${log.duration}h) • ${log.date}</strong>
+              <span style="color: ${statusColor}; font-weight: bold;">Scor: ${log.rpe}/10</span>
+            </div>
+            <div style="display: flex; gap: 16px; font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; flex-wrap: wrap;">
+              <span><strong>Total:</strong> ${log.carbs}g carbo, ${log.fluid}L lichide</span>
+              <span style="color: var(--accent);"><strong>Orar:</strong> ${carbsPerHour}g/h, ${fluidPerHour}L/h</span>
+            </div>
+            ${log.notes ? `<div style="font-size: 12px; color: var(--text-tertiary); font-style: italic;">"${log.notes}"</div>` : ''}
+          </div>
+        `;
+      }).join('');
+    };
+
+    const gutForm = page.querySelector('#gut-form');
+    page.querySelector('#gut-date').value = new Date().toISOString().split('T')[0];
+
+    gutForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      storage.addGutTrainingEntry({
+        date: page.querySelector('#gut-date').value,
+        type: page.querySelector('#gut-type').value,
+        duration: parseFloat(page.querySelector('#gut-duration').value),
+        carbs: parseInt(page.querySelector('#gut-carbs').value),
+        fluid: parseFloat(page.querySelector('#gut-fluid').value),
+        rpe: parseInt(page.querySelector('#gut-rpe').value),
+        notes: page.querySelector('#gut-notes').value
+      });
+      renderGutList();
+      gutForm.reset();
+      page.querySelector('#gut-date').value = new Date().toISOString().split('T')[0];
+    });
+
+    renderGutList();
   }, 0);
 
   return page;
