@@ -534,7 +534,6 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
                   
                   ${o&&o.sets?`
                     <div class="gym-today-session">
-                      <span class="today-session-label">✅ Astăzi:</span>
                       ${o.sets.map((e,t)=>{let n=a?.sets?.[t],r=n&&(e.weight>n.weight||e.weight===n.weight&&e.reps>n.reps);return`<span class="today-session-set ${r?`improved`:``}">${e.weight}kg × ${e.reps}${r?` 📈`:``}</span>`}).join(``)}
                       ${o.totalVolume?`<span class="today-session-volume">Vol: ${o.totalVolume}kg</span>`:``}
                     </div>
