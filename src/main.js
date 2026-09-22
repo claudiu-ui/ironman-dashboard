@@ -518,6 +518,38 @@ function buildApp() {
     
     html += `</div>`;
     
+    // Gym Exercises (Sets & Reps)
+    if (type === 'gym' || type === 'conditioning') {
+      let exercisesArr = [];
+      if (Array.isArray(log.exercises)) exercisesArr = log.exercises;
+      else if (log.exercises && Array.isArray(log.exercises.exercises)) exercisesArr = log.exercises.exercises;
+      
+      if (exercisesArr.length > 0) {
+        html += `<div style="margin-bottom: var(--space-lg);">
+          <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent); margin-bottom: 12px; font-weight: 700;">Serii Logate</div>
+          <div style="display: flex; flex-direction: column; gap: 8px;">`;
+        
+        exercisesArr.forEach(ex => {
+          if (ex.sets && ex.sets.length > 0) {
+            const validSets = ex.sets.filter(s => s.weight || s.reps);
+            if (validSets.length > 0) {
+              html += `<div style="background: var(--bg-glass); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 12px;">
+                <div style="font-weight: 600; font-size: 13px; color: var(--text-primary); margin-bottom: 8px;">${ex.name}</div>`;
+              validSets.forEach((s, i) => {
+                html += `<div style="display: flex; justify-content: space-between; padding: 4px 0; border-top: 1px dashed var(--border-subtle); font-size: 13px;">
+                  <span style="color: var(--text-tertiary);">Set ${i+1}</span>
+                  <span style="color: var(--text-secondary); font-family: var(--font-mono);"><b>${s.weight || '-'}</b> kg × <b>${s.reps || '-'}</b></span>
+                </div>`;
+              });
+              html += `</div>`;
+            }
+          }
+        });
+        
+        html += `</div></div>`;
+      }
+    }
+    
     // Notes
     if (log.notes) {
       html += `<div style="padding: 12px; background: var(--bg-glass); border-radius: var(--radius-md); border: 1px solid var(--border-subtle); margin-bottom: var(--space-md);">
