@@ -49,7 +49,6 @@ export function renderDashboard() {
         if (log.type === 'swim') actualSwim += dist; 
         else if (log.type === 'run') actualRun += dist;
         else if (log.type === 'bike') actualBike += dist;
-        else if (log.type === 'gym' || log.type === 'conditioning') actualGym += 1;
         else if (log.type === 'rest') restDays.push(date);
       }
       
@@ -78,6 +77,13 @@ export function renderDashboard() {
         }
       }
     });
+  });
+
+  // Calculate actual gym sessions from deduplicated completedSessions
+  Object.values(completedSessions).forEach(session => {
+    if (!session.isSkipped && (session.type === 'gym' || session.type === 'conditioning')) {
+       actualGym += 1;
+    }
   });
 
   // Calculate Fatigue (3-day avg RPE)
