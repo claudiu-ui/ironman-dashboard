@@ -1079,7 +1079,8 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
           <div class="card-title">📖 Jurnal Gut Training</div>
         </div>
         <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: var(--space-md);">
-          Notează testele de nutriție din antrenamentele lungi (Long Ride / Long Run). Antrenează-ți stomacul să tolereze 90g+ carbohidrați/oră.
+          Notează testele de nutriție din antrenamentele lungi (Long Ride / Long Run). Antrenează-ți stomacul să tolereze 90g+ carbohidrați/oră. 
+          <br><span style="color: var(--text-tertiary); font-size: 12px;">ℹ️ Antrenamentele scurte (Easy Run/Bike sub 90 min) nu necesită alimentare în timpul efortului, hidratarea cu apă/electroliți este suficientă.</span>
         </p>
         
         <form id="gut-form" class="grid-2" style="gap: var(--space-md); margin-bottom: var(--space-lg);">
@@ -1143,7 +1144,7 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
             </div>
             ${e.notes?`<div style="font-size: 12px; color: var(--text-tertiary); font-style: italic;">"${e.notes}"</div>`:``}
           </div>
-        `}).join(``)},n=e.querySelector(`#gut-form`);e.querySelector(`#gut-date`).value=new Date().toISOString().split(`T`)[0],n.addEventListener(`submit`,r=>{r.preventDefault(),A.addGutTrainingEntry({date:e.querySelector(`#gut-date`).value,type:e.querySelector(`#gut-type`).value,duration:parseFloat(e.querySelector(`#gut-duration`).value),carbs:parseInt(e.querySelector(`#gut-carbs`).value),fluid:parseFloat(e.querySelector(`#gut-fluid`).value),rpe:parseInt(e.querySelector(`#gut-rpe`).value),notes:e.querySelector(`#gut-notes`).value}),t(),n.reset(),e.querySelector(`#gut-date`).value=new Date().toISOString().split(`T`)[0]}),t()},0),e}a(`/`,ye),a(`/gym`,Oe),a(`/nutrition`,je),a(`/analytics`,Gu),a(`/settings`,Ku),a(`/gear`,Yu),a(`/fueling`,Xu);function Zu(){let e=document.getElementById(`app`),t=_(),r=g(t),i=v();e.innerHTML=`
+        `}).join(``)},n=e.querySelector(`#gut-form`);e.querySelector(`#gut-date`).value=new Date().toISOString().split(`T`)[0];let r=e.querySelector(`#gut-duration`),i=e.querySelector(`#gut-carbs`),a=e.querySelector(`#gut-fluid`);r.addEventListener(`input`,e=>{let t=parseFloat(e.target.value);t>0&&((!i.value||i.dataset.auto===`true`)&&(i.value=Math.round(t*90),i.dataset.auto=`true`),(!a.value||a.dataset.auto===`true`)&&(a.value=(t*.75).toFixed(1),a.dataset.auto=`true`))}),i.addEventListener(`input`,()=>i.dataset.auto=`false`),a.addEventListener(`input`,()=>a.dataset.auto=`false`),n.addEventListener(`submit`,o=>{o.preventDefault(),A.addGutTrainingEntry({date:e.querySelector(`#gut-date`).value,type:e.querySelector(`#gut-type`).value,duration:parseFloat(r.value),carbs:parseInt(i.value),fluid:parseFloat(a.value),rpe:parseInt(e.querySelector(`#gut-rpe`).value),notes:e.querySelector(`#gut-notes`).value}),t(),n.reset(),e.querySelector(`#gut-date`).value=new Date().toISOString().split(`T`)[0],i.dataset.auto=`true`,a.dataset.auto=`true`}),t()},0),e}a(`/`,ye),a(`/gym`,Oe),a(`/nutrition`,je),a(`/analytics`,Gu),a(`/settings`,Ku),a(`/gear`,Yu),a(`/fueling`,Xu);function Zu(){let e=document.getElementById(`app`),t=_(),r=g(t),i=v();e.innerHTML=`
     <!-- Mobile Toggle -->
     <button class="mobile-toggle" id="mobile-toggle">☰</button>
     <div class="mobile-overlay" id="mobile-overlay"></div>
