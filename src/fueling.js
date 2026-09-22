@@ -110,7 +110,8 @@ export function renderFuelingPage() {
           <div class="card-title">📖 Jurnal Gut Training</div>
         </div>
         <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: var(--space-md);">
-          Notează testele de nutriție din antrenamentele lungi (Long Ride / Long Run). Antrenează-ți stomacul să tolereze 90g+ carbohidrați/oră.
+          Notează testele de nutriție din antrenamentele lungi (Long Ride / Long Run). Antrenează-ți stomacul să tolereze 90g+ carbohidrați/oră. 
+          <br><span style="color: var(--text-tertiary); font-size: 12px;">ℹ️ Antrenamentele scurte (Easy Run/Bike sub 90 min) nu necesită alimentare în timpul efortului, hidratarea cu apă/electroliți este suficientă.</span>
         </p>
         
         <form id="gut-form" class="grid-2" style="gap: var(--space-md); margin-bottom: var(--space-lg);">
@@ -240,20 +241,46 @@ export function renderFuelingPage() {
     const gutForm = page.querySelector('#gut-form');
     page.querySelector('#gut-date').value = new Date().toISOString().split('T')[0];
 
+    // Auto-calculate targets when duration is entered
+    const durationInput = page.querySelector('#gut-duration');
+    const carbsInput = page.querySelector('#gut-carbs');
+    const fluidInput = page.querySelector('#gut-fluid');
+
+    durationInput.addEventListener('input', (e) => {
+      const dur = parseFloat(e.target.value);
+      if (dur > 0) {
+        // Default targets: 90g carbs/h, 0.75L fluid/h
+        if (!carbsInput.value || carbsInput.dataset.auto === 'true') {
+          carbsInput.value = Math.round(dur * 90);
+          carbsInput.dataset.auto = 'true';
+        }
+        if (!fluidInput.value || fluidInput.dataset.auto === 'true') {
+          fluidInput.value = (dur * 0.75).toFixed(1);
+          fluidInput.dataset.auto = 'true';
+        }
+      }
+    });
+
+    // Remove auto flag if user manually changes the values
+    carbsInput.addEventListener('input', () => carbsInput.dataset.auto = 'false');
+    fluidInput.addEventListener('input', () => fluidInput.dataset.auto = 'false');
+
     gutForm.addEventListener('submit', (e) => {
       e.preventDefault();
       storage.addGutTrainingEntry({
         date: page.querySelector('#gut-date').value,
         type: page.querySelector('#gut-type').value,
-        duration: parseFloat(page.querySelector('#gut-duration').value),
-        carbs: parseInt(page.querySelector('#gut-carbs').value),
-        fluid: parseFloat(page.querySelector('#gut-fluid').value),
+        duration: parseFloat(durationInput.value),
+        carbs: parseInt(carbsInput.value),
+        fluid: parseFloat(fluidInput.value),
         rpe: parseInt(page.querySelector('#gut-rpe').value),
         notes: page.querySelector('#gut-notes').value
       });
       renderGutList();
       gutForm.reset();
       page.querySelector('#gut-date').value = new Date().toISOString().split('T')[0];
+      carbsInput.dataset.auto = 'true';
+      fluidInput.dataset.auto = 'true';
     });
 
     renderGutList();
