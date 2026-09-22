@@ -91,10 +91,17 @@ export function renderGymPage() {
     for (const date of dates) {
       if (date === currentDateStr) continue; // Skip current planned date
       const session = gymLogs[date]?.[sessionKey];
-      if (session && session.exercises) {
-        const ex = session.exercises.find(e => e.name === exerciseName);
-        if (ex && ex.sets && ex.sets.length > 0) {
-          return ex;
+      if (session) {
+        // Handle potentially corrupted data (nested exercises object)
+        const exercisesArr = Array.isArray(session.exercises) 
+          ? session.exercises 
+          : (session.exercises && Array.isArray(session.exercises.exercises) ? session.exercises.exercises : null);
+          
+        if (exercisesArr) {
+          const ex = exercisesArr.find(e => e.name === exerciseName);
+          if (ex && ex.sets && ex.sets.length > 0) {
+            return ex;
+          }
         }
       }
     }
@@ -120,8 +127,14 @@ export function renderGymPage() {
         
         <div class="gym-exercises" id="exercises-${key}">
           ${program.exercises.map((ex, i) => {
-            const lastSession = getLastSessionData(key, ex.name);
-            const loggedEx = logged?.exercises?.find(e => e.name === ex.name);
+            const lastSession = getLastSessionData(key, ex.name, dateStr);
+            let loggedEx = null;
+            if (logged) {
+              const exercisesArr = Array.isArray(logged.exercises) 
+                ? logged.exercises 
+                : (logged.exercises && Array.isArray(logged.exercises.exercises) ? logged.exercises.exercises : []);
+              loggedEx = exercisesArr.find(e => e.name === ex.name);
+            }
             
             return `
             <div class="gym-exercise-row" data-index="${i}">
@@ -481,7 +494,7 @@ export function renderGymPage() {
         };
       });
 
-      storage.saveGymSession(dateStr, sessionType, { exercises: logExercises, completedAt: new Date().toISOString() });
+      storage.saveGymSession(dateStr, sessionType, logExercises);
       
       // Also save as a workout log for the dashboard tracking
       storage.saveWorkout(dateStr, {
