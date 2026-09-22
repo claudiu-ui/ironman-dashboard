@@ -396,9 +396,13 @@ export function renderGymPage() {
         </div>
         
         <div id="gym-log-exercises">
-          ${exercisesWithSets.map((ex, ei) => `
+          ${exercisesWithSets.map((ex, ei) => {
+            const hasLastData = ex.sets.some(s => s.weight || s.reps);
+            const lastDataStr = hasLastData ? ex.sets.map(s => s.weight && s.reps ? `<b>${s.weight}</b>kg × <b>${s.reps}</b>` : '-').join(' | ') : '';
+            return `
             <div class="gym-log-exercise" data-index="${ei}">
-              <div class="gym-log-exercise-name">${ex.name}</div>
+              <div class="gym-log-exercise-name" style="margin-bottom: ${hasLastData ? '4px' : 'var(--space-md)'};">${ex.name}</div>
+              ${hasLastData ? `<div style="font-size: 12px; color: var(--text-secondary); margin-bottom: var(--space-md); padding: 6px 10px; background: rgba(59, 130, 246, 0.1); border-left: 2px solid var(--info); border-radius: 4px;">📈 Țintă (tura trecută): <span style="color: var(--text-primary);">${lastDataStr}</span></div>` : ''}
               <div class="gym-log-sets">
                 <div class="gym-log-sets-header">
                   <span style="width: 30px; text-align: center; font-size: 11px; color: var(--text-tertiary);">Set</span>
@@ -417,7 +421,8 @@ export function renderGymPage() {
                 <button class="btn btn-ghost btn-sm gym-add-set-btn" data-ex="${ei}" style="width: 100%; margin-top: 4px; font-size: 11px; border-style: dashed;">+ Set</button>
               </div>
             </div>
-          `).join('')}
+            `;
+          }).join('')}
         </div>
 
         <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: var(--space-lg); padding-top: var(--space-md); border-top: 1px solid var(--border-subtle);">

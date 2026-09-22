@@ -543,8 +543,21 @@ export function renderDashboard() {
   if (weekAvgSleep !== '—' && parseFloat(weekAvgSleep) < 7) coachingTips.push({ icon: '😴', tip: `Dormi în medie ${weekAvgSleep}h — sub cele 8h recomandate. Somnul e cel mai important "supliment" al tău.` });
   if (nextDeload) coachingTips.push({ icon: '🔄', tip: `Săptămâna ${nextWeekNum} este DELOAD. Nu te ambiționa să adaugi volum — corpul tău are nevoie de recuperare activă.` });
   if (overallScore >= 90) coachingTips.push({ icon: '🎯', tip: `Săptămână excelentă! Menține consistența — la Ironman, consistența bate intensitatea pe termen lung.` });
-  if (coachingTips.length === 0) coachingTips.push({ icon: '💡', tip: `Menține ritmul și concentrează-te pe calitatea somnului și nutriția post-antrenament pentru recuperare optimă.` });
+  
+  // Gear Wear Alerts
+  const gearList = storage.getGear() || [];
+  gearList.forEach(g => {
+    if (g.active && g.maxDistance > 0 && g.distance >= g.maxDistance * 0.9) {
+      coachingTips.push({ icon: '⚠️', tip: `<span style="color:var(--warning);">Echipament uzat:</span> ${g.name} a atins ${g.distance.toFixed(0)}km din limita setată de ${g.maxDistance}km. Ia în calcul înlocuirea pentru a evita accidentările. <a href="#/gear" style="color:var(--accent);">Vezi Echipament</a>` });
+    }
+  });
 
+  // Fueling Planner Prompt
+  if (plannedBike >= 40 || plannedRun >= 15) {
+    coachingTips.unshift({ icon: '🚀', tip: `Urmează sesiuni lungi (Long Run / Ride). Nu uita să generezi strategia de carbohidrați și hidratare ca să îți antrenezi stomacul. <a href="#/fueling" style="color:var(--accent);">Deschide Fueling Planner</a>` });
+  }
+
+  if (coachingTips.length === 0) coachingTips.push({ icon: '💡', tip: `Menține ritmul și concentrează-te pe calitatea somnului și nutriția post-antrenament pentru recuperare optimă.` });
   function progressBar(pct, color) {
     const w = Math.min(100, pct);
     return `<div style="height:6px;background:rgba(255,255,255,0.08);border-radius:3px;margin-top:8px;overflow:hidden;">
