@@ -172,7 +172,6 @@ export function renderGymPage() {
                   
                   ${loggedEx && loggedEx.sets ? `
                     <div class="gym-today-session">
-                      <span class="today-session-label">✅ Astăzi:</span>
                       ${loggedEx.sets.map((s, si) => {
                         const lastSet = lastSession?.sets?.[si];
                         const improved = lastSet && (s.weight > lastSet.weight || (s.weight === lastSet.weight && s.reps > lastSet.reps));
