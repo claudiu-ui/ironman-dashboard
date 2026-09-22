@@ -855,7 +855,6 @@ async function loadAndRenderFitnessWidget(page) {
     console.error('Fitness widget error:', e);
     container.innerHTML = `<div style="padding:12px;color:var(--text-tertiary);font-size:12px;">⚠️ Eroare la încărcarea metricilor: ${e.message}</div>`;
   }
-  }
 }
 
 // ============================================
