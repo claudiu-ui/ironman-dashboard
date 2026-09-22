@@ -871,8 +871,8 @@ async function loadWeatherWidget(container) {
   `;
 
   try {
-    // Defaulting to Bucharest coordinates
-    const url = 'https://api.open-meteo.com/v1/forecast?latitude=44.4323&longitude=26.1063&daily=weathercode,temperature_2m_max,temperature_2m_min,windspeed_10m_max&timezone=Europe%2FBucharest&forecast_days=3';
+    // Iași coordinates
+    const url = 'https://api.open-meteo.com/v1/forecast?latitude=47.1585&longitude=27.6014&daily=weathercode,temperature_2m_max,temperature_2m_min,windspeed_10m_max&timezone=Europe%2FBucharest&forecast_days=3';
     const res = await fetch(url);
     if (!res.ok) throw new Error('Vreme indisponibilă');
     const data = await res.json();
@@ -914,7 +914,7 @@ async function loadWeatherWidget(container) {
     container.innerHTML = `
       <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: var(--space-md); border-radius: var(--radius-md); display: flex; flex-direction: column; gap: var(--space-sm);">
         <div style="font-size: 12px; font-weight: 500; color: var(--text-secondary); display: flex; justify-content: space-between;">
-          <span>☁️ Vremea (București)</span>
+          <span>☁️ Vremea (Iași)</span>
           <span style="color: var(--text-tertiary); font-weight: normal;">Următoarele 3 zile</span>
         </div>
         <div style="display: flex; gap: 8px;">
