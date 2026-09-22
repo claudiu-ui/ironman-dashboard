@@ -482,7 +482,7 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
           ${u(M.accesorii,`accesorii`,o.accesorii)}
         </div>
       </div>
-    `,p()}function l(e,t,n){let r=j.get(`gym`,{}),i=Object.keys(r).sort().reverse();for(let a of i){if(a===n)continue;let i=r[a]?.[e];if(i&&i.exercises){let e=i.exercises.find(e=>e.name===t);if(e&&e.sets&&e.sets.length>0)return e}}return null}function u(e,t,n){let r=j.getGymSession(n,t);return`
+    `,p()}function l(e,t,n){let r=j.get(`gym`,{}),i=Object.keys(r).sort().reverse();for(let a of i){if(a===n)continue;let i=r[a]?.[e];if(i){let e=Array.isArray(i.exercises)?i.exercises:i.exercises&&Array.isArray(i.exercises.exercises)?i.exercises.exercises:null;if(e){let n=e.find(e=>e.name===t);if(n&&n.sets&&n.sets.length>0)return n}}}return null}function u(e,t,n){let r=j.getGymSession(n,t);return`
       <div class="card animate-in">
         <div class="card-header">
           <div>
@@ -498,13 +498,13 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
         ${e.notes?`<div style="font-size: 12px; color: var(--warning); margin-bottom: var(--space-md); padding: 8px 12px; background: rgba(234,179,8,0.08); border-radius: var(--radius-md);">${e.notes}</div>`:``}
         
         <div class="gym-exercises" id="exercises-${t}">
-          ${e.exercises.map((e,n)=>{let i=l(t,e.name),a=r?.exercises?.find(t=>t.name===e.name);return`
-            <div class="gym-exercise-row" data-index="${n}">
+          ${e.exercises.map((e,i)=>{let a=l(t,e.name,n),o=null;return r&&(o=(Array.isArray(r.exercises)?r.exercises:r.exercises&&Array.isArray(r.exercises.exercises)?r.exercises.exercises:[]).find(t=>t.name===e.name)),`
+            <div class="gym-exercise-row" data-index="${i}">
               ${Ce?`
                 <div style="display: flex; flex-direction: column; gap: var(--space-sm); width: 100%;">
                   <div style="display: flex; justify-content: space-between;">
                     <input type="text" class="form-input edit-ex-name" value="${e.name}" placeholder="Nume Exercițiu" style="flex: 1; margin-right: 8px; padding: 4px 8px;" />
-                    <button class="btn btn-ghost btn-sm remove-ex-btn" data-session="${t}" data-index="${n}" style="color: var(--danger); padding: 4px;">❌</button>
+                    <button class="btn btn-ghost btn-sm remove-ex-btn" data-session="${t}" data-index="${i}" style="color: var(--danger); padding: 4px;">❌</button>
                   </div>
                   <div style="display: flex; gap: var(--space-sm);">
                     <input type="text" class="form-input edit-ex-sets" value="${e.sets}" placeholder="Serii x Rep" style="width: 100px; padding: 4px 8px;" />
@@ -513,7 +513,7 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
                   </div>
                 </div>
               `:`
-                <div class="gym-exercise-num">${n+1}</div>
+                <div class="gym-exercise-num">${i+1}</div>
                 <div class="gym-exercise-info" style="flex: 1;">
                   <div class="gym-exercise-name">${e.name}</div>
                   <div class="gym-exercise-meta">
@@ -522,21 +522,21 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
                   </div>
                   ${e.notes?`<div class="gym-exercise-notes">${e.notes}</div>`:``}
                   
-                  ${i?`
+                  ${a?`
                     <div class="gym-last-session">
                       <span class="last-session-label">Ultima sesiune:</span>
-                      ${i.sets.map((e,t)=>`
+                      ${a.sets.map((e,t)=>`
                         <span class="last-session-set">${e.weight}kg × ${e.reps}</span>
                       `).join(``)}
-                      ${i.totalVolume?`<span class="last-session-volume">Vol: ${i.totalVolume}kg</span>`:``}
+                      ${a.totalVolume?`<span class="last-session-volume">Vol: ${a.totalVolume}kg</span>`:``}
                     </div>
                   `:``}
                   
-                  ${a&&a.sets?`
+                  ${o&&o.sets?`
                     <div class="gym-today-session">
                       <span class="today-session-label">✅ Astăzi:</span>
-                      ${a.sets.map((e,t)=>{let n=i?.sets?.[t],r=n&&(e.weight>n.weight||e.weight===n.weight&&e.reps>n.reps);return`<span class="today-session-set ${r?`improved`:``}">${e.weight}kg × ${e.reps}${r?` 📈`:``}</span>`}).join(``)}
-                      ${a.totalVolume?`<span class="today-session-volume">Vol: ${a.totalVolume}kg</span>`:``}
+                      ${o.sets.map((e,t)=>{let n=a?.sets?.[t],r=n&&(e.weight>n.weight||e.weight===n.weight&&e.reps>n.reps);return`<span class="today-session-set ${r?`improved`:``}">${e.weight}kg × ${e.reps}${r?` 📈`:``}</span>`}).join(``)}
+                      ${o.totalVolume?`<span class="today-session-volume">Vol: ${o.totalVolume}kg</span>`:``}
                     </div>
                   `:``}
                 </div>
@@ -632,7 +632,7 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
           <input type="number" class="form-input gym-log-weight" data-ex="${t}" data-set="${n}" value="" placeholder="kg" step="0.5" style="flex: 1; text-align: center; padding: 6px;" />
           <input type="number" class="form-input gym-log-reps" data-ex="${t}" data-set="${n}" value="" placeholder="reps" style="flex: 1; text-align: center; padding: 6px;" />
           <button class="btn btn-ghost btn-sm remove-set-btn" style="color: var(--danger); width: 24px; padding: 0;">❌</button>
-        `,e.before(r)})}),i.addEventListener(`click`,e=>{if(e.target.classList.contains(`remove-set-btn`)){let t=e.target.closest(`.gym-log-set-row`),n=t.closest(`.gym-log-sets`);t.remove(),n.querySelectorAll(`.gym-log-set-row`).forEach((e,t)=>{e.querySelector(`.gym-log-set-num`).textContent=t+1,e.querySelector(`.gym-log-weight`).dataset.set=t,e.querySelector(`.gym-log-reps`).dataset.set=t})}}),i.querySelector(`#gym-log-save`).addEventListener(`click`,()=>{let a=r.map((e,n)=>{let r=i.querySelectorAll(`.gym-log-weight[data-ex="${n}"]`),a=[],o=0;return r.forEach((e,t)=>{let r=i.querySelector(`.gym-log-reps[data-ex="${n}"][data-set="${t}"]`),s=parseFloat(e.value)||0,c=parseInt(r?.value)||0;(s>0||c>0)&&(a.push({weight:s,reps:c}),o+=s*c)}),{name:e.name,sets:a,totalVolume:o,plannedSets:t[n]?.sets||``,completed:a.length>0}});j.saveGymSession(n,e,{exercises:a,completedAt:new Date().toISOString()}),j.saveWorkout(n,{type:e===`conditioning`?`conditioning`:`gym`,distance:0,duration:0,hr:0,rpe:0,notes:`${M[e]?.name||`Conditioning`} — ${a.filter(e=>e.completed).length} exerciții completate`,source:`manual`}),i.remove(),c()})}return c(),e}var N=!1,Te=null;function Ee(){let e=document.createElement(`div`);e.className=`nutrition-page`,Te=j.getCustomSupplements(te.supplements);let t=new Date().toISOString().split(`T`)[0];function n(){let n=j.getDailyLog(t),i=j.getSupplements(t),a=j.getWorkoutLog(t)||[],o=a.reduce((e,t)=>e+(parseInt(t.calories)||0),0),s=a.reduce((e,t)=>e+(t.isSkipped?0:oe(t)),0),c=ee(o,s),l=c.dayType===`high`?`High Carb Day`:c.dayType===`low`?`Low Carb Day`:`Moderate Day`,u=c.dayType===`high`?`Ai avut un antrenament lung sau intens (TSS ridicat). Targetul tău de carbohidrați este la maximum pentru a reface glicogenul.`:c.dayType===`low`?`Zi de refacere sau antrenament ușor. Targetul tău de carbohidrați e scăzut, proteinele și grăsimile sunt ridicate pentru sațietate.`:`Echilibru clasic pentru susținerea unui efort moderat.`,d=c.dayType===`high`?`var(--danger)`:c.dayType===`low`?`var(--success)`:`var(--warning)`;e.innerHTML=`
+        `,e.before(r)})}),i.addEventListener(`click`,e=>{if(e.target.classList.contains(`remove-set-btn`)){let t=e.target.closest(`.gym-log-set-row`),n=t.closest(`.gym-log-sets`);t.remove(),n.querySelectorAll(`.gym-log-set-row`).forEach((e,t)=>{e.querySelector(`.gym-log-set-num`).textContent=t+1,e.querySelector(`.gym-log-weight`).dataset.set=t,e.querySelector(`.gym-log-reps`).dataset.set=t})}}),i.querySelector(`#gym-log-save`).addEventListener(`click`,()=>{let a=r.map((e,n)=>{let r=i.querySelectorAll(`.gym-log-weight[data-ex="${n}"]`),a=[],o=0;return r.forEach((e,t)=>{let r=i.querySelector(`.gym-log-reps[data-ex="${n}"][data-set="${t}"]`),s=parseFloat(e.value)||0,c=parseInt(r?.value)||0;(s>0||c>0)&&(a.push({weight:s,reps:c}),o+=s*c)}),{name:e.name,sets:a,totalVolume:o,plannedSets:t[n]?.sets||``,completed:a.length>0}});j.saveGymSession(n,e,a),j.saveWorkout(n,{type:e===`conditioning`?`conditioning`:`gym`,distance:0,duration:0,hr:0,rpe:0,notes:`${M[e]?.name||`Conditioning`} — ${a.filter(e=>e.completed).length} exerciții completate`,source:`manual`}),i.remove(),c()})}return c(),e}var N=!1,Te=null;function Ee(){let e=document.createElement(`div`);e.className=`nutrition-page`,Te=j.getCustomSupplements(te.supplements);let t=new Date().toISOString().split(`T`)[0];function n(){let n=j.getDailyLog(t),i=j.getSupplements(t),a=j.getWorkoutLog(t)||[],o=a.reduce((e,t)=>e+(parseInt(t.calories)||0),0),s=a.reduce((e,t)=>e+(t.isSkipped?0:oe(t)),0),c=ee(o,s),l=c.dayType===`high`?`High Carb Day`:c.dayType===`low`?`Low Carb Day`:`Moderate Day`,u=c.dayType===`high`?`Ai avut un antrenament lung sau intens (TSS ridicat). Targetul tău de carbohidrați este la maximum pentru a reface glicogenul.`:c.dayType===`low`?`Zi de refacere sau antrenament ușor. Targetul tău de carbohidrați e scăzut, proteinele și grăsimile sunt ridicate pentru sațietate.`:`Echilibru clasic pentru susținerea unui efort moderat.`,d=c.dayType===`high`?`var(--danger)`:c.dayType===`low`?`var(--success)`:`var(--warning)`;e.innerHTML=`
       <div class="page-body">
         <!-- Date Picker -->
         <div class="date-picker-bar animate-in">
