@@ -435,10 +435,10 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
     <div style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05); padding: var(--space-sm) var(--space-md); border-radius: var(--radius-md); display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-tertiary);">
       <span>⏳</span> Se încarcă prognoza meteo...
     </div>
-  `;try{let t=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=44.4323&longitude=26.1063&daily=weathercode,temperature_2m_max,temperature_2m_min,windspeed_10m_max&timezone=Europe%2FBucharest&forecast_days=3`);if(!t.ok)throw Error(`Vreme indisponibilă`);let n=await t.json();if(!n.daily||!n.daily.time)throw Error(`Format date greșit`);let r=n.daily,i=[`Duminică`,`Luni`,`Marți`,`Miercuri`,`Joi`,`Vineri`,`Sâmbătă`];function a(e){return e===0?`☀️`:e>=1&&e<=3?`⛅`:e>=45&&e<=48?`🌫️`:e>=51&&e<=67?`🌧️`:e>=71&&e<=77?`❄️`:e>=80&&e<=82?`🌦️`:e>=95&&e<=99?`⛈️`:`☁️`}e.innerHTML=`
+  `;try{let t=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=47.1585&longitude=27.6014&daily=weathercode,temperature_2m_max,temperature_2m_min,windspeed_10m_max&timezone=Europe%2FBucharest&forecast_days=3`);if(!t.ok)throw Error(`Vreme indisponibilă`);let n=await t.json();if(!n.daily||!n.daily.time)throw Error(`Format date greșit`);let r=n.daily,i=[`Duminică`,`Luni`,`Marți`,`Miercuri`,`Joi`,`Vineri`,`Sâmbătă`];function a(e){return e===0?`☀️`:e>=1&&e<=3?`⛅`:e>=45&&e<=48?`🌫️`:e>=51&&e<=67?`🌧️`:e>=71&&e<=77?`❄️`:e>=80&&e<=82?`🌦️`:e>=95&&e<=99?`⛈️`:`☁️`}e.innerHTML=`
       <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); padding: var(--space-md); border-radius: var(--radius-md); display: flex; flex-direction: column; gap: var(--space-sm);">
         <div style="font-size: 12px; font-weight: 500; color: var(--text-secondary); display: flex; justify-content: space-between;">
-          <span>☁️ Vremea (București)</span>
+          <span>☁️ Vremea (Iași)</span>
           <span style="color: var(--text-tertiary); font-weight: normal;">Următoarele 3 zile</span>
         </div>
         <div style="display: flex; gap: 8px;">
