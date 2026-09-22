@@ -80,11 +80,16 @@ export function renderDashboard() {
   });
 
   // Calculate actual gym sessions from deduplicated completedSessions
+  // Aggressive week-level deduplication: use max to avoid double-counting same-week misaligned logs
+  let manualGymCount = 0;
+  let watchGymCount = 0;
   Object.values(completedSessions).forEach(session => {
     if (!session.isSkipped && (session.type === 'gym' || session.type === 'conditioning')) {
-       actualGym += 1;
+       if (session.source === 'manual') manualGymCount += 1;
+       else watchGymCount += 1;
     }
   });
+  actualGym = Math.max(manualGymCount, watchGymCount);
 
   // Calculate Fatigue (3-day avg RPE)
   const todayDate = new Date();
