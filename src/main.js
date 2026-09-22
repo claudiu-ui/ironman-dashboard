@@ -345,15 +345,34 @@ function buildApp() {
       document.getElementById('wd-title').innerHTML = `${title} — ${detail}`;
       
       const targetsList = document.getElementById('wd-targets');
-      targetsList.innerHTML = prescription.targets.map(t => `<li>${t}</li>`).join('');
-      
       const structureList = document.getElementById('wd-structure');
-      structureList.innerHTML = prescription.structure.map(s => `
-        <div class="wd-step">
-          <div class="wd-step-name">${s.name}</div>
-          <div class="wd-step-desc">${s.desc}</div>
-        </div>
-      `).join('');
+      const structureTitle = structureList.previousElementSibling;
+      
+      if (type === 'gym' || type === 'conditioning') {
+        targetsList.parentElement.style.display = 'none';
+        if (structureTitle) structureTitle.style.display = 'none';
+        
+        import('./gym.js').then(({ getDashboardGymCardNode }) => {
+          const card = getDashboardGymCardNode(title, dateStr);
+          if (card) {
+            structureList.innerHTML = '';
+            structureList.appendChild(card);
+          } else {
+            structureList.innerHTML = '<p>Nu s-a putut încărca programul de sală.</p>';
+          }
+        });
+      } else {
+        targetsList.parentElement.style.display = 'block';
+        if (structureTitle) structureTitle.style.display = 'block';
+        
+        targetsList.innerHTML = prescription.targets.map(t => `<li>${t}</li>`).join('');
+        structureList.innerHTML = prescription.structure.map(s => `
+          <div class="wd-step">
+            <div class="wd-step-name">${s.name}</div>
+            <div class="wd-step-desc">${s.desc}</div>
+          </div>
+        `).join('');
+      }
 
       // Personalized coaching notes based on athlete profile
       const coachingNotes = getCoachingNotes(type, title, weekNum, phase, ATHLETE);
@@ -394,16 +413,19 @@ function buildApp() {
           // Auto-switch to results if completed or skipped
           tabResults?.click();
           
-          // Hide log button
+          // Hide log button for normal workouts
+          // For gym workouts, we hide the default log button because the Gym Card has its own button
           document.getElementById('wd-log-btn').style.display = 'none';
           const skipBtn = document.getElementById('wd-skip-btn');
           if (skipBtn) skipBtn.style.display = 'none';
         } else {
           tabResults.style.display = '';
           document.getElementById('wd-results-content').innerHTML = '<p style="color: var(--text-tertiary); text-align: center; padding: var(--space-xl);">Acest antrenament nu a fost încă completat. Finalizează-l mai întâi!</p>';
-          document.getElementById('wd-log-btn').style.display = '';
+          
+          // Hide default log button if it's a gym session (gym card has its own)
+          document.getElementById('wd-log-btn').style.display = (type === 'gym' || type === 'conditioning') ? 'none' : '';
           const skipBtn = document.getElementById('wd-skip-btn');
-          if (skipBtn) skipBtn.style.display = '';
+          if (skipBtn) skipBtn.style.display = (type === 'gym' || type === 'conditioning') ? 'none' : '';
         }
       });
       

@@ -509,9 +509,30 @@ export function renderGymPage() {
 
       modal.remove();
       render(); // Re-render to show logged data
+      
+      // If we are in the dashboard modal, re-render the current route to reflect changes
+      import('./router.js').then(({ renderCurrentRoute }) => renderCurrentRoute());
     });
   }
 
   render();
   return page;
+}
+
+export function getDashboardGymCardNode(title, dateStr) {
+  const page = renderGymPage();
+  const cards = Array.from(page.querySelectorAll('.card'));
+  
+  // Find the exact card that matches the title
+  let targetCard = cards.find(c => {
+    const cardTitle = c.querySelector('.card-title');
+    return cardTitle && cardTitle.textContent.toLowerCase().includes(title.toLowerCase());
+  });
+  
+  // Fallback for conditioning which might just be named "Conditioning"
+  if (!targetCard && title.toLowerCase().includes('conditioning')) {
+     targetCard = cards.find(c => c.querySelector('.card-title').textContent.toLowerCase().includes('conditioning'));
+  }
+  
+  return targetCard;
 }

@@ -53,15 +53,28 @@ export function renderDashboard() {
         else if (log.type === 'rest') restDays.push(date);
       }
       
+      // Normalize gym-like activities for rendering
+      let normType = log.type.toLowerCase();
+      if (normType === 'strength' || normType === 'weight training') {
+        normType = 'gym';
+      }
+      
       // Store for calendar matching
-      const key = `${date}_${log.type}`;
+      const key = `${date}_${normType}`;
       if (!completedSessions[key]) {
-        completedSessions[key] = log;
+        completedSessions[key] = { ...log, type: normType };
       } else {
-        // Merge if multiple of same type on same day (sum distance)
-        completedSessions[key].distance = (parseFloat(completedSessions[key].distance) || 0) + dist;
-        if (log.hr && (!completedSessions[key].hr || log.hr > completedSessions[key].hr)) {
-          completedSessions[key].hr = log.hr;
+        if (normType === 'gym' || normType === 'conditioning') {
+          // Prefer manual log over watch sync for gym
+          if (log.source === 'manual') {
+            completedSessions[key] = { ...log, type: normType };
+          }
+        } else {
+          // Merge if multiple of same type on same day (sum distance)
+          completedSessions[key].distance = (parseFloat(completedSessions[key].distance) || 0) + dist;
+          if (log.hr && (!completedSessions[key].hr || log.hr > completedSessions[key].hr)) {
+            completedSessions[key].hr = log.hr;
+          }
         }
       }
     });
