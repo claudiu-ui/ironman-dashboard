@@ -125,12 +125,85 @@ export function renderDashboard() {
     loadAndRenderFitnessWidget(page);
     loadWeatherWidget(page.querySelector('#weather-widget-container'));
   }, 0);
+  // ── Streak Counter: consecutive days with at least 1 logged workout ──────
+  const allWorkouts = storage.get('workouts', {});
+  let streakDays = 0;
+  const streakDate = new Date();
+  streakDate.setHours(0, 0, 0, 0);
+  // Start from yesterday (today might not be logged yet)
+  streakDate.setDate(streakDate.getDate() - 1);
+  while (true) {
+    const key = streakDate.toISOString().split('T')[0];
+    const dayLogs = allWorkouts[key];
+    const hasRealWorkout = dayLogs && dayLogs.some(w => !w.isSkipped && w.type !== 'rest');
+    if (hasRealWorkout) {
+      streakDays++;
+      streakDate.setDate(streakDate.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+  // Check if today also has a workout — add it to streak
+  const todayKey = new Date().toISOString().split('T')[0];
+  const todayLogs = allWorkouts[todayKey];
+  if (todayLogs && todayLogs.some(w => !w.isSkipped && w.type !== 'rest')) {
+    streakDays++;
+  }
+
+  // ── Early overallScore for hero display ────────────────────────────────────
+  const plannedSwim = weekVolume ? weekVolume.swim / 1000 : 0;
+  const plannedRun = weekVolume ? weekVolume.runTotal : 0;
+  const plannedBike = weekVolume ? weekVolume.bikeTotal : 0;
+  const plannedGym = scheduledGymSessions;
+  const earlyPct = (a, p) => p === 0 ? 100 : Math.min(100, Math.round((a / p) * 100));
+  const overallScore = Math.min(100, Math.round(
+    (earlyPct(actualSwim, plannedSwim) + earlyPct(actualRun, plannedRun) + 
+     earlyPct(actualBike, plannedBike) + earlyPct(actualGym, plannedGym)) / 4
+  ));
+
+  // ── Last Sync badge ────────────────────────────────────────────────────────
+  const lastSyncTs = parseInt(localStorage.getItem('ironman_lastSyncTimestamp') || '0');
+  let lastSyncAgo = '';
+  if (lastSyncTs > 0) {
+    const diffMin = Math.round((Date.now() - lastSyncTs) / 60000);
+    if (diffMin < 2) lastSyncAgo = 'Chiar acum';
+    else if (diffMin < 60) lastSyncAgo = `Acum ${diffMin} min`;
+    else if (diffMin < 1440) lastSyncAgo = `Acum ${Math.round(diffMin / 60)}h`;
+    else lastSyncAgo = `Acum ${Math.round(diffMin / 1440)} zile`;
+  }
 
   page.innerHTML = `
     <div class="page-body">
       <!-- Hero Stats & Fatigue -->
       <div id="fitness-widget-container">${fitnessWidgetHtml}</div>
       <div id="weather-widget-container" style="margin-top: var(--space-md)"></div>
+      
+      <!-- Streak Counter -->
+      <div class="animate-in" style="margin-top: var(--space-md); display: flex; gap: 12px; align-items: stretch;">
+        <div style="flex: 1; background: linear-gradient(135deg, rgba(249, 115, 22, 0.08), rgba(234, 179, 8, 0.06)); border: 1px solid rgba(249, 115, 22, 0.15); border-radius: var(--radius-md); padding: 16px; display: flex; align-items: center; gap: 14px;">
+          <div style="font-size: 32px;">${streakDays >= 7 ? '🔥' : streakDays >= 3 ? '💪' : '🌱'}</div>
+          <div>
+            <div style="font-size: 28px; font-weight: 800; color: ${streakDays >= 7 ? '#f97316' : streakDays >= 3 ? 'var(--success)' : 'var(--text-secondary)'}; line-height: 1;">${streakDays}</div>
+            <div style="font-size: 11px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px;">zile consecutive</div>
+          </div>
+        </div>
+        <div style="flex: 1; background: var(--bg-glass); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 16px; display: flex; align-items: center; gap: 14px;">
+          <div style="font-size: 32px;">📊</div>
+          <div>
+            <div style="font-size: 28px; font-weight: 800; color: var(--text-primary); line-height: 1;">${overallScore}%</div>
+            <div style="font-size: 11px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px;">scor săptămânal</div>
+          </div>
+        </div>
+        ${lastSyncAgo ? `
+        <div style="flex: 1; background: var(--bg-glass); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 16px; display: flex; align-items: center; gap: 14px;">
+          <div style="font-size: 32px;">⌚</div>
+          <div>
+            <div style="font-size: 16px; font-weight: 700; color: var(--text-primary); line-height: 1.2;">${lastSyncAgo}</div>
+            <div style="font-size: 11px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px;">ultima sincronizare</div>
+          </div>
+        </div>` : ''}
+      </div>
+
       <div class="stats-grid animate-in" style="margin-top: var(--space-md)">
         <div class="stat-card" style="display: flex; flex-direction: column; justify-content: space-between;">
           <div>
@@ -458,10 +531,7 @@ export function renderDashboard() {
   `;
 
   // ── Weekly Report: data gathering ──────────────────────────────────────
-  const plannedSwim = weekVolume ? weekVolume.swim / 1000 : 0;
-  const plannedRun  = weekVolume ? weekVolume.runTotal : 0;
-  const plannedBike = weekVolume ? weekVolume.bikeTotal : 0;
-  const plannedGym  = weekVolume ? weekVolume.gym : 0;
+  // plannedSwim, plannedRun, plannedBike, plannedGym already declared above
 
   // Previous week data
   const prevWeekNum = weekNum - 1;
@@ -515,7 +585,7 @@ export function renderDashboard() {
   const runPct   = pct(actualRun, plannedRun);
   const bikePct  = pct(actualBike, plannedBike);
   const gymPct   = pct(actualGym, plannedGym);
-  const overallScore = Math.min(100, Math.round((swimPct + runPct + bikePct + gymPct) / 4));
+  // overallScore already declared above (used by hero streak bar)
 
   const swimDelta = delta(actualSwim, prevSwim);
   const runDelta  = delta(actualRun, prevRun);

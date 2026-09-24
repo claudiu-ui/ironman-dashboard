@@ -815,33 +815,95 @@ function buildApp() {
   initRouter();
 }
 
-function showToast(message) {
+function showToast(message, type = 'success') {
+  const icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
+  const colors = { success: 'var(--success)', error: 'var(--danger)', info: 'var(--info)', warning: 'var(--warning)' };
+  
+  // Create container if not exists
+  let container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    container.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:10000;display:flex;flex-direction:column-reverse;gap:8px;pointer-events:none;';
+    document.body.appendChild(container);
+  }
+  
   const toast = document.createElement('div');
-  toast.className = 'toast';
-  toast.textContent = message;
-  document.body.appendChild(toast);
-  requestAnimationFrame(() => toast.classList.add('visible'));
+  toast.style.cssText = `
+    pointer-events:auto;
+    display:flex;align-items:center;gap:10px;
+    padding:12px 20px;border-radius:12px;
+    background:rgba(20,20,20,0.95);backdrop-filter:blur(12px);
+    border:1px solid ${colors[type]}33;
+    box-shadow:0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.03);
+    font-size:13px;font-weight:500;color:var(--text-primary);
+    transform:translateX(120%);opacity:0;
+    transition:all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    max-width:380px;
+  `;
+  toast.innerHTML = `<span style="font-size:18px;flex-shrink:0;">${icons[type] || icons.info}</span><span>${message}</span>`;
+  container.appendChild(toast);
+  
+  requestAnimationFrame(() => {
+    toast.style.transform = 'translateX(0)';
+    toast.style.opacity = '1';
+  });
+  
+  // Haptic feedback on mobile
+  if (navigator.vibrate) navigator.vibrate(50);
+  
   setTimeout(() => {
-    toast.classList.remove('visible');
-    setTimeout(() => toast.remove(), 300);
-  }, 2500);
+    toast.style.transform = 'translateX(120%)';
+    toast.style.opacity = '0';
+    setTimeout(() => toast.remove(), 400);
+  }, 3000);
 }
+
+// Make globally accessible
+window.showToast = showToast;
 
 // Initialize
 buildApp();
 
-// Auto-sync in the background
-(async function autoSync() {
+// ── Smart Auto-Sync with cooldown ──────────────────────────────────────────
+(async function smartAutoSync() {
+  const SYNC_COOLDOWN_MS = 30 * 60 * 1000; // 30 minutes
+  const lastSync = parseInt(localStorage.getItem('ironman_lastSyncTimestamp') || '0');
+  const now = Date.now();
+  
   const { athleteId, apiKey } = storage.getIntervalsSettings();
-  if (athleteId && apiKey) {
-    try {
-      const count = await syncIntervalsWorkouts(athleteId, apiKey);
-      if (count > 0) {
-        showToast(`🔄 Auto-sync: ${count} antrenamente noi de pe Intervals.icu`);
-        renderCurrentRoute(); // Refresh UI if new data arrived
-      }
-    } catch (e) {
-      console.warn('Auto-sync failed:', e.message);
+  if (!athleteId || !apiKey) return;
+  
+  // Skip if synced recently
+  if (now - lastSync < SYNC_COOLDOWN_MS) {
+    const ago = Math.round((now - lastSync) / 60000);
+    console.log(`Auto-sync skipped (last sync ${ago}min ago)`);
+    return;
+  }
+  
+  try {
+    const count = await syncIntervalsWorkouts(athleteId, apiKey);
+    localStorage.setItem('ironman_lastSyncTimestamp', String(Date.now()));
+    
+    if (count > 0) {
+      showToast(`🔄 Auto-sync: ${count} antrenamente noi de pe ceas`, 'info');
+      renderCurrentRoute();
     }
+  } catch (e) {
+    console.warn('Auto-sync failed:', e.message);
+  }
+})();
+
+// ── Weekly Backup Reminder ─────────────────────────────────────────────────
+(function backupReminder() {
+  const BACKUP_KEY = 'ironman_lastBackupReminder';
+  const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
+  const lastReminder = parseInt(localStorage.getItem(BACKUP_KEY) || '0');
+  
+  if (Date.now() - lastReminder > ONE_WEEK) {
+    setTimeout(() => {
+      showToast('💾 Ai făcut backup recent? Exportă datele din Setări ca să nu le pierzi!', 'warning');
+      localStorage.setItem(BACKUP_KEY, String(Date.now()));
+    }, 5000); // Show after 5s to not stack with sync toast
   }
 })();

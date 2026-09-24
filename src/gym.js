@@ -512,6 +512,7 @@ export function renderGymPage() {
       });
 
       modal.remove();
+      if (window.showToast) window.showToast('🏋️ Sesiune de sală salvată!');
       render(); // Re-render to show logged data
       
       // If we are in the dashboard modal, re-render the current route to reflect changes
