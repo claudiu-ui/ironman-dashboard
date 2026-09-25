@@ -577,7 +577,7 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
           </button>
         `:``}
       </div>
-    `}function p(e,t){let n=j.getGymSession(t,`conditioning`);return`
+    `}function p(e,t){let n=j.getGymSession(t,`conditioning`),r=n&&n.exercises?n.exercises:n;return`
       <div class="card animate-in">
         <div class="card-header">
           <div>
@@ -585,8 +585,8 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
             <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 2px">${e.day} • ${e.focus}</div>
           </div>
           ${N?``:`
-            <button class="btn btn-sm ${n?`btn-ghost`:`btn-primary`} log-gym-btn" data-session="conditioning" data-date="${t}">
-              ${n?`✏️ Editează`:`📝 Loghează`}
+            <button class="btn btn-sm ${r?`btn-ghost`:`btn-primary`} log-gym-btn" data-session="conditioning" data-date="${t}">
+              ${r?`✏️ Editează`:`📝 Loghează`}
             </button>
           `}
         </div>
@@ -599,18 +599,18 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
                      <span class="conditioning-variant-format">${e.format}</span>`}
               </div>
               <div class="conditioning-stations">
-                ${(n&&n.stations&&n.stations.length>0?n.stations:e.stations.map(e=>({name:e,value:``}))).map((e,r)=>`
+                ${(r&&r.stations&&r.stations.length>0?r.stations:e.stations.map(e=>({name:e,value:``}))).map((e,n)=>`
                   <div class="conditioning-station" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                     <div style="display: flex; align-items: center;">
-                      <span class="station-num">${r+1}</span>
-                      ${N&&!n?`<input type="text" class="form-input edit-cond-station" value="${e.name}" style="flex: 1; padding: 4px;" />
-                           <button class="btn btn-ghost btn-sm remove-cond-station-btn" data-variant="${t}" data-station="${r}" style="color: var(--danger); margin-left: 8px;">❌</button>`:`<span class="station-name">${e.name}</span>`}
+                      <span class="station-num">${n+1}</span>
+                      ${N&&!r?`<input type="text" class="form-input edit-cond-station" value="${e.name}" style="flex: 1; padding: 4px;" />
+                           <button class="btn btn-ghost btn-sm remove-cond-station-btn" data-variant="${t}" data-station="${n}" style="color: var(--danger); margin-left: 8px;">❌</button>`:`<span class="station-name">${e.name}</span>`}
                     </div>
                     ${e.value?`<span style="font-size: 12px; font-weight: 600; color: var(--accent);">${e.value}</span>`:``}
                   </div>
                 `).join(``)}
               </div>
-              ${N&&!n?`
+              ${N&&!r?`
                 <button class="btn btn-ghost btn-sm add-cond-station-btn" data-variant="${t}" style="margin-top: var(--space-sm); width: 100%; border-style: dashed;">
                   ➕ Adaugă Stație
                 </button>
@@ -662,7 +662,7 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
           <input type="number" class="form-input gym-log-weight" data-ex="${t}" data-set="${n}" value="" placeholder="kg" step="0.5" style="flex: 1; text-align: center; padding: 6px;" />
           <input type="number" class="form-input gym-log-reps" data-ex="${t}" data-set="${n}" value="" placeholder="reps" style="flex: 1; text-align: center; padding: 6px;" />
           <button class="btn btn-ghost btn-sm remove-set-btn" style="color: var(--danger); width: 24px; padding: 0;">❌</button>
-        `,e.before(r)})}),s.addEventListener(`click`,e=>{if(e.target.classList.contains(`remove-set-btn`)){let t=e.target.closest(`.gym-log-set-row`),n=t.closest(`.gym-log-sets`);t.remove(),n.querySelectorAll(`.gym-log-set-row`).forEach((e,t)=>{e.querySelector(`.gym-log-set-num`).textContent=t+1,e.querySelector(`.gym-log-weight`).dataset.set=t,e.querySelector(`.gym-log-reps`).dataset.set=t})}}),s.querySelector(`#gym-log-save`).addEventListener(`click`,()=>{let i=o.map((e,n)=>{let r=s.querySelectorAll(`.gym-log-weight[data-ex="${n}"]`),i=[],a=0;return r.forEach((e,t)=>{let r=s.querySelector(`.gym-log-reps[data-ex="${n}"][data-set="${t}"]`),o=parseFloat(e.value)||0,c=parseInt(r?.value)||0;(o>0||c>0)&&(i.push({weight:o,reps:c}),a+=o*c)}),{name:e.name,sets:i,totalVolume:a,plannedSets:t[n]?.sets||``,completed:i.length>0}});j.saveGymSession(r,e,i),j.saveWorkout(r,{type:e===`conditioning`?`conditioning`:`gym`,distance:0,duration:0,hr:0,rpe:0,notes:`${P[e]?.name||`Conditioning`} — ${i.filter(e=>e.completed).length} exerciții completate`,source:`manual`}),s.remove(),window.showToast&&window.showToast(`🏋️ Sesiune de sală salvată!`),l(),M(async()=>{let{renderCurrentRoute:e}=await Promise.resolve().then(()=>n);return{renderCurrentRoute:e}},void 0).then(({renderCurrentRoute:e})=>e())})}function v(e){let t=P.conditioning,r=t.variants[0],i=j.getGymSession(e,`conditioning`),a=i&&i.stations&&i.stations.length>0?i.stations.map(e=>e.name):[...r.stations];function o(e){let t=e.toLowerCase();return t.includes(`row`)||t.includes(`sled`)||t.includes(`farmer`)||t.includes(`walk`)||t.includes(`push`)||t.includes(`run`)?`m`:t.includes(`ski`)||t.includes(`bike`)||t.includes(`assault`)||t.includes(`echo`)?`cal`:t.includes(`plank`)||t.includes(`hold`)?`sec`:`reps`}let s=document.createElement(`div`);s.className=`modal-overlay active`,s.id=`conditioning-log-modal`;function c(){return a.map((e,t)=>{let n=o(e),r=``;if(i&&i.stations&&i.stations[t]){let e=i.stations[t].value;if(e){let t=e.trim().split(` `);t.length>1?(n=t[t.length-1],r=t.slice(0,-1).join(` `)):r=t[0]}}return`
+        `,e.before(r)})}),s.addEventListener(`click`,e=>{if(e.target.classList.contains(`remove-set-btn`)){let t=e.target.closest(`.gym-log-set-row`),n=t.closest(`.gym-log-sets`);t.remove(),n.querySelectorAll(`.gym-log-set-row`).forEach((e,t)=>{e.querySelector(`.gym-log-set-num`).textContent=t+1,e.querySelector(`.gym-log-weight`).dataset.set=t,e.querySelector(`.gym-log-reps`).dataset.set=t})}}),s.querySelector(`#gym-log-save`).addEventListener(`click`,()=>{let i=o.map((e,n)=>{let r=s.querySelectorAll(`.gym-log-weight[data-ex="${n}"]`),i=[],a=0;return r.forEach((e,t)=>{let r=s.querySelector(`.gym-log-reps[data-ex="${n}"][data-set="${t}"]`),o=parseFloat(e.value)||0,c=parseInt(r?.value)||0;(o>0||c>0)&&(i.push({weight:o,reps:c}),a+=o*c)}),{name:e.name,sets:i,totalVolume:a,plannedSets:t[n]?.sets||``,completed:i.length>0}});j.saveGymSession(r,e,i),j.saveWorkout(r,{type:e===`conditioning`?`conditioning`:`gym`,distance:0,duration:0,hr:0,rpe:0,notes:`${P[e]?.name||`Conditioning`} — ${i.filter(e=>e.completed).length} exerciții completate`,source:`manual`}),s.remove(),window.showToast&&window.showToast(`🏋️ Sesiune de sală salvată!`),l(),M(async()=>{let{renderCurrentRoute:e}=await Promise.resolve().then(()=>n);return{renderCurrentRoute:e}},void 0).then(({renderCurrentRoute:e})=>e())})}function v(e){let t=P.conditioning,r=t.variants[0],i=j.getGymSession(e,`conditioning`),a=i&&i.exercises?i.exercises:i,o=a&&a.stations&&a.stations.length>0?a.stations.map(e=>e.name):[...r.stations];function s(e){let t=e.toLowerCase();return t.includes(`row`)||t.includes(`sled`)||t.includes(`farmer`)||t.includes(`walk`)||t.includes(`push`)||t.includes(`run`)?`m`:t.includes(`ski`)||t.includes(`bike`)||t.includes(`assault`)||t.includes(`echo`)?`cal`:t.includes(`plank`)||t.includes(`hold`)?`sec`:`reps`}let c=document.createElement(`div`);c.className=`modal-overlay active`,c.id=`conditioning-log-modal`;function u(){return o.map((e,t)=>{let n=s(e),r=``;if(a&&a.stations&&a.stations[t]){let e=a.stations[t].value;if(e){let t=e.trim().split(` `);t.length>1?(n=t[t.length-1],r=t.slice(0,-1).join(` `)):r=t[0]}}return`
           <div class="cond-log-station-row" style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.02); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 8px;">
             <span class="cond-log-station-num" style="width: 24px; height: 24px; border-radius: 50%; background: var(--conditioning-bg); color: var(--conditioning); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0;">${t+1}</span>
             <input type="text" class="form-input cond-station-name" value="${e}" placeholder="Nume Exercițiu" style="flex: 2; padding: 6px 8px; font-size: 13px;" />
@@ -677,7 +677,7 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
             </select>
             <button type="button" class="btn btn-ghost btn-sm remove-cond-log-btn" data-index="${t}" style="color: var(--danger); padding: 4px;">❌</button>
           </div>
-        `}).join(``)}s.innerHTML=`
+        `}).join(``)}c.innerHTML=`
       <div class="modal" style="max-width: 600px; max-height: 85vh; overflow-y: auto;">
         <div class="modal-title">📝 Loghează: ${t.name}</div>
         <div style="font-size: 12px; color: var(--text-tertiary); margin-bottom: var(--space-md);">
@@ -687,21 +687,21 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
         <div style="display: flex; gap: 12px; margin-bottom: var(--space-lg);">
           <div class="form-group" style="flex: 1;">
             <label class="form-label">Runde (opțional)</label>
-            <input type="number" class="form-input" id="cond-rounds" value="${i&&i.rounds||``}" placeholder="ex: 3" min="1" />
+            <input type="number" class="form-input" id="cond-rounds" value="${a&&a.rounds||``}" placeholder="ex: 3" min="1" />
           </div>
           <div class="form-group" style="flex: 1;">
             <label class="form-label">Timp total (min)</label>
-            <input type="number" class="form-input" id="cond-time" value="${i&&i.time||``}" placeholder="ex: 45" />
+            <input type="number" class="form-input" id="cond-time" value="${a&&a.time||``}" placeholder="ex: 45" />
           </div>
           <div class="form-group" style="flex: 1;">
             <label class="form-label">RPE (1-10)</label>
-            <input type="number" class="form-input" id="cond-rpe" value="${i&&i.rpe||``}" min="1" max="10" placeholder="8" />
+            <input type="number" class="form-input" id="cond-rpe" value="${a&&a.rpe||``}" min="1" max="10" placeholder="8" />
           </div>
         </div>
         
         <div style="font-size: 13px; font-weight: 600; margin-bottom: var(--space-sm); color: var(--text-secondary);">Stații Efectuate:</div>
         <div id="cond-stations-log-container">
-          ${c()}
+          ${u()}
         </div>
         
         <button type="button" class="btn btn-ghost btn-sm" id="add-cond-log-btn" style="width: 100%; border-style: dashed; margin-top: 8px;">
@@ -710,7 +710,7 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
 
         <div class="form-group" style="margin-top: var(--space-lg);">
           <label class="form-label">Notițe</label>
-          <textarea class="form-input" id="cond-notes" rows="2" placeholder="Cum a fost? Ce modificări ai făcut?">${i&&i.notes||``}</textarea>
+          <textarea class="form-input" id="cond-notes" rows="2" placeholder="Cum a fost? Ce modificări ai făcut?">${a&&a.notes||``}</textarea>
         </div>
 
         <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: var(--space-lg); padding-top: var(--space-md); border-top: 1px solid var(--border-subtle);">
@@ -718,7 +718,7 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
           <button type="button" class="btn btn-primary" id="cond-log-save">💾 Salvează Sesiunea</button>
         </div>
       </div>
-    `,document.body.appendChild(s);let u=s.querySelector(`#cond-stations-log-container`);u.addEventListener(`click`,e=>{let t=e.target.closest(`.remove-cond-log-btn`);t&&(t.closest(`.cond-log-station-row`).remove(),u.querySelectorAll(`.cond-log-station-num`).forEach((e,t)=>{e.textContent=t+1}))}),s.querySelector(`#add-cond-log-btn`).addEventListener(`click`,()=>{let e=u.querySelectorAll(`.cond-log-station-row`).length,t=document.createElement(`div`);t.innerHTML=`
+    `,document.body.appendChild(c);let d=c.querySelector(`#cond-stations-log-container`);d.addEventListener(`click`,e=>{let t=e.target.closest(`.remove-cond-log-btn`);t&&(t.closest(`.cond-log-station-row`).remove(),d.querySelectorAll(`.cond-log-station-num`).forEach((e,t)=>{e.textContent=t+1}))}),c.querySelector(`#add-cond-log-btn`).addEventListener(`click`,()=>{let e=d.querySelectorAll(`.cond-log-station-row`).length,t=document.createElement(`div`);t.innerHTML=`
         <div class="cond-log-station-row" style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.02); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 8px;">
           <span class="cond-log-station-num" style="width: 24px; height: 24px; border-radius: 50%; background: var(--conditioning-bg); color: var(--conditioning); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0;">${e+1}</span>
           <input type="text" class="form-input cond-station-name" value="" placeholder="Nume Exercițiu" style="flex: 2; padding: 6px 8px; font-size: 13px;" />
@@ -733,7 +733,7 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
           </select>
           <button type="button" class="btn btn-ghost btn-sm remove-cond-log-btn" style="color: var(--danger); padding: 4px;">❌</button>
         </div>
-      `,u.appendChild(t.firstElementChild)}),s.querySelector(`#cond-log-cancel`).addEventListener(`click`,()=>s.remove()),s.addEventListener(`click`,e=>{e.target===s&&s.remove()}),s.querySelector(`#cond-log-save`).addEventListener(`click`,()=>{let i=parseInt(s.querySelector(`#cond-rounds`).value)||0,a=parseInt(s.querySelector(`#cond-time`).value)||0,o=parseInt(s.querySelector(`#cond-rpe`).value)||0,c=s.querySelector(`#cond-notes`).value,u=s.querySelectorAll(`.cond-station-name`),d=s.querySelectorAll(`.cond-station-value`),f=s.querySelectorAll(`.cond-station-metric`),p=[];u.forEach((e,t)=>{let n=d[t]?.value||``,r=f[t]?.value||`reps`;e.value.trim()!==``&&p.push({name:e.value,value:n?`${n} ${r}`:``,completed:n!==``})}),j.saveGymSession(e,`conditioning`,{type:`conditioning`,variant:r.name,rounds:i,time:a,rpe:o,notes:c,stations:p}),j.saveWorkout(e,{type:`conditioning`,distance:0,duration:a,hr:0,rpe:o,notes:`${t.name} — ${i?i+` runde, `:``}${a} min${c?`. `+c:``}`,source:`manual`}),s.remove(),window.showToast&&window.showToast(`💪 Conditioning logat!`),l(),M(async()=>{let{renderCurrentRoute:e}=await Promise.resolve().then(()=>n);return{renderCurrentRoute:e}},void 0).then(({renderCurrentRoute:e})=>e())})}return l(),e}function Oe(e,t){let n=De(),r=Array.from(n.querySelectorAll(`.card`)),i=r.find(t=>{let n=t.querySelector(`.card-title`);return n&&n.textContent.toLowerCase().includes(e.toLowerCase())});return!i&&e.toLowerCase().includes(`conditioning`)&&(i=r.find(e=>e.querySelector(`.card-title`).textContent.toLowerCase().includes(`conditioning`))),i}var F=!1,ke=null;function Ae(){let e=document.createElement(`div`);e.className=`nutrition-page`,ke=j.getCustomSupplements(te.supplements);let t=new Date().toISOString().split(`T`)[0];function n(){let n=j.getDailyLog(t),i=j.getSupplements(t),a=j.getWorkoutLog(t)||[],o=a.reduce((e,t)=>e+(parseInt(t.calories)||0),0),s=a.reduce((e,t)=>e+(t.isSkipped?0:oe(t)),0),c=ee(o,s),l=c.dayType===`high`?`High Carb Day`:c.dayType===`low`?`Low Carb Day`:`Moderate Day`,u=c.dayType===`high`?`Ai avut un antrenament lung sau intens (TSS ridicat). Targetul tău de carbohidrați este la maximum pentru a reface glicogenul.`:c.dayType===`low`?`Zi de refacere sau antrenament ușor. Targetul tău de carbohidrați e scăzut, proteinele și grăsimile sunt ridicate pentru sațietate.`:`Echilibru clasic pentru susținerea unui efort moderat.`,d=c.dayType===`high`?`var(--danger)`:c.dayType===`low`?`var(--success)`:`var(--warning)`;e.innerHTML=`
+      `,d.appendChild(t.firstElementChild)}),c.querySelector(`#cond-log-cancel`).addEventListener(`click`,()=>c.remove()),c.addEventListener(`click`,e=>{e.target===c&&c.remove()}),c.querySelector(`#cond-log-save`).addEventListener(`click`,()=>{let i=parseInt(c.querySelector(`#cond-rounds`).value)||0,a=parseInt(c.querySelector(`#cond-time`).value)||0,o=parseInt(c.querySelector(`#cond-rpe`).value)||0,s=c.querySelector(`#cond-notes`).value,u=c.querySelectorAll(`.cond-station-name`),d=c.querySelectorAll(`.cond-station-value`),f=c.querySelectorAll(`.cond-station-metric`),p=[];u.forEach((e,t)=>{let n=d[t]?.value||``,r=f[t]?.value||`reps`;e.value.trim()!==``&&p.push({name:e.value,value:n?`${n} ${r}`:``,completed:n!==``})}),j.saveGymSession(e,`conditioning`,{type:`conditioning`,variant:r.name,rounds:i,time:a,rpe:o,notes:s,stations:p}),j.saveWorkout(e,{type:`conditioning`,distance:0,duration:a,hr:0,rpe:o,notes:`${t.name} — ${i?i+` runde, `:``}${a} min${s?`. `+s:``}`,source:`manual`}),c.remove(),window.showToast&&window.showToast(`💪 Conditioning logat!`),l(),M(async()=>{let{renderCurrentRoute:e}=await Promise.resolve().then(()=>n);return{renderCurrentRoute:e}},void 0).then(({renderCurrentRoute:e})=>e())})}return l(),e}function Oe(e,t){let n=De(),r=Array.from(n.querySelectorAll(`.card`)),i=r.find(t=>{let n=t.querySelector(`.card-title`);return n&&n.textContent.toLowerCase().includes(e.toLowerCase())});return!i&&e.toLowerCase().includes(`conditioning`)&&(i=r.find(e=>e.querySelector(`.card-title`).textContent.toLowerCase().includes(`conditioning`))),i}var F=!1,ke=null;function Ae(){let e=document.createElement(`div`);e.className=`nutrition-page`,ke=j.getCustomSupplements(te.supplements);let t=new Date().toISOString().split(`T`)[0];function n(){let n=j.getDailyLog(t),i=j.getSupplements(t),a=j.getWorkoutLog(t)||[],o=a.reduce((e,t)=>e+(parseInt(t.calories)||0),0),s=a.reduce((e,t)=>e+(t.isSkipped?0:oe(t)),0),c=ee(o,s),l=c.dayType===`high`?`High Carb Day`:c.dayType===`low`?`Low Carb Day`:`Moderate Day`,u=c.dayType===`high`?`Ai avut un antrenament lung sau intens (TSS ridicat). Targetul tău de carbohidrați este la maximum pentru a reface glicogenul.`:c.dayType===`low`?`Zi de refacere sau antrenament ușor. Targetul tău de carbohidrați e scăzut, proteinele și grăsimile sunt ridicate pentru sațietate.`:`Echilibru clasic pentru susținerea unui efort moderat.`,d=c.dayType===`high`?`var(--danger)`:c.dayType===`low`?`var(--success)`:`var(--warning)`;e.innerHTML=`
       <div class="page-body">
         <!-- Date Picker -->
         <div class="date-picker-bar animate-in">
