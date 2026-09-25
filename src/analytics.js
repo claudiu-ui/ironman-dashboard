@@ -8,6 +8,36 @@ import { storage } from './storage.js';
 
 let charts = [];
 
+// Vertical line plugin — draws "current week" marker
+const currentWeekLinePlugin = {
+  id: 'currentWeekLine',
+  afterDraw(chart) {
+    const weekNum = getCurrentWeek();
+    const meta = chart.getDatasetMeta(0);
+    if (!meta || !meta.data || weekNum - 1 >= meta.data.length) return;
+    
+    const x = meta.data[weekNum - 1]?.x;
+    if (!x) return;
+    
+    const { ctx, chartArea: { top, bottom } } = chart;
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(x, top);
+    ctx.lineTo(x, bottom);
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+    ctx.setLineDash([4, 4]);
+    ctx.stroke();
+    
+    // Label
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.font = '10px Inter';
+    ctx.textAlign = 'center';
+    ctx.fillText('▼ Acum', x, top - 4);
+    ctx.restore();
+  }
+};
+
 export function renderAnalyticsPage() {
   const page = document.createElement('div');
   page.className = 'analytics-page';
@@ -32,9 +62,20 @@ export function renderAnalyticsPage() {
         </div>
       </div>
 
+      <!-- Compliance % Chart — NEW -->
+      <div class="card animate-in animate-in-delay-1" style="margin-bottom: var(--space-lg)">
+        <div class="card-header">
+          <div class="card-title">📊 Consistență Săptămânală (Plan vs. Real)</div>
+          <div class="card-badge" style="background: rgba(139, 92, 246, 0.15); color: #a855f7;">% Îndeplinire</div>
+        </div>
+        <div style="height: 300px; position: relative;">
+          <canvas id="compliance-chart"></canvas>
+        </div>
+      </div>
+
       <div class="grid-2" style="margin-bottom: var(--space-lg)">
         <!-- Swim Progression -->
-        <div class="card animate-in animate-in-delay-1">
+        <div class="card animate-in animate-in-delay-2">
           <div class="card-header">
             <div class="card-title">🏊 Progresie Înot</div>
           </div>
@@ -65,10 +106,10 @@ export function renderAnalyticsPage() {
           </div>
         </div>
 
-        <!-- Weekly Summary -->
-        <div class="card animate-in animate-in-delay-4">
+        <!-- Training Hours: Plan vs Real -->
+        <div class="card animate-in animate-in-delay-3">
           <div class="card-header">
-            <div class="card-title">📊 Ore de Antrenament Estimate / Săptămână</div>
+            <div class="card-title">⏱️ Ore de Antrenament / Săptămână</div>
           </div>
           <div style="height: 250px; position: relative;">
             <canvas id="hours-chart"></canvas>
@@ -115,24 +156,20 @@ export function renderAnalyticsPage() {
       }
     };
 
-    const allVolumes = [...PHASE1_VOLUMES, ...PHASE2_VOLUMES, ...PHASE3_VOLUMES, ...PHASE4_VOLUMES];
-    const weekNum = getCurrentWeek();
-
     const weekLabels = allVolumes.map(v => {
       const deload = v.deload ? '🔄' : v.simulation ? '🏁' : '';
       return `S${v.week}${deload}`;
     });
 
-    // PMC Algorithm (Fitness vs Fatigue)
+    // ── PMC Algorithm (Fitness vs Fatigue) ─────────────────────────────────
     const today = new Date();
-    // Plot from start to 7 days in the future
     const daysDiff = Math.max(14, Math.floor((today - PLAN_START) / (1000 * 60 * 60 * 24)) + 7); 
     
     const pmcLabels = [];
-    const ctlData = []; // Fitness
-    const atlData = []; // Fatigue
-    const tsbData = []; // Form
-    const tssData = []; // Daily Stress
+    const ctlData = [];
+    const atlData = [];
+    const tsbData = [];
+    const tssData = [];
     
     let currentCTL = 0;
     let currentATL = 0;
@@ -142,8 +179,7 @@ export function renderAnalyticsPage() {
       d.setDate(d.getDate() + i);
       const dateStr = d.toISOString().split('T')[0];
       
-      // Reduce labels to one per week for readability, but keep daily data
-      if (d.getDay() === 1) { // Monday
+      if (d.getDay() === 1) {
         pmcLabels.push(d.toLocaleDateString('ro-RO', { month: 'short', day: 'numeric' }));
       } else {
         pmcLabels.push('');
@@ -155,16 +191,13 @@ export function renderAnalyticsPage() {
       logs.forEach(log => {
           const dur = parseInt(log.duration) || 0;
           const hr = parseInt(log.hr) || 0;
-          const rpe = parseInt(log.rpe) || (hr ? Math.max(1, (hr / 150) * 10) : 5); // Fallback to RPE 5 if no HR/RPE
-          
+          const rpe = parseInt(log.rpe) || (hr ? Math.max(1, (hr / 150) * 10) : 5);
           if (dur > 0) {
-              // Estimate TSS: 100 TSS = 1 hour at RPE 10 (Threshold).
               dailyTSS += (dur / 60) * (rpe * 10);
           }
       });
       
       tssData.push(dailyTSS);
-      
       currentCTL = currentCTL * Math.exp(-1/42) + dailyTSS * (1 - Math.exp(-1/42));
       currentATL = currentATL * Math.exp(-1/7) + dailyTSS * (1 - Math.exp(-1/7));
       
@@ -242,11 +275,9 @@ export function renderAnalyticsPage() {
       }));
     }
 
-    // Calculate Actual Volumes per week
+    // ── Calculate Actual Volumes per week ────────────────────────────────────
     const actualVolumes = allVolumes.map(v => {
-      let runTotal = 0;
-      let bikeTotal = 0;
-      let swimTotal = 0;
+      let runTotal = 0, bikeTotal = 0, swimTotal = 0, totalMinutes = 0;
       
       const start = new Date(PLAN_START);
       start.setDate(start.getDate() + (v.week - 1) * 7);
@@ -258,17 +289,102 @@ export function renderAnalyticsPage() {
         const logs = storage.getWorkoutLog(dateStr) || [];
         
         logs.forEach(log => {
-          if (log.distance > 0) {
-            if (log.type === 'run') runTotal += parseFloat(log.distance);
-            if (log.type === 'bike') bikeTotal += parseFloat(log.distance);
-            if (log.type === 'swim') swimTotal += parseFloat(log.distance) * 1000;
+          if (!log.isSkipped) {
+            const dist = parseFloat(log.distance) || 0;
+            const dur = parseInt(log.duration) || 0;
+            totalMinutes += dur;
+            if (log.type === 'run') runTotal += dist;
+            if (log.type === 'bike') bikeTotal += dist;
+            if (log.type === 'swim') swimTotal += dist * 1000; // km to m
           }
         });
       }
-      return { runTotal, bikeTotal, swimTotal };
+      return { runTotal, bikeTotal, swimTotal, totalHours: totalMinutes / 60 };
     });
 
-    // Swim chart
+    // Only show real data up to current week (don't show 0 for future weeks)
+    const realSwimData = actualVolumes.map((v, i) => i < weekNum && v.swimTotal > 0 ? v.swimTotal : null);
+    const realRunData = actualVolumes.map((v, i) => i < weekNum && v.runTotal > 0 ? v.runTotal : null);
+    const realBikeData = actualVolumes.map((v, i) => i < weekNum && v.bikeTotal > 0 ? v.bikeTotal : null);
+    const realHoursData = actualVolumes.map((v, i) => i < weekNum && v.totalHours > 0 ? Math.round(v.totalHours * 10) / 10 : null);
+
+    // ── Compliance % Chart ──────────────────────────────────────────────────
+    const complianceData = allVolumes.map((v, i) => {
+      if (i >= weekNum) return null; // future weeks
+      const av = actualVolumes[i];
+      
+      const swimPct = v.swim > 0 ? Math.min(100, (av.swimTotal / v.swim) * 100) : 100;
+      const runPct = v.runTotal > 0 ? Math.min(100, (av.runTotal / v.runTotal) * 100) : 100;
+      const bikePct = v.bikeTotal > 0 ? Math.min(100, (av.bikeTotal / v.bikeTotal) * 100) : 100;
+      
+      return Math.round((swimPct + runPct + bikePct) / 3);
+    });
+
+    const complianceCtx = page.querySelector('#compliance-chart');
+    if (complianceCtx) {
+      charts.push(new Chart(complianceCtx, {
+        type: 'bar',
+        data: {
+          labels: weekLabels,
+          datasets: [
+            {
+              type: 'line',
+              label: 'Target (80%)',
+              data: allVolumes.map(() => 80),
+              borderColor: 'rgba(255, 255, 255, 0.15)',
+              borderDash: [4, 4],
+              pointRadius: 0,
+              borderWidth: 1,
+              fill: false,
+            },
+            {
+              label: 'Consistență %',
+              data: complianceData,
+              backgroundColor: complianceData.map(v => {
+                if (v === null) return 'transparent';
+                if (v >= 90) return 'rgba(34, 197, 94, 0.7)';   // green
+                if (v >= 70) return 'rgba(249, 115, 22, 0.7)';  // orange
+                if (v >= 50) return 'rgba(234, 179, 8, 0.7)';   // yellow
+                return 'rgba(239, 68, 68, 0.7)';                // red
+              }),
+              borderRadius: 6,
+              barPercentage: 0.6,
+            }
+          ]
+        },
+        options: {
+          ...chartDefaults,
+          plugins: {
+            ...chartDefaults.plugins,
+            tooltip: {
+              ...chartDefaults.plugins.tooltip,
+              callbacks: {
+                label: (ctx) => {
+                  if (ctx.dataset.label === 'Target (80%)') return null;
+                  return ctx.raw !== null ? `Îndeplinire: ${ctx.raw}%` : '';
+                }
+              }
+            }
+          },
+          scales: {
+            ...chartDefaults.scales,
+            y: { 
+              ...chartDefaults.scales.y, 
+              min: 0, 
+              max: 110,
+              title: { display: true, text: '%', color: 'rgba(232,232,240,0.4)', font: { size: 10 } },
+              ticks: {
+                ...chartDefaults.scales.y.ticks,
+                callback: v => v + '%'
+              }
+            }
+          }
+        },
+        plugins: [currentWeekLinePlugin]
+      }));
+    }
+
+    // ── Swim chart (cyan theme) ─────────────────────────────────────────────
     const swimCtx = page.querySelector('#swim-chart');
     if (swimCtx) {
       charts.push(new Chart(swimCtx, {
@@ -279,7 +395,7 @@ export function renderAnalyticsPage() {
             {
               label: 'Planificat (m)',
               data: allVolumes.map(v => v.swim),
-              borderColor: 'rgba(239, 68, 68, 0.4)',
+              borderColor: 'rgba(6, 182, 212, 0.35)',
               borderDash: [5, 5],
               fill: false,
               tension: 0.3,
@@ -288,22 +404,24 @@ export function renderAnalyticsPage() {
             },
             {
               label: 'Realizat (m)',
-              data: actualVolumes.map(v => v.swimTotal > 0 ? v.swimTotal : null),
-              borderColor: '#ef4444',
-              backgroundColor: 'rgba(239, 68, 68, 0.1)',
+              data: realSwimData,
+              borderColor: '#06b6d4',
+              backgroundColor: 'rgba(6, 182, 212, 0.1)',
               fill: true,
               tension: 0.3,
               pointRadius: 3,
+              pointBackgroundColor: '#06b6d4',
               borderWidth: 2,
-              spanGaps: true
+              spanGaps: false,
             }
           ]
         },
-        options: chartDefaults
+        options: chartDefaults,
+        plugins: [currentWeekLinePlugin]
       }));
     }
 
-    // Run chart
+    // ── Run chart (orange theme) ────────────────────────────────────────────
     const runCtx = page.querySelector('#run-chart');
     if (runCtx) {
       charts.push(new Chart(runCtx, {
@@ -314,7 +432,7 @@ export function renderAnalyticsPage() {
             {
               label: 'Planificat (km)',
               data: allVolumes.map(v => v.runTotal),
-              borderColor: 'rgba(185, 28, 28, 0.4)',
+              borderColor: 'rgba(249, 115, 22, 0.35)',
               borderDash: [5, 5],
               fill: false,
               tension: 0.3,
@@ -323,22 +441,24 @@ export function renderAnalyticsPage() {
             },
             {
               label: 'Realizat (km)',
-              data: actualVolumes.map(v => v.runTotal > 0 ? v.runTotal : null),
-              borderColor: '#b91c1c',
-              backgroundColor: 'rgba(185, 28, 28, 0.1)',
+              data: realRunData,
+              borderColor: '#f97316',
+              backgroundColor: 'rgba(249, 115, 22, 0.1)',
               fill: true,
               tension: 0.3,
               pointRadius: 3,
+              pointBackgroundColor: '#f97316',
               borderWidth: 2,
-              spanGaps: true
+              spanGaps: false,
             }
           ]
         },
-        options: chartDefaults
+        options: chartDefaults,
+        plugins: [currentWeekLinePlugin]
       }));
     }
 
-    // Bike chart
+    // ── Bike chart (green theme) ────────────────────────────────────────────
     const bikeCtx = page.querySelector('#bike-chart');
     if (bikeCtx) {
       charts.push(new Chart(bikeCtx, {
@@ -349,7 +469,7 @@ export function renderAnalyticsPage() {
             {
               label: 'Planificat (km)',
               data: allVolumes.map(v => v.bikeTotal),
-              borderColor: 'rgba(220, 38, 38, 0.4)',
+              borderColor: 'rgba(34, 197, 94, 0.35)',
               borderDash: [5, 5],
               fill: false,
               tension: 0.3,
@@ -358,44 +478,64 @@ export function renderAnalyticsPage() {
             },
             {
               label: 'Realizat (km)',
-              data: actualVolumes.map(v => v.bikeTotal > 0 ? v.bikeTotal : null),
-              borderColor: '#dc2626',
-              backgroundColor: 'rgba(220, 38, 38, 0.1)',
+              data: realBikeData,
+              borderColor: '#22c55e',
+              backgroundColor: 'rgba(34, 197, 94, 0.1)',
               fill: true,
               tension: 0.3,
               pointRadius: 3,
+              pointBackgroundColor: '#22c55e',
               borderWidth: 2,
-              spanGaps: true
+              spanGaps: false,
             }
           ]
         },
-        options: chartDefaults
+        options: chartDefaults,
+        plugins: [currentWeekLinePlugin]
       }));
     }
 
-    // Training hours estimate
+    // ── Training Hours: Plan vs Real ────────────────────────────────────────
+    const plannedHours = allVolumes.map(v => {
+      const swimH = (v.swim * 2 / 100) / 60;
+      const runH = (v.runTotal * 6) / 60;
+      const bikeH = (v.bikeTotal * 2.5) / 60;
+      const gymH = (v.gym || 0) * 1;
+      return Math.round((swimH + runH + bikeH + gymH) * 10) / 10;
+    });
+
     const hoursCtx = page.querySelector('#hours-chart');
     if (hoursCtx) {
       charts.push(new Chart(hoursCtx, {
         type: 'bar',
         data: {
           labels: weekLabels,
-          datasets: [{
-            label: 'Ore estimate / săptămână',
-            data: allVolumes.map(v => {
-              // Rough estimates: swim=2min/100m, run=6min/km, bike=2.5min/km, gym=1h each, conditioning=0.75h
-              const swimH = (v.swim * 2 / 100) / 60;
-              const runH = (v.runTotal * 6) / 60;
-              const bikeH = (v.bikeTotal * 2.5) / 60;
-              const gymH = (v.gym || 0) * 1;
-              return Math.round((swimH + runH + bikeH + gymH) * 10) / 10;
-            }),
-            backgroundColor: allVolumes.map(v => {
-              const phase = PHASES.find(p => v.week >= p.weeks[0] && v.week <= p.weeks[1]);
-              return phase ? phase.color + '99' : 'rgba(139,92,246,0.6)';
-            }),
-            borderRadius: 4,
-          }]
+          datasets: [
+            {
+              label: 'Planificat (ore)',
+              data: plannedHours,
+              backgroundColor: allVolumes.map(v => {
+                const phase = PHASES.find(p => v.week >= p.weeks[0] && v.week <= p.weeks[1]);
+                return phase ? phase.color + '33' : 'rgba(139,92,246,0.2)';
+              }),
+              borderColor: allVolumes.map(v => {
+                const phase = PHASES.find(p => v.week >= p.weeks[0] && v.week <= p.weeks[1]);
+                return phase ? phase.color + '66' : 'rgba(139,92,246,0.4)';
+              }),
+              borderWidth: 1,
+              borderRadius: 4,
+              barPercentage: 0.5,
+              categoryPercentage: 0.8,
+            },
+            {
+              label: 'Realizat (ore)',
+              data: realHoursData,
+              backgroundColor: 'rgba(255, 255, 255, 0.65)',
+              borderRadius: 4,
+              barPercentage: 0.5,
+              categoryPercentage: 0.8,
+            }
+          ]
         },
         options: {
           ...chartDefaults,
@@ -403,7 +543,8 @@ export function renderAnalyticsPage() {
             ...chartDefaults.scales,
             y: { ...chartDefaults.scales.y, title: { display: true, text: 'ore', color: 'rgba(232,232,240,0.4)', font: { family: 'Inter', size: 11 } } }
           }
-        }
+        },
+        plugins: [currentWeekLinePlugin]
       }));
     }
   }, 100);
