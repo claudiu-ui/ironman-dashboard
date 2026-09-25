@@ -599,15 +599,18 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
                      <span class="conditioning-variant-format">${e.format}</span>`}
               </div>
               <div class="conditioning-stations">
-                ${e.stations.map((e,n)=>`
-                  <div class="conditioning-station">
-                    <span class="station-num">${n+1}</span>
-                    ${N?`<input type="text" class="form-input edit-cond-station" value="${e}" style="flex: 1; padding: 4px;" />
-                         <button class="btn btn-ghost btn-sm remove-cond-station-btn" data-variant="${t}" data-station="${n}" style="color: var(--danger); margin-left: 8px;">❌</button>`:`<span class="station-name">${e}</span>`}
+                ${(n&&n.stations&&n.stations.length>0?n.stations:e.stations.map(e=>({name:e,value:``}))).map((e,r)=>`
+                  <div class="conditioning-station" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <div style="display: flex; align-items: center;">
+                      <span class="station-num">${r+1}</span>
+                      ${N&&!n?`<input type="text" class="form-input edit-cond-station" value="${e.name}" style="flex: 1; padding: 4px;" />
+                           <button class="btn btn-ghost btn-sm remove-cond-station-btn" data-variant="${t}" data-station="${r}" style="color: var(--danger); margin-left: 8px;">❌</button>`:`<span class="station-name">${e.name}</span>`}
+                    </div>
+                    ${e.value?`<span style="font-size: 12px; font-weight: 600; color: var(--accent);">${e.value}</span>`:``}
                   </div>
                 `).join(``)}
               </div>
-              ${N?`
+              ${N&&!n?`
                 <button class="btn btn-ghost btn-sm add-cond-station-btn" data-variant="${t}" style="margin-top: var(--space-sm); width: 100%; border-style: dashed;">
                   ➕ Adaugă Stație
                 </button>
