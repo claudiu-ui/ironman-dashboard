@@ -118,8 +118,8 @@ export function renderGymPage() {
             <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 2px">${program.day} • ${program.focus}</div>
           </div>
           ${!isEditMode ? `
-            <button class="btn btn-sm ${logged ? 'btn-ghost' : 'btn-primary'} log-gym-btn" data-session="${key}" data-date="${dateStr}" ${logged ? 'disabled' : ''}>
-              ${logged ? '✓ Logat' : '📝 Loghează Sesiune'}
+            <button class="btn btn-sm ${logged ? 'btn-ghost' : 'btn-primary'} log-gym-btn" data-session="${key}" data-date="${dateStr}">
+              ${logged ? '✏️ Editează' : '📝 Loghează Sesiune'}
             </button>
           ` : ''}
         </div>
@@ -206,8 +206,8 @@ export function renderGymPage() {
             <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 2px">${program.day} • ${program.focus}</div>
           </div>
           ${!isEditMode ? `
-            <button class="btn btn-sm ${logged ? 'btn-ghost' : 'btn-primary'} log-gym-btn" data-session="conditioning" data-date="${dateStr}" ${logged ? 'disabled' : ''}>
-              ${logged ? '✓ Logat' : '📝 Loghează'}
+            <button class="btn btn-sm ${logged ? 'btn-ghost' : 'btn-primary'} log-gym-btn" data-session="conditioning" data-date="${dateStr}">
+              ${logged ? '✏️ Editează' : '📝 Loghează'}
             </button>
           ` : ''}
         </div>
@@ -367,21 +367,30 @@ export function renderGymPage() {
 
   // Gym Log Modal — per exercise, per set, weight + reps
   function openGymLogModal(sessionType, exercises, dateStr) {
-    // Parse number of sets from the exercise definition (e.g., "3 × 10" → 3 sets)
+    const currentLog = storage.getGymSession(dateStr, sessionType);
+    const currentLogExercises = currentLog && Array.isArray(currentLog.exercises) ? currentLog.exercises 
+                              : (currentLog && currentLog.exercises && Array.isArray(currentLog.exercises.exercises) ? currentLog.exercises.exercises : []);
+
     const exercisesWithSets = exercises.map(ex => {
       const setsMatch = (ex.sets || '3').match(/(\d+)\s*[×x]/i);
       const numSets = setsMatch ? parseInt(setsMatch[1]) : 3;
       
-      // Get last session for pre-filling weights
-      const lastData = getLastSessionData(sessionType, ex.name);
+      const loggedEx = currentLogExercises.find(e => e.name === ex.name);
+      const lastData = getLastSessionData(sessionType, ex.name, dateStr);
       
       const sets = [];
-      for (let i = 0; i < numSets; i++) {
-        const lastSet = lastData?.sets?.[i];
-        sets.push({
-          weight: lastSet?.weight || '',
-          reps: lastSet?.reps || ''
-        });
+      const targetSetsCount = loggedEx && loggedEx.sets ? Math.max(numSets, loggedEx.sets.length) : numSets;
+      
+      for (let i = 0; i < targetSetsCount; i++) {
+        let w = '', r = '';
+        if (loggedEx && loggedEx.sets && loggedEx.sets[i]) {
+          w = loggedEx.sets[i].weight;
+          r = loggedEx.sets[i].reps;
+        } else if (!currentLog) { // Only pre-fill from last session if not currently editing an existing log
+          w = lastData?.sets?.[i]?.weight || '';
+          r = lastData?.sets?.[i]?.reps || '';
+        }
+        sets.push({ weight: w, reps: r });
       }
       return { name: ex.name, sets, numSets };
     });
@@ -527,7 +536,10 @@ export function renderGymPage() {
   function openConditioningLogModal(dateStr) {
     const program = currentPrograms.conditioning;
     const variant = program.variants[0];
-    let stations = [...variant.stations]; // Clone stations so we can modify
+    const existingLog = storage.getGymSession(dateStr, 'conditioning');
+    let stations = existingLog && existingLog.stations && existingLog.stations.length > 0
+                   ? existingLog.stations.map(s => s.name)
+                   : [...variant.stations];
 
     function getStationMetricOption(station) {
       const s = station.toLowerCase();
@@ -543,12 +555,26 @@ export function renderGymPage() {
     
     function renderStations() {
       return stations.map((s, i) => {
-        const defaultMetric = getStationMetricOption(s);
+        let defaultMetric = getStationMetricOption(s);
+        let defaultVal = '';
+        if (existingLog && existingLog.stations && existingLog.stations[i]) {
+          const loggedVal = existingLog.stations[i].value; // e.g., "500 m" or "15 reps"
+          if (loggedVal) {
+            const parts = loggedVal.trim().split(' ');
+            if (parts.length > 1) {
+              defaultMetric = parts[parts.length - 1];
+              defaultVal = parts.slice(0, -1).join(' ');
+            } else {
+              defaultVal = parts[0];
+            }
+          }
+        }
+
         return `
           <div class="cond-log-station-row" style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.02); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 8px;">
             <span class="cond-log-station-num" style="width: 24px; height: 24px; border-radius: 50%; background: var(--conditioning-bg); color: var(--conditioning); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0;">${i + 1}</span>
             <input type="text" class="form-input cond-station-name" value="${s}" placeholder="Nume Exercițiu" style="flex: 2; padding: 6px 8px; font-size: 13px;" />
-            <input type="number" class="form-input cond-station-value" placeholder="valoare" style="flex: 1; min-width: 60px; padding: 6px 8px; font-size: 13px; text-align: center;" />
+            <input type="number" class="form-input cond-station-value" value="${defaultVal}" placeholder="valoare" style="flex: 1; min-width: 60px; padding: 6px 8px; font-size: 13px; text-align: center;" />
             <select class="form-input cond-station-metric" style="width: 75px; padding: 6px 4px; font-size: 12px;">
               <option value="reps" ${defaultMetric === 'reps' ? 'selected' : ''}>reps</option>
               <option value="m" ${defaultMetric === 'm' ? 'selected' : ''}>metri</option>
@@ -573,15 +599,15 @@ export function renderGymPage() {
         <div style="display: flex; gap: 12px; margin-bottom: var(--space-lg);">
           <div class="form-group" style="flex: 1;">
             <label class="form-label">Runde (opțional)</label>
-            <input type="number" class="form-input" id="cond-rounds" value="" placeholder="ex: 3" min="1" />
+            <input type="number" class="form-input" id="cond-rounds" value="${existingLog ? (existingLog.rounds || '') : ''}" placeholder="ex: 3" min="1" />
           </div>
           <div class="form-group" style="flex: 1;">
             <label class="form-label">Timp total (min)</label>
-            <input type="number" class="form-input" id="cond-time" placeholder="ex: 45" />
+            <input type="number" class="form-input" id="cond-time" value="${existingLog ? (existingLog.time || '') : ''}" placeholder="ex: 45" />
           </div>
           <div class="form-group" style="flex: 1;">
             <label class="form-label">RPE (1-10)</label>
-            <input type="number" class="form-input" id="cond-rpe" min="1" max="10" placeholder="8" />
+            <input type="number" class="form-input" id="cond-rpe" value="${existingLog ? (existingLog.rpe || '') : ''}" min="1" max="10" placeholder="8" />
           </div>
         </div>
         
@@ -596,7 +622,7 @@ export function renderGymPage() {
 
         <div class="form-group" style="margin-top: var(--space-lg);">
           <label class="form-label">Notițe</label>
-          <textarea class="form-input" id="cond-notes" rows="2" placeholder="Cum a fost? Ce modificări ai făcut?"></textarea>
+          <textarea class="form-input" id="cond-notes" rows="2" placeholder="Cum a fost? Ce modificări ai făcut?">${existingLog ? (existingLog.notes || '') : ''}</textarea>
         </div>
 
         <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: var(--space-lg); padding-top: var(--space-md); border-top: 1px solid var(--border-subtle);">
