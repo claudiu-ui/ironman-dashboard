@@ -370,6 +370,12 @@ export function renderDashboard() {
                   ? `${Math.floor(actualDuration / actualDist)}:${String(Math.round((actualDuration / actualDist % 1) * 60)).padStart(2, '0')}/km` 
                   : null;
                 
+                // For Gym and Conditioning, overwrite the hardcoded planned detail with actuals to avoid confusion
+                let displayDetail = s._morphedTo ? (completed.notes || s.detail) : (isSkipped ? completed.notes : s.detail);
+                if (isCompleted && !isSkipped && (renderType === 'gym' || renderType === 'conditioning') && actualDuration > 0) {
+                  displayDetail = `${actualDuration}min`;
+                }
+                
                 // Determine HR zone for completed workout
                 let hrZoneLabel = '';
                 if (actualHr > 0) {
@@ -398,11 +404,11 @@ export function renderDashboard() {
                   ${badgeHtml}
                   ${s.time ? `<span class="session-time">${s.time}</span>` : ''}
                   <span class="session-title">${renderIcon} ${isSkipped ? `<del>${renderTitle}</del>` : renderTitle}</span>
-                  <span class="session-detail">${s._morphedTo ? (completed.notes || s.detail) : (isSkipped ? completed.notes : s.detail)}</span>
+                  <span class="session-detail">${displayDetail}</span>
                   ${isCompleted && !isSkipped ? `
                     <div class="session-actual-data">
                       ${actualDist > 0 ? `<span class="actual-metric">${actualDist.toFixed(1)}km</span>` : ''}
-                      ${actualDuration > 0 ? `<span class="actual-metric">${actualDuration}min</span>` : ''}
+                      ${actualDuration > 0 && renderType !== 'gym' && renderType !== 'conditioning' ? `<span class="actual-metric">${actualDuration}min</span>` : ''}
                       ${actualHr > 0 ? `<span class="actual-metric">❤️${actualHr} ${hrZoneLabel}</span>` : ''}
                       ${actualPace ? `<span class="actual-metric">⏱${actualPace}</span>` : ''}
                     </div>
