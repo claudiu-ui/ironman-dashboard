@@ -197,7 +197,8 @@ export function renderGymPage() {
   }
 
   function renderConditioningCard(program, dateStr) {
-    const logged = storage.getGymSession(dateStr, 'conditioning');
+    const rawLog = storage.getGymSession(dateStr, 'conditioning');
+    const logged = rawLog && rawLog.exercises ? rawLog.exercises : rawLog;
     return `
       <div class="card animate-in">
         <div class="card-header">
@@ -539,7 +540,9 @@ export function renderGymPage() {
   function openConditioningLogModal(dateStr) {
     const program = currentPrograms.conditioning;
     const variant = program.variants[0];
-    const existingLog = storage.getGymSession(dateStr, 'conditioning');
+    const rawLog = storage.getGymSession(dateStr, 'conditioning');
+    const existingLog = rawLog && rawLog.exercises ? rawLog.exercises : rawLog;
+    
     let stations = existingLog && existingLog.stations && existingLog.stations.length > 0
                    ? existingLog.stations.map(s => s.name)
                    : [...variant.stations];
