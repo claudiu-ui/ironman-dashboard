@@ -223,18 +223,21 @@ export function renderGymPage() {
                 }
               </div>
               <div class="conditioning-stations">
-                ${v.stations.map((s, si) => `
-                  <div class="conditioning-station">
-                    <span class="station-num">${si + 1}</span>
-                    ${isEditMode
-                      ? `<input type="text" class="form-input edit-cond-station" value="${s}" style="flex: 1; padding: 4px;" />
-                         <button class="btn btn-ghost btn-sm remove-cond-station-btn" data-variant="${vi}" data-station="${si}" style="color: var(--danger); margin-left: 8px;">❌</button>`
-                      : `<span class="station-name">${s}</span>`
-                    }
+                ${(logged && logged.stations && logged.stations.length > 0 ? logged.stations : v.stations.map(s => ({name: s, value: ''}))).map((s, si) => `
+                  <div class="conditioning-station" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <div style="display: flex; align-items: center;">
+                      <span class="station-num">${si + 1}</span>
+                      ${isEditMode && !logged
+                        ? `<input type="text" class="form-input edit-cond-station" value="${s.name}" style="flex: 1; padding: 4px;" />
+                           <button class="btn btn-ghost btn-sm remove-cond-station-btn" data-variant="${vi}" data-station="${si}" style="color: var(--danger); margin-left: 8px;">❌</button>`
+                        : `<span class="station-name">${s.name}</span>`
+                      }
+                    </div>
+                    ${s.value ? `<span style="font-size: 12px; font-weight: 600; color: var(--accent);">${s.value}</span>` : ''}
                   </div>
                 `).join('')}
               </div>
-              ${isEditMode ? `
+              ${isEditMode && !logged ? `
                 <button class="btn btn-ghost btn-sm add-cond-station-btn" data-variant="${vi}" style="margin-top: var(--space-sm); width: 100%; border-style: dashed;">
                   ➕ Adaugă Stație
                 </button>
