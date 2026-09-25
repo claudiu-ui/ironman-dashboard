@@ -131,24 +131,24 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
                      ondrop="window.__handleDrop(${n}, event)">
                   <div class="day-header ${r?`today`:``}">${e.day.substring(0,3)}</div>
                   ${o?`<div class="session-block rest-badge" style="background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.3); color: var(--danger)">🤒 Odihnă</div>`:``}
-              `,c=Object.keys(w).filter(e=>e.startsWith(a)).map(e=>w[e]),l=e.sessions.map(e=>({...e}));return l.forEach(e=>{let t=c.findIndex(t=>t.type===e.type);t!==-1&&(e._log=c[t],c.splice(t,1))}),l.forEach(e=>{if(!e._log&&c.length>0){let t=c.shift();e._log=t,e._morphedTo=t.type}}),s+=l.map((e,r)=>{let i=!!e._log,s=e._log,c=s&&s.isSkipped,l=e._morphedTo||e.type,u=e._morphedTo?{run:`🏃`,swim:`🏊`,bike:`🚴`,gym:`🏋️`,conditioning:`💪`,other:`🏅`}[l]:e.icon,d=e._morphedTo?`${l.charAt(0).toUpperCase()+l.slice(1)} <span style="font-size:10px; color:var(--text-tertiary)">(în loc de ${e.title})</span>`:e.title,f=s&&!c&&parseFloat(s.distance)||0,p=s&&!c&&parseInt(s.hr)||0,h=s&&!c&&parseInt(s.duration)||0,g=f>0&&h>0&&l===`run`?`${Math.floor(h/f)}:${String(Math.round(h/f%1*60)).padStart(2,`0`)}/km`:null,_=``;if(p>0){let e=m.find(e=>p>=e.bpmMin&&p<=e.bpmMax);_=e?`Z${e.zone}`:``}let v=c?`opacity: 0.4; filter: grayscale(100%); cursor: grab; transition: transform 0.2s; border: 1px dashed var(--border-subtle);`:`${o?`opacity: 0.4;`:``} cursor: grab; transition: transform 0.2s, filter 0.2s; ${i?`border-color: var(--success); box-shadow: 0 0 8px rgba(34, 197, 94, 0.15);`:``} ${e._morphedTo?`border-style: dashed; border-color: var(--warning);`:``}`,y=c?`<span class="session-completed-badge" style="background: var(--danger); font-size: 10px; padding: 2px 4px; border-radius: 4px;">Skipped</span>`:i?`<span class="session-completed-badge" ${e._morphedTo?`style="background: var(--warning);"`:``}>${e._morphedTo?`⚠️`:`✅`}</span>`:``;return`
+              `,c=Object.keys(w).filter(e=>e.startsWith(a)).map(e=>w[e]),l=e.sessions.map(e=>({...e}));return l.forEach(e=>{let t=c.findIndex(t=>t.type===e.type);t!==-1&&(e._log=c[t],c.splice(t,1))}),l.forEach(e=>{if(!e._log&&c.length>0){let t=c.shift();e._log=t,e._morphedTo=t.type}}),s+=l.map((e,r)=>{let i=!!e._log,s=e._log,c=s&&s.isSkipped,l=e._morphedTo||e.type,u=e._morphedTo?{run:`🏃`,swim:`🏊`,bike:`🚴`,gym:`🏋️`,conditioning:`💪`,other:`🏅`}[l]:e.icon,d=e._morphedTo?`${l.charAt(0).toUpperCase()+l.slice(1)} <span style="font-size:10px; color:var(--text-tertiary)">(în loc de ${e.title})</span>`:e.title,f=s&&!c&&parseFloat(s.distance)||0,p=s&&!c&&parseInt(s.hr)||0,h=s&&!c&&parseInt(s.duration)||0,g=f>0&&h>0&&l===`run`?`${Math.floor(h/f)}:${String(Math.round(h/f%1*60)).padStart(2,`0`)}/km`:null,_=e._morphedTo?s.notes||e.detail:c?s.notes:e.detail;i&&!c&&(l===`gym`||l===`conditioning`)&&h>0&&(_=`${h}min`);let v=``;if(p>0){let e=m.find(e=>p>=e.bpmMin&&p<=e.bpmMax);v=e?`Z${e.zone}`:``}let y=c?`opacity: 0.4; filter: grayscale(100%); cursor: grab; transition: transform 0.2s; border: 1px dashed var(--border-subtle);`:`${o?`opacity: 0.4;`:``} cursor: grab; transition: transform 0.2s, filter 0.2s; ${i?`border-color: var(--success); box-shadow: 0 0 8px rgba(34, 197, 94, 0.15);`:``} ${e._morphedTo?`border-style: dashed; border-color: var(--warning);`:``}`,b=c?`<span class="session-completed-badge" style="background: var(--danger); font-size: 10px; padding: 2px 4px; border-radius: 4px;">Skipped</span>`:i?`<span class="session-completed-badge" ${e._morphedTo?`style="background: var(--warning);"`:``}>${e._morphedTo?`⚠️`:`✅`}</span>`:``;return`
                 <div class="session-block ${l} ${i&&!c?`completed`:``}" 
                      title="${e.detail}" 
                      draggable="true"
                      ondragstart="window.__handleDragStart(${n}, ${r}, event)"
-                     style="${v}" 
+                     style="${y}" 
                      onmouseover="${c?``:`this.style.filter='brightness(1.2)';`}" 
                      onmouseout="${c?``:`this.style.filter='brightness(1)';`}" 
                      onclick="window.openWorkoutDetails(${t}, '${l}', '${e.title}', '${e.detail}', '${a}')">
-                  ${y}
+                  ${b}
                   ${e.time?`<span class="session-time">${e.time}</span>`:``}
                   <span class="session-title">${u} ${c?`<del>${d}</del>`:d}</span>
-                  <span class="session-detail">${e._morphedTo?s.notes||e.detail:c?s.notes:e.detail}</span>
+                  <span class="session-detail">${_}</span>
                   ${i&&!c?`
                     <div class="session-actual-data">
                       ${f>0?`<span class="actual-metric">${f.toFixed(1)}km</span>`:``}
-                      ${h>0?`<span class="actual-metric">${h}min</span>`:``}
-                      ${p>0?`<span class="actual-metric">❤️${p} ${_}</span>`:``}
+                      ${h>0&&l!==`gym`&&l!==`conditioning`?`<span class="actual-metric">${h}min</span>`:``}
+                      ${p>0?`<span class="actual-metric">❤️${p} ${v}</span>`:``}
                       ${g?`<span class="actual-metric">⏱${g}</span>`:``}
                     </div>
                   `:``}
