@@ -523,27 +523,48 @@ export function renderGymPage() {
   }
 
   // ── Conditioning Log Modal — station-appropriate metrics ──────────────────
+  // ── Conditioning Log Modal — station-appropriate metrics ──────────────────
   function openConditioningLogModal(dateStr) {
     const program = currentPrograms.conditioning;
     const variant = program.variants[0];
-    const stations = variant.stations;
+    let stations = [...variant.stations]; // Clone stations so we can modify
 
-    function getStationMetric(station) {
+    function getStationMetricOption(station) {
       const s = station.toLowerCase();
-      if (s.includes('row') || s.includes('sled') || s.includes('farmer') || s.includes('walk') || s.includes('push'))
-        return { placeholder: 'ex: 500m, 25m' };
-      if (s.includes('ski') || s.includes('bike') || s.includes('assault') || s.includes('echo'))
-        return { placeholder: 'ex: 30 cal' };
-      if (s.includes('ball') || s.includes('burpee') || s.includes('jump') || s.includes('sandbag') || s.includes('swing') || s.includes('squat') || s.includes('lunge'))
-        return { placeholder: 'ex: 15 reps' };
-      return { placeholder: 'ex: 15 reps, 200m' };
+      if (s.includes('row') || s.includes('sled') || s.includes('farmer') || s.includes('walk') || s.includes('push') || s.includes('run')) return 'm';
+      if (s.includes('ski') || s.includes('bike') || s.includes('assault') || s.includes('echo')) return 'cal';
+      if (s.includes('plank') || s.includes('hold')) return 'sec';
+      return 'reps';
     }
 
     const modal = document.createElement('div');
     modal.className = 'modal-overlay active';
     modal.id = 'conditioning-log-modal';
+    
+    function renderStations() {
+      return stations.map((s, i) => {
+        const defaultMetric = getStationMetricOption(s);
+        return `
+          <div class="cond-log-station-row" style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.02); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 8px;">
+            <span class="cond-log-station-num" style="width: 24px; height: 24px; border-radius: 50%; background: var(--conditioning-bg); color: var(--conditioning); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0;">${i + 1}</span>
+            <input type="text" class="form-input cond-station-name" value="${s}" placeholder="Nume Exercițiu" style="flex: 2; padding: 6px 8px; font-size: 13px;" />
+            <input type="number" class="form-input cond-station-value" placeholder="valoare" style="flex: 1; min-width: 60px; padding: 6px 8px; font-size: 13px; text-align: center;" />
+            <select class="form-input cond-station-metric" style="width: 75px; padding: 6px 4px; font-size: 12px;">
+              <option value="reps" ${defaultMetric === 'reps' ? 'selected' : ''}>reps</option>
+              <option value="m" ${defaultMetric === 'm' ? 'selected' : ''}>metri</option>
+              <option value="kg" ${defaultMetric === 'kg' ? 'selected' : ''}>kg</option>
+              <option value="cal" ${defaultMetric === 'cal' ? 'selected' : ''}>cal</option>
+              <option value="min" ${defaultMetric === 'min' ? 'selected' : ''}>min</option>
+              <option value="sec" ${defaultMetric === 'sec' ? 'selected' : ''}>sec</option>
+            </select>
+            <button type="button" class="btn btn-ghost btn-sm remove-cond-log-btn" data-index="${i}" style="color: var(--danger); padding: 4px;">❌</button>
+          </div>
+        `;
+      }).join('');
+    }
+
     modal.innerHTML = `
-      <div class="modal" style="max-width: 550px; max-height: 85vh; overflow-y: auto;">
+      <div class="modal" style="max-width: 600px; max-height: 85vh; overflow-y: auto;">
         <div class="modal-title">📝 Loghează: ${program.name}</div>
         <div style="font-size: 12px; color: var(--text-tertiary); margin-bottom: var(--space-md);">
           ${variant.name} • ${variant.format}
@@ -551,8 +572,8 @@ export function renderGymPage() {
         
         <div style="display: flex; gap: 12px; margin-bottom: var(--space-lg);">
           <div class="form-group" style="flex: 1;">
-            <label class="form-label">Runde</label>
-            <input type="number" class="form-input" id="cond-rounds" value="3" min="1" />
+            <label class="form-label">Runde (opțional)</label>
+            <input type="number" class="form-input" id="cond-rounds" value="" placeholder="ex: 3" min="1" />
           </div>
           <div class="form-group" style="flex: 1;">
             <label class="form-label">Timp total (min)</label>
@@ -564,23 +585,18 @@ export function renderGymPage() {
           </div>
         </div>
         
-        <div style="font-size: 13px; font-weight: 600; margin-bottom: var(--space-sm); color: var(--text-secondary);">Stații (poți edita numele):</div>
-        <div id="cond-stations-log" style="display: flex; flex-direction: column; gap: 8px;">
-          ${stations.map((s, i) => {
-            const metric = getStationMetric(s);
-            return `
-              <div style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.02); padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.05);">
-                <span style="width: 24px; height: 24px; border-radius: 50%; background: var(--conditioning-bg); color: var(--conditioning); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0;">${i + 1}</span>
-                <input type="text" class="form-input cond-station-name" value="${s}" style="flex: 1; padding: 4px 8px; font-size: 13px;" />
-                <input type="text" class="form-input cond-station-value" placeholder="${metric.placeholder}" style="width: 110px; padding: 4px 8px; font-size: 12px; text-align: center;" />
-              </div>
-            `;
-          }).join('')}
+        <div style="font-size: 13px; font-weight: 600; margin-bottom: var(--space-sm); color: var(--text-secondary);">Stații Efectuate:</div>
+        <div id="cond-stations-log-container">
+          ${renderStations()}
         </div>
+        
+        <button type="button" class="btn btn-ghost btn-sm" id="add-cond-log-btn" style="width: 100%; border-style: dashed; margin-top: 8px;">
+          ➕ Adaugă Stație / Exercițiu
+        </button>
 
-        <div class="form-group" style="margin-top: var(--space-md);">
+        <div class="form-group" style="margin-top: var(--space-lg);">
           <label class="form-label">Notițe</label>
-          <textarea class="form-input" id="cond-notes" rows="2" placeholder="Cum a fost? Ce ai schimbat?"></textarea>
+          <textarea class="form-input" id="cond-notes" rows="2" placeholder="Cum a fost? Ce modificări ai făcut?"></textarea>
         </div>
 
         <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: var(--space-lg); padding-top: var(--space-md); border-top: 1px solid var(--border-subtle);">
@@ -591,6 +607,44 @@ export function renderGymPage() {
     `;
 
     document.body.appendChild(modal);
+    
+    const container = modal.querySelector('#cond-stations-log-container');
+
+    // Handle removing stations (event delegation)
+    container.addEventListener('click', (e) => {
+      const btn = e.target.closest('.remove-cond-log-btn');
+      if (btn) {
+        btn.closest('.cond-log-station-row').remove();
+        // Update numbers
+        container.querySelectorAll('.cond-log-station-num').forEach((el, idx) => {
+          el.textContent = idx + 1;
+        });
+      }
+    });
+
+    // Handle adding stations
+    modal.querySelector('#add-cond-log-btn').addEventListener('click', () => {
+      const currentCount = container.querySelectorAll('.cond-log-station-row').length;
+      const newRow = document.createElement('div');
+      newRow.innerHTML = `
+        <div class="cond-log-station-row" style="display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.02); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 8px;">
+          <span class="cond-log-station-num" style="width: 24px; height: 24px; border-radius: 50%; background: var(--conditioning-bg); color: var(--conditioning); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0;">${currentCount + 1}</span>
+          <input type="text" class="form-input cond-station-name" value="" placeholder="Nume Exercițiu" style="flex: 2; padding: 6px 8px; font-size: 13px;" />
+          <input type="number" class="form-input cond-station-value" placeholder="valoare" style="flex: 1; min-width: 60px; padding: 6px 8px; font-size: 13px; text-align: center;" />
+          <select class="form-input cond-station-metric" style="width: 75px; padding: 6px 4px; font-size: 12px;">
+            <option value="reps" selected>reps</option>
+            <option value="m">metri</option>
+            <option value="kg">kg</option>
+            <option value="cal">cal</option>
+            <option value="min">min</option>
+            <option value="sec">sec</option>
+          </select>
+          <button type="button" class="btn btn-ghost btn-sm remove-cond-log-btn" style="color: var(--danger); padding: 4px;">❌</button>
+        </div>
+      `;
+      container.appendChild(newRow.firstElementChild);
+    });
+
     modal.querySelector('#cond-log-cancel').addEventListener('click', () => modal.remove());
     modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
 
@@ -602,14 +656,19 @@ export function renderGymPage() {
 
       const stationNames = modal.querySelectorAll('.cond-station-name');
       const stationValues = modal.querySelectorAll('.cond-station-value');
+      const stationMetrics = modal.querySelectorAll('.cond-station-metric');
       
       const logStations = [];
       stationNames.forEach((nameInput, i) => {
-        logStations.push({
-          name: nameInput.value,
-          value: stationValues[i]?.value || '',
-          completed: true
-        });
+        const val = stationValues[i]?.value || '';
+        const metric = stationMetrics[i]?.value || 'reps';
+        if (nameInput.value.trim() !== '') {
+          logStations.push({
+            name: nameInput.value,
+            value: val ? `${val} ${metric}` : '',
+            completed: val !== ''
+          });
+        }
       });
 
       storage.saveGymSession(dateStr, 'conditioning', {
@@ -625,7 +684,7 @@ export function renderGymPage() {
         duration: time,
         hr: 0,
         rpe,
-        notes: `${program.name} — ${rounds} runde, ${time} min${notes ? '. ' + notes : ''}`,
+        notes: `${program.name} — ${rounds ? rounds + ' runde, ' : ''}${time} min${notes ? '. ' + notes : ''}`,
         source: 'manual'
       });
 
