@@ -351,7 +351,7 @@ export function renderGymPage(forceDateStr = null) {
 
   function saveEdits() {
     // Save standard sessions
-    ['lower', 'upper1', 'upper2'].forEach(sessionKey => {
+    ['lower', 'upper1', 'upper2', 'accesorii'].forEach(sessionKey => {
       const rows = page.querySelectorAll(`#exercises-${sessionKey} .gym-exercise-row`);
       rows.forEach((row, i) => {
         const name = row.querySelector('.edit-ex-name')?.value;
