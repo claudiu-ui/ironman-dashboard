@@ -8,23 +8,23 @@ import { storage } from './storage.js';
 let isEditMode = false;
 let currentPrograms = null;
 
-export function renderGymPage() {
+export function renderGymPage(forceDateStr = null) {
   const page = document.createElement('div');
   page.className = 'gym-page animate-in';
   
   // Load programs from storage or fallback to defaults
   currentPrograms = storage.getCustomGymPrograms(GYM_PROGRAMS);
-  const todayStr = new Date().toISOString().split('T')[0];
-
+  
   // Dynamically find scheduled dates for gym sessions
-  const weekNum = getCurrentWeek();
+  const weekNum = getCurrentWeek(forceDateStr);
   const weekScheduleKey = `week_schedule_${weekNum}`;
   const currentSchedule = storage.get(weekScheduleKey) || getDynamicWeekSchedule(weekNum);
   
   const weekStartDate = new Date(PLAN_START);
   weekStartDate.setDate(PLAN_START.getDate() + (weekNum - 1) * 7);
 
-  const scheduledDates = { lower: todayStr, upper1: todayStr, upper2: todayStr, conditioning: todayStr, accesorii: todayStr };
+  const defaultDateStr = forceDateStr || new Date().toISOString().split('T')[0];
+  const scheduledDates = { lower: defaultDateStr, upper1: defaultDateStr, upper2: defaultDateStr, conditioning: defaultDateStr, accesorii: defaultDateStr };
   const scheduledDays = { lower: 'Nelogat', upper1: 'Nelogat', upper2: 'Nelogat', conditioning: 'Nelogat', accesorii: 'Nelogat' };
 
   currentSchedule.forEach((day, dayIdx) => {
@@ -751,7 +751,7 @@ export function renderGymPage() {
 }
 
 export function getDashboardGymCardNode(title, dateStr) {
-  const page = renderGymPage();
+  const page = renderGymPage(dateStr);
   const cards = Array.from(page.querySelectorAll('.card'));
   
   // Find the exact card that matches the title

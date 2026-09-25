@@ -163,6 +163,12 @@ function buildApp() {
             </div>
           </div>
           <div class="form-row">
+            <div class="form-group" id="log-swolf-group" style="display: none;">
+              <label class="form-label">SWOLF / Eficiență</label>
+              <input type="number" class="form-input" id="log-swolf" placeholder="ex: 35" />
+            </div>
+          </div>
+          <div class="form-row">
             <div class="form-group" id="log-gear-group" style="display: none;">
               <label class="form-label">Echipament (Opțional)</label>
               <select class="form-input" id="log-gear">
@@ -178,7 +184,6 @@ function buildApp() {
             <button type="button" class="btn btn-ghost" id="log-cancel">Anulează</button>
             <button type="submit" class="btn btn-primary">💾 Salvează</button>
           </div>
-        </form>
         </form>
       </div>
     </div>
@@ -732,6 +737,7 @@ function buildApp() {
 
   logTypeInput?.addEventListener('change', (e) => {
     updateGearOptions(e.target.value);
+    document.getElementById('log-swolf-group').style.display = e.target.value === 'swim' ? 'block' : 'none';
   });
 
   window.openLogModal = (type = 'run', dateStr = null, distance = '', duration = '', notes = '') => {
@@ -740,6 +746,8 @@ function buildApp() {
     logDistanceInput.value = distance;
     logDurationInput.value = duration;
     logNotesInput.value = notes;
+    document.getElementById('log-swolf-group').style.display = type === 'swim' ? 'block' : 'none';
+    document.getElementById('log-swolf').value = '';
     updateGearOptions(type);
     logModal.classList.add('active');
   };
@@ -760,6 +768,7 @@ function buildApp() {
         duration: parseFloat(document.getElementById('log-duration').value) || 0,
         hr: parseFloat(document.getElementById('log-hr').value) || 0,
         rpe: parseInt(document.getElementById('log-rpe').value) || 0,
+        swolf: logTypeInput.value === 'swim' ? (parseInt(document.getElementById('log-swolf').value) || 0) : 0,
         notes: document.getElementById('log-notes').value,
       });
       logModal.classList.remove('active');

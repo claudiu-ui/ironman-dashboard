@@ -38,8 +38,10 @@ export function getCurrentPhase(weekNum) {
   return PHASES.find(p => weekNum >= p.weeks[0] && weekNum <= p.weeks[1]) || PHASES[0];
 }
 
-export function getCurrentWeek() {
-  const now = new Date();
+export function getCurrentWeek(dateStr = null) {
+  const now = dateStr ? new Date(dateStr) : new Date();
+  // Set to midnight to avoid timezone issues when calculating difference
+  now.setHours(0, 0, 0, 0);
   const diff = now - PLAN_START;
   const weekNum = Math.floor(diff / (7 * 24 * 60 * 60 * 1000)) + 1;
   return Math.max(1, Math.min(48, weekNum));
