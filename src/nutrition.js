@@ -150,14 +150,16 @@ export function renderNutritionPage() {
             <div class="grid-2" style="gap: 12px; margin-bottom: 12px;">
               <input type="text" id="niggle-part" class="form-input" placeholder="Zonă (ex: Genunchi Stâng)" required />
               <input type="number" id="niggle-pain" class="form-input" min="1" max="10" placeholder="Durere (1-10)" required />
+              <input type="date" id="niggle-date" class="form-input" value="${currentDate}" />
               <select id="niggle-trend" class="form-input" required>
                 <option value="stable">➡️ Stabil (Nu se schimbă)</option>
                 <option value="worse">📈 În creștere (Mai rău)</option>
                 <option value="better">📉 În scădere (Mai bine)</option>
               </select>
-              <input type="text" id="niggle-notes" class="form-input" placeholder="Notițe scurte..." />
+              <input type="text" id="niggle-notes" class="form-input" placeholder="Notițe scurte..." style="grid-column: 1 / -1;" />
             </div>
-            <button type="submit" class="btn btn-primary btn-sm" style="width: 100%; justify-content: center;">Salvează Durere</button>
+            <input type="hidden" id="niggle-edit-id" value="" />
+            <button type="submit" class="btn btn-primary btn-sm" id="niggle-submit-btn" style="width: 100%; justify-content: center;">Salvează Durere</button>
           </form>
         </div>
       </div>
@@ -285,9 +287,12 @@ export function renderNutritionPage() {
             <div>
               <div style="font-weight: 500; font-size: 14px;">${n.part}</div>
               <div style="font-size: 12px; color: var(--text-secondary);">${trendIcon} Durere: ${n.pain}/10 ${n.notes ? `• ${n.notes}` : ''}</div>
-              <div style="font-size: 10px; color: var(--text-tertiary); margin-top: 4px;">Adăugat: ${n.date}</div>
+              <div style="font-size: 10px; color: var(--text-tertiary); margin-top: 4px;">Data: ${n.date || n.createdAt?.split('T')[0] || '—'}</div>
             </div>
-            <button class="btn btn-ghost btn-sm text-danger" onclick="window._deleteNiggle(${n.id})">❌</button>
+            <div style="display: flex; gap: 4px;">
+              <button class="btn btn-ghost btn-sm" onclick="window._editNiggle(${n.id})" style="padding: 4px 8px;">✏️</button>
+              <button class="btn btn-ghost btn-sm text-danger" onclick="window._deleteNiggle(${n.id})" style="padding: 4px 8px;">❌</button>
+            </div>
           </div>
         `;
       }).join('');
@@ -298,17 +303,43 @@ export function renderNutritionPage() {
       renderNigglesList();
     };
 
+    window._editNiggle = (id) => {
+      const niggles = storage.getNiggles();
+      const n = niggles.find(x => x.id === id);
+      if (!n) return;
+      page.querySelector('#niggle-part').value = n.part;
+      page.querySelector('#niggle-pain').value = n.pain;
+      page.querySelector('#niggle-trend').value = n.trend || 'stable';
+      page.querySelector('#niggle-notes').value = n.notes || '';
+      page.querySelector('#niggle-date').value = n.date || new Date().toISOString().split('T')[0];
+      page.querySelector('#niggle-edit-id').value = id;
+      page.querySelector('#niggle-submit-btn').textContent = '✏️ Actualizează Durere';
+      page.querySelector('#niggle-form').scrollIntoView({ behavior: 'smooth' });
+    };
+
     const niggleForm = page.querySelector('#niggle-form');
     niggleForm?.addEventListener('submit', (e) => {
       e.preventDefault();
-      storage.addNiggle({
+      const editId = page.querySelector('#niggle-edit-id').value;
+      const data = {
         part: page.querySelector('#niggle-part').value,
         pain: parseInt(page.querySelector('#niggle-pain').value),
         trend: page.querySelector('#niggle-trend').value,
         notes: page.querySelector('#niggle-notes').value,
-        date: new Date().toLocaleDateString('ro-RO')
-      });
+        date: page.querySelector('#niggle-date').value
+      };
+
+      if (editId) {
+        // Update existing
+        storage.updateNiggle(parseInt(editId), data);
+      } else {
+        // Add new
+        storage.addNiggle(data);
+      }
       niggleForm.reset();
+      page.querySelector('#niggle-date').value = currentDate;
+      page.querySelector('#niggle-edit-id').value = '';
+      page.querySelector('#niggle-submit-btn').textContent = 'Salvează Durere';
       renderNigglesList();
     });
 

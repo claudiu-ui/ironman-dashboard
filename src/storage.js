@@ -224,6 +224,15 @@ export const storage = {
     this.set('niggles', list);
   },
 
+  updateNiggle(id, updates) {
+    let list = this.get('niggles', []);
+    const idx = list.findIndex(n => n.id === id);
+    if (idx !== -1) {
+      list[idx] = { ...list[idx], ...updates, updatedAt: new Date().toISOString() };
+      this.set('niggles', list);
+    }
+  },
+
   // Export all data
   exportAll() {
     const data = {};

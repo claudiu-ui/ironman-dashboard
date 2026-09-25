@@ -265,11 +265,13 @@ export function renderGymPage() {
           e.stopPropagation();
           const sessionType = btn.dataset.session;
           const sessionDateStr = btn.dataset.date;
-          const exercises = sessionType === 'conditioning' 
-            ? currentPrograms.conditioning.variants[0].stations.map((s, i) => ({ name: s, sets: '1' }))
-            : currentPrograms[sessionType]?.exercises || [];
           
-          openGymLogModal(sessionType, exercises, sessionDateStr);
+          if (sessionType === 'conditioning') {
+            openConditioningLogModal(sessionDateStr);
+          } else {
+            const exercises = currentPrograms[sessionType]?.exercises || [];
+            openGymLogModal(sessionType, exercises, sessionDateStr);
+          }
         });
       });
     }
@@ -516,6 +518,120 @@ export function renderGymPage() {
       render(); // Re-render to show logged data
       
       // If we are in the dashboard modal, re-render the current route to reflect changes
+      import('./router.js').then(({ renderCurrentRoute }) => renderCurrentRoute());
+    });
+  }
+
+  // ── Conditioning Log Modal — station-appropriate metrics ──────────────────
+  function openConditioningLogModal(dateStr) {
+    const program = currentPrograms.conditioning;
+    const variant = program.variants[0];
+    const stations = variant.stations;
+
+    function getStationMetric(station) {
+      const s = station.toLowerCase();
+      if (s.includes('row') || s.includes('sled') || s.includes('farmer') || s.includes('walk') || s.includes('push'))
+        return { placeholder: 'ex: 500m, 25m' };
+      if (s.includes('ski') || s.includes('bike') || s.includes('assault') || s.includes('echo'))
+        return { placeholder: 'ex: 30 cal' };
+      if (s.includes('ball') || s.includes('burpee') || s.includes('jump') || s.includes('sandbag') || s.includes('swing') || s.includes('squat') || s.includes('lunge'))
+        return { placeholder: 'ex: 15 reps' };
+      return { placeholder: 'ex: 15 reps, 200m' };
+    }
+
+    const modal = document.createElement('div');
+    modal.className = 'modal-overlay active';
+    modal.id = 'conditioning-log-modal';
+    modal.innerHTML = `
+      <div class="modal" style="max-width: 550px; max-height: 85vh; overflow-y: auto;">
+        <div class="modal-title">📝 Loghează: ${program.name}</div>
+        <div style="font-size: 12px; color: var(--text-tertiary); margin-bottom: var(--space-md);">
+          ${variant.name} • ${variant.format}
+        </div>
+        
+        <div style="display: flex; gap: 12px; margin-bottom: var(--space-lg);">
+          <div class="form-group" style="flex: 1;">
+            <label class="form-label">Runde</label>
+            <input type="number" class="form-input" id="cond-rounds" value="3" min="1" />
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label class="form-label">Timp total (min)</label>
+            <input type="number" class="form-input" id="cond-time" placeholder="ex: 45" />
+          </div>
+          <div class="form-group" style="flex: 1;">
+            <label class="form-label">RPE (1-10)</label>
+            <input type="number" class="form-input" id="cond-rpe" min="1" max="10" placeholder="8" />
+          </div>
+        </div>
+        
+        <div style="font-size: 13px; font-weight: 600; margin-bottom: var(--space-sm); color: var(--text-secondary);">Stații (poți edita numele):</div>
+        <div id="cond-stations-log" style="display: flex; flex-direction: column; gap: 8px;">
+          ${stations.map((s, i) => {
+            const metric = getStationMetric(s);
+            return `
+              <div style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.02); padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.05);">
+                <span style="width: 24px; height: 24px; border-radius: 50%; background: var(--conditioning-bg); color: var(--conditioning); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0;">${i + 1}</span>
+                <input type="text" class="form-input cond-station-name" value="${s}" style="flex: 1; padding: 4px 8px; font-size: 13px;" />
+                <input type="text" class="form-input cond-station-value" placeholder="${metric.placeholder}" style="width: 110px; padding: 4px 8px; font-size: 12px; text-align: center;" />
+              </div>
+            `;
+          }).join('')}
+        </div>
+
+        <div class="form-group" style="margin-top: var(--space-md);">
+          <label class="form-label">Notițe</label>
+          <textarea class="form-input" id="cond-notes" rows="2" placeholder="Cum a fost? Ce ai schimbat?"></textarea>
+        </div>
+
+        <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: var(--space-lg); padding-top: var(--space-md); border-top: 1px solid var(--border-subtle);">
+          <button type="button" class="btn btn-ghost" id="cond-log-cancel">Anulează</button>
+          <button type="button" class="btn btn-primary" id="cond-log-save">💾 Salvează Sesiunea</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+    modal.querySelector('#cond-log-cancel').addEventListener('click', () => modal.remove());
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+
+    modal.querySelector('#cond-log-save').addEventListener('click', () => {
+      const rounds = parseInt(modal.querySelector('#cond-rounds').value) || 0;
+      const time = parseInt(modal.querySelector('#cond-time').value) || 0;
+      const rpe = parseInt(modal.querySelector('#cond-rpe').value) || 0;
+      const notes = modal.querySelector('#cond-notes').value;
+
+      const stationNames = modal.querySelectorAll('.cond-station-name');
+      const stationValues = modal.querySelectorAll('.cond-station-value');
+      
+      const logStations = [];
+      stationNames.forEach((nameInput, i) => {
+        logStations.push({
+          name: nameInput.value,
+          value: stationValues[i]?.value || '',
+          completed: true
+        });
+      });
+
+      storage.saveGymSession(dateStr, 'conditioning', {
+        type: 'conditioning',
+        variant: variant.name,
+        rounds, time, rpe, notes,
+        stations: logStations
+      });
+
+      storage.saveWorkout(dateStr, {
+        type: 'conditioning',
+        distance: 0,
+        duration: time,
+        hr: 0,
+        rpe,
+        notes: `${program.name} — ${rounds} runde, ${time} min${notes ? '. ' + notes : ''}`,
+        source: 'manual'
+      });
+
+      modal.remove();
+      if (window.showToast) window.showToast('💪 Conditioning logat!');
+      render();
       import('./router.js').then(({ renderCurrentRoute }) => renderCurrentRoute());
     });
   }
