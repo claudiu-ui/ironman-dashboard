@@ -213,7 +213,27 @@ export function renderGymPage() {
           ` : ''}
         </div>
         <div class="conditioning-variants">
-          ${program.variants.map((v, vi) => `
+          ${logged && logged.stations && logged.stations.length > 0 ? `
+            <div class="conditioning-variant">
+              <div class="conditioning-variant-header">
+                <span class="conditioning-variant-name">${logged.variant || 'Sesiune Logată'}</span>
+                <span class="conditioning-variant-format">
+                  ${logged.time ? logged.time + ' min' : ''}${logged.time && logged.rounds ? ', ' : ''}${logged.rounds ? logged.rounds + ' runde' : ''}
+                </span>
+              </div>
+              <div class="conditioning-stations">
+                ${logged.stations.map((s, si) => `
+                  <div class="conditioning-station" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <div style="display: flex; align-items: center;">
+                      <span class="station-num">${si + 1}</span>
+                      <span class="station-name">${s.name}</span>
+                    </div>
+                    ${s.value ? `<span style="font-size: 12px; font-weight: 600; color: var(--accent);">${s.value}</span>` : ''}
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : program.variants.map((v, vi) => `
             <div class="conditioning-variant" id="cond-variant-${vi}">
               <div class="conditioning-variant-header">
                 ${isEditMode 
@@ -224,21 +244,20 @@ export function renderGymPage() {
                 }
               </div>
               <div class="conditioning-stations">
-                ${(logged && logged.stations && logged.stations.length > 0 ? logged.stations : v.stations.map(s => ({name: s, value: ''}))).map((s, si) => `
+                ${v.stations.map((s, si) => `
                   <div class="conditioning-station" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                     <div style="display: flex; align-items: center;">
                       <span class="station-num">${si + 1}</span>
-                      ${isEditMode && !logged
-                        ? `<input type="text" class="form-input edit-cond-station" value="${s.name}" style="flex: 1; padding: 4px;" />
+                      ${isEditMode
+                        ? `<input type="text" class="form-input edit-cond-station" value="${s}" style="flex: 1; padding: 4px;" />
                            <button class="btn btn-ghost btn-sm remove-cond-station-btn" data-variant="${vi}" data-station="${si}" style="color: var(--danger); margin-left: 8px;">❌</button>`
-                        : `<span class="station-name">${s.name}</span>`
+                        : `<span class="station-name">${s}</span>`
                       }
                     </div>
-                    ${s.value ? `<span style="font-size: 12px; font-weight: 600; color: var(--accent);">${s.value}</span>` : ''}
                   </div>
                 `).join('')}
               </div>
-              ${isEditMode && !logged ? `
+              ${isEditMode ? `
                 <button class="btn btn-ghost btn-sm add-cond-station-btn" data-variant="${vi}" style="margin-top: var(--space-sm); width: 100%; border-style: dashed;">
                   ➕ Adaugă Stație
                 </button>
