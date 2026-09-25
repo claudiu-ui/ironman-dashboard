@@ -591,7 +591,27 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
           `}
         </div>
         <div class="conditioning-variants">
-          ${e.variants.map((e,t)=>`
+          ${r&&r.stations&&r.stations.length>0?`
+            <div class="conditioning-variant">
+              <div class="conditioning-variant-header">
+                <span class="conditioning-variant-name">${r.variant||`Sesiune Logată`}</span>
+                <span class="conditioning-variant-format">
+                  ${r.time?r.time+` min`:``}${r.time&&r.rounds?`, `:``}${r.rounds?r.rounds+` runde`:``}
+                </span>
+              </div>
+              <div class="conditioning-stations">
+                ${r.stations.map((e,t)=>`
+                  <div class="conditioning-station" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <div style="display: flex; align-items: center;">
+                      <span class="station-num">${t+1}</span>
+                      <span class="station-name">${e.name}</span>
+                    </div>
+                    ${e.value?`<span style="font-size: 12px; font-weight: 600; color: var(--accent);">${e.value}</span>`:``}
+                  </div>
+                `).join(``)}
+              </div>
+            </div>
+          `:e.variants.map((e,t)=>`
             <div class="conditioning-variant" id="cond-variant-${t}">
               <div class="conditioning-variant-header">
                 ${N?`<input type="text" class="form-input edit-cond-name" value="${e.name}" style="flex: 1; margin-right: 8px;" />
@@ -599,18 +619,17 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
                      <span class="conditioning-variant-format">${e.format}</span>`}
               </div>
               <div class="conditioning-stations">
-                ${(r&&r.stations&&r.stations.length>0?r.stations:e.stations.map(e=>({name:e,value:``}))).map((e,n)=>`
+                ${e.stations.map((e,n)=>`
                   <div class="conditioning-station" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                     <div style="display: flex; align-items: center;">
                       <span class="station-num">${n+1}</span>
-                      ${N&&!r?`<input type="text" class="form-input edit-cond-station" value="${e.name}" style="flex: 1; padding: 4px;" />
-                           <button class="btn btn-ghost btn-sm remove-cond-station-btn" data-variant="${t}" data-station="${n}" style="color: var(--danger); margin-left: 8px;">❌</button>`:`<span class="station-name">${e.name}</span>`}
+                      ${N?`<input type="text" class="form-input edit-cond-station" value="${e}" style="flex: 1; padding: 4px;" />
+                           <button class="btn btn-ghost btn-sm remove-cond-station-btn" data-variant="${t}" data-station="${n}" style="color: var(--danger); margin-left: 8px;">❌</button>`:`<span class="station-name">${e}</span>`}
                     </div>
-                    ${e.value?`<span style="font-size: 12px; font-weight: 600; color: var(--accent);">${e.value}</span>`:``}
                   </div>
                 `).join(``)}
               </div>
-              ${N&&!r?`
+              ${N?`
                 <button class="btn btn-ghost btn-sm add-cond-station-btn" data-variant="${t}" style="margin-top: var(--space-sm); width: 100%; border-style: dashed;">
                   ➕ Adaugă Stație
                 </button>
