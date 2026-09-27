@@ -883,8 +883,19 @@ function showToast(message, type = 'success') {
 // Make globally accessible
 window.showToast = showToast;
 
-// Initialize
-buildApp();
+import { handleCorosCallback } from './coros.js';
+
+// Initialize — handle COROS OAuth callback first if present
+(async () => {
+  const url = new URL(window.location.href);
+  if (url.searchParams.has('code') && url.searchParams.has('state')) {
+    const success = await handleCorosCallback();
+    if (success) {
+      console.log('COROS MCP: authenticated successfully');
+    }
+  }
+  buildApp();
+})();
 
 // ── Smart Auto-Sync with cooldown ──────────────────────────────────────────
 (async function smartAutoSync() {

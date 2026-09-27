@@ -3,6 +3,7 @@
 // ============================================
 
 import { storage } from './storage.js';
+import { isCorosConnected, startCorosAuth, disconnectCoros } from './coros.js';
 
 export function renderSettingsPage() {
   const page = document.createElement('div');
@@ -50,6 +51,20 @@ export function renderSettingsPage() {
       </div>
       </div>
 
+      <!-- COROS MCP Connection -->
+      <div class="card animate-in animate-in-delay-1" style="margin-top: var(--space-lg);">
+        <div class="card-header">
+          <div class="card-title">⌚ Conectare COROS (Date directe somn / HRV)</div>
+        </div>
+        <div style="padding: 0 var(--space-md) var(--space-md);">
+          <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: var(--space-md);">
+            Conectează-te direct la COROS prin MCP pentru a trage <strong>scorul de somn, durata exactă, HRV și RHR</strong> exact cum le vezi pe ceas.
+          </p>
+          <div id="coros-status" style="display:flex; align-items:center; gap:12px;">
+          </div>
+        </div>
+      </div>
+
 
       <!-- Sync Results -->
       <div class="card animate-in animate-in-delay-2" style="margin-top: var(--space-lg);" id="sync-results-card">
@@ -68,6 +83,28 @@ export function renderSettingsPage() {
   `;
 
   setTimeout(() => {
+    // ── COROS MCP Status ──────────────────────────────────────────────
+    const corosStatusEl = page.querySelector('#coros-status');
+    if (corosStatusEl) {
+      const connected = isCorosConnected();
+      corosStatusEl.innerHTML = connected
+        ? `<div style="display:flex;align-items:center;gap:8px;">
+             <div style="width:8px;height:8px;border-radius:50%;background:var(--success);box-shadow:0 0 6px var(--success);"></div>
+             <span style="font-size:13px;font-weight:600;color:var(--success);">Conectat la COROS</span>
+           </div>
+           <button class="btn btn-ghost" id="coros-disconnect-btn" style="color:#ef4444;border-color:#ef4444;">Deconectează</button>`
+        : `<button class="btn btn-primary" id="coros-connect-btn">🔗 Conectează COROS</button>`;
+      
+      const connectBtn = corosStatusEl.querySelector('#coros-connect-btn');
+      const disconnectBtn = corosStatusEl.querySelector('#coros-disconnect-btn');
+      if (connectBtn) connectBtn.addEventListener('click', () => startCorosAuth());
+      if (disconnectBtn) disconnectBtn.addEventListener('click', () => {
+        disconnectCoros();
+        corosStatusEl.innerHTML = '<button class="btn btn-primary" id="coros-connect-btn">🔗 Conectează COROS</button>';
+        corosStatusEl.querySelector('#coros-connect-btn').addEventListener('click', () => startCorosAuth());
+      });
+    }
+
     const saveBtn = page.querySelector('#save-settings-btn');
     const syncBtn = page.querySelector('#sync-intervals-btn');
     const statusText = page.querySelector('#sync-status');

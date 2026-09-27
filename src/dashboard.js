@@ -837,6 +837,7 @@ function renderFitnessWidgetPlaceholder() {
       </div>
     </div>`;
 }
+import { fetchCorosWellness, isCorosConnected, startCorosAuth, disconnectCoros } from './coros.js';
 
 // ── Fitness Widget: Real data renderer ────────────────────────────────────
 async function loadAndRenderFitnessWidget(page) {
@@ -845,6 +846,17 @@ async function loadAndRenderFitnessWidget(page) {
 
   try {
     const m = await getFitnessMetrics();
+
+    // Also try to fetch COROS wellness data (sleep, HRV, RHR with real scores)
+    let corosData = null;
+    if (isCorosConnected()) {
+      try {
+        corosData = await fetchCorosWellness();
+      } catch (e) {
+        console.warn('COROS wellness fetch failed:', e);
+      }
+    }
+
     if (!m) {
       container.innerHTML = `
         <div class="card" style="background:linear-gradient(145deg,#1a1a1a,#111);border:1px solid var(--border-subtle);margin-bottom:var(--space-md);padding:16px 20px;">
@@ -859,7 +871,14 @@ async function loadAndRenderFitnessWidget(page) {
       return;
     }
 
-    const { ctl, atl, tsb, weeklyTSS, prevWeeklyTSS, ctlDelta, atlDelta, tsbDelta, ctlMonthDelta, source, sleepSecs, restingHR, hrv, sleepScore, readiness } = m;
+    const { ctl, atl, tsb, weeklyTSS, prevWeeklyTSS, ctlDelta, atlDelta, tsbDelta, ctlMonthDelta, source } = m;
+
+    // Merge wellness: COROS takes priority over Intervals
+    const sleepSecs = corosData?.sleepSecs ?? m.sleepSecs;
+    const restingHR = corosData?.restingHR ?? m.restingHR;
+    const hrv = corosData?.hrv ?? m.hrv;
+    const sleepScore = corosData?.sleepScore ?? null;
+    const readiness = m.readiness; // computed from Intervals data
 
     const tsbColor = tsb >= 5 ? '#22c55e' : tsb >= -10 ? '#f97316' : '#ef4444';
     const tsbIcon = tsb <= -20 ? '🔴' : tsb <= -10 ? '🟡' : tsb <= 5 ? '🟢' : '🚀';
@@ -898,13 +917,14 @@ async function loadAndRenderFitnessWidget(page) {
     
     const rhr = restingHR ? Math.round(restingHR) : '—';
     const hrvVal = hrv ? Math.round(hrv) : '—';
-    const recScore = readiness != null ? Math.round(readiness) : (sleepScore != null ? Math.round(sleepScore) : null);
+    const recScore = sleepScore != null ? Math.round(sleepScore) : (readiness != null ? Math.round(readiness) : null);
+    const recSource = sleepScore != null ? 'COROS' : (readiness != null ? 'calc' : null);
 
-    const wellnessHtml = (source === 'intervals' && (sleepSecs || restingHR || hrv)) ? `
+    const wellnessHtml = (sleepSecs || restingHR || hrv) ? `
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:1px;background:var(--border-subtle);border-bottom:1px solid var(--border-subtle);">
         <div style="background:#0f0f0f;padding:12px 14px;text-align:center;">
-          <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">💤 Somn</div>
-          <div style="font-size:20px;font-weight:700;color:var(--text-primary);">${sleepStr}</div>
+          <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">💤 Somn${corosData?.sleepSecs ? ' (COROS)' : ''}</div>
+          <div style="font-size:20px;font-weight:700;color:${sleepSecs && sleepSecs >= 8*3600 ? '#22c55e' : sleepSecs && sleepSecs >= 7*3600 ? '#f97316' : sleepSecs ? '#ef4444' : 'var(--text-primary)'};">${sleepStr}</div>
         </div>
         <div style="background:#0f0f0f;padding:12px 14px;text-align:center;">
           <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">❤️ RHR</div>
@@ -915,7 +935,7 @@ async function loadAndRenderFitnessWidget(page) {
           <div style="font-size:20px;font-weight:700;color:var(--text-primary);">${hrvVal} <span style="font-size:12px;color:var(--text-tertiary);font-weight:400;">ms</span></div>
         </div>
         <div style="background:#0f0f0f;padding:12px 14px;text-align:center;">
-          <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">🔋 Recovery</div>
+          <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">🔋 Recovery${recSource ? ` (${recSource})` : ''}</div>
           <div style="font-size:20px;font-weight:700;color:${recScore >= 80 ? '#22c55e' : (recScore >= 60 ? '#f97316' : (recScore ? '#ef4444' : 'var(--text-primary)'))};">${recScore != null ? recScore : '—'} <span style="font-size:12px;color:var(--text-tertiary);font-weight:400;">${recScore != null ? '%' : ''}</span></div>
         </div>
       </div>
