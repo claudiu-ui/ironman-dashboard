@@ -569,7 +569,9 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
                       `).join(``)}
                       ${a.totalVolume?`<span class="last-session-volume">Vol: ${a.totalVolume}kg</span>`:``}
                     </div>
-                  `:``}
+                  `:`<div style="font-size: 9px; color: var(--text-tertiary); margin-top: 4px; opacity: 0.5;">
+                        Debug: no past data. Key: ${t}. Name: ${e.name}. Dates: ${Object.keys(j.get(`gym`,{})).join(`, `)}
+                      </div>`}
                   
                   ${o&&o.sets?`
                     <div class="gym-today-session">
