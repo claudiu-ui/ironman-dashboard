@@ -56,13 +56,8 @@ export function renderGymPage(forceDateStr = null) {
   function render() {
     page.innerHTML = `
       <div class="page-body">
-        <div class="gym-intro animate-in" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-lg);">
-          <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.7; flex: 1;">
-            <strong style="color: var(--text-primary)">Program Dinamic:</strong> Zilele sunt preluate direct din <a href="#/" style="color: var(--accent)">Dashboard</a>.
-            <br>
-            <span style="color: var(--warning)">⚠️ Niciodată la eșec pe picioare (RIR 3-4). Femuralul drept — greutate ușoară pe curls.</span>
-          </p>
-          <button class="btn btn-ghost" id="toggle-edit-mode" style="margin-left: var(--space-md);">
+        <div class="gym-intro animate-in" style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: var(--space-lg);">
+          <button class="btn btn-ghost" id="toggle-edit-mode">
             ${isEditMode ? '💾 Salvează Programul' : '✏️ Editează Programul'}
           </button>
         </div>
@@ -123,10 +118,11 @@ export function renderGymPage(forceDateStr = null) {
 
   function renderGymCard(program, key, dateStr) {
     const logged = storage.getGymSession(dateStr, key);
+    const isCollapsed = localStorage.getItem(`gym_collapsed_${key}`) === 'true';
     return `
       <div class="card animate-in">
         <div class="card-header" style="align-items: flex-start;">
-          <div style="flex: 1; margin-right: 12px;">
+          <div style="flex: 1; margin-right: 12px; cursor: ${isEditMode ? 'default' : 'pointer'};" class="${isEditMode ? '' : 'gym-card-toggle'}" data-key="${key}">
             ${isEditMode ? `
               <input type="text" class="form-input edit-prog-name" data-session="${key}" value="${program.name}" style="font-size: 14px; font-weight: bold; width: 100%; margin-bottom: 4px; padding: 4px 8px; text-transform: uppercase;" />
               <div style="display: flex; gap: 4px; align-items: center;">
@@ -134,7 +130,10 @@ export function renderGymPage(forceDateStr = null) {
                 <input type="text" class="form-input edit-prog-focus" data-session="${key}" value="${program.focus || ''}" style="font-size: 12px; width: 100%; padding: 2px 8px;" placeholder="Focus (ex: Piept, Umeri)" />
               </div>
             ` : `
-              <div class="card-title">${program.name}</div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div class="card-title">${program.name}</div>
+                <div class="toggle-icon" id="toggle-icon-${key}" style="font-size: 12px; color: var(--text-tertiary);">${isCollapsed ? '▼' : '▲'}</div>
+              </div>
               <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 2px">${program.day} • ${program.focus}</div>
             `}
           </div>
@@ -144,6 +143,7 @@ export function renderGymPage(forceDateStr = null) {
             </button>
           ` : ''}
         </div>
+        <div id="exercises-container-${key}" style="display: ${isCollapsed && !isEditMode ? 'none' : 'block'};">
         ${isEditMode ? `
           <div style="margin-bottom: var(--space-md);">
             <input type="text" class="form-input edit-prog-notes" data-session="${key}" value="${program.notes || ''}" placeholder="Note generale (ex: RIR 3-4...)" style="width: 100%; padding: 6px 12px; border: 1px dashed var(--warning); border-radius: var(--radius-md);" />
@@ -212,11 +212,13 @@ export function renderGymPage(forceDateStr = null) {
           }).join('')}
         </div>
         
+        </div>
         ${isEditMode ? `
           <button class="btn btn-ghost btn-sm add-ex-btn" data-session="${key}" style="margin-top: var(--space-md); width: 100%; border-style: dashed;">
             ➕ Adaugă Exercițiu
           </button>
         ` : ''}
+        </div>
       </div>
     `;
   }
@@ -224,10 +226,11 @@ export function renderGymPage(forceDateStr = null) {
   function renderConditioningCard(program, dateStr) {
     const rawLog = storage.getGymSession(dateStr, 'conditioning');
     const logged = rawLog && rawLog.exercises ? rawLog.exercises : rawLog;
+    const isCollapsed = localStorage.getItem(`gym_collapsed_conditioning`) === 'true';
     return `
       <div class="card animate-in">
         <div class="card-header" style="align-items: flex-start;">
-          <div style="flex: 1; margin-right: 12px;">
+          <div style="flex: 1; margin-right: 12px; cursor: ${isEditMode ? 'default' : 'pointer'};" class="${isEditMode ? '' : 'gym-card-toggle'}" data-key="conditioning">
             ${isEditMode ? `
               <input type="text" class="form-input edit-prog-name" data-session="conditioning" value="${program.name}" style="font-size: 14px; font-weight: bold; width: 100%; margin-bottom: 4px; padding: 4px 8px; text-transform: uppercase;" />
               <div style="display: flex; gap: 4px; align-items: center;">
@@ -235,7 +238,10 @@ export function renderGymPage(forceDateStr = null) {
                 <input type="text" class="form-input edit-prog-focus" data-session="conditioning" value="${program.focus || ''}" style="font-size: 12px; width: 100%; padding: 2px 8px;" placeholder="Focus (ex: Cardio)" />
               </div>
             ` : `
-              <div class="card-title">${program.name}</div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div class="card-title">${program.name}</div>
+                <div class="toggle-icon" id="toggle-icon-conditioning" style="font-size: 12px; color: var(--text-tertiary);">${isCollapsed ? '▼' : '▲'}</div>
+              </div>
               <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 2px">${program.day} • ${program.focus}</div>
             `}
           </div>
@@ -245,6 +251,7 @@ export function renderGymPage(forceDateStr = null) {
             </button>
           ` : ''}
         </div>
+        <div id="exercises-container-conditioning" style="display: ${isCollapsed && !isEditMode ? 'none' : 'block'};">
         <div class="conditioning-variants">
           ${logged && logged.stations && logged.stations.length > 0 ? `
             <div class="conditioning-variant">
@@ -298,6 +305,7 @@ export function renderGymPage(forceDateStr = null) {
             </div>
           `).join('')}
         </div>
+        </div>
       </div>
     `;
   }
@@ -313,6 +321,29 @@ export function renderGymPage(forceDateStr = null) {
       isEditMode = !isEditMode;
       render();
     });
+
+    // Collapsible cards toggle
+    if (!isEditMode) {
+      page.querySelectorAll('.gym-card-toggle').forEach(el => {
+        el.addEventListener('click', () => {
+          const key = el.dataset.key;
+          const container = page.querySelector(`#exercises-container-${key}`);
+          const icon = page.querySelector(`#toggle-icon-${key}`);
+          if (container && icon) {
+            const isCollapsed = container.style.display === 'none';
+            if (isCollapsed) {
+              container.style.display = 'block';
+              icon.textContent = '▲';
+              localStorage.setItem(`gym_collapsed_${key}`, 'false');
+            } else {
+              container.style.display = 'none';
+              icon.textContent = '▼';
+              localStorage.setItem(`gym_collapsed_${key}`, 'true');
+            }
+          }
+        });
+      });
+    }
 
     // Logging workouts — opens the detailed logging modal
     if (!isEditMode) {
