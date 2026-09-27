@@ -139,6 +139,7 @@ export async function handleCorosCallback() {
 
   if (!savedState || state !== savedState || !verifier) {
     console.error('COROS OAuth: state mismatch or missing verifier');
+    alert('Eroare logare COROS: Eroare de securitate (State mismatch). Te rog încearcă din nou.');
     // Clean up URL params
     url.searchParams.delete('code');
     url.searchParams.delete('state');
@@ -165,6 +166,7 @@ export async function handleCorosCallback() {
     if (!resp.ok) {
       const err = await resp.text();
       console.error('COROS token exchange failed:', err);
+      alert('Eroare logare COROS (Server): ' + err);
       return false;
     }
 
@@ -178,6 +180,7 @@ export async function handleCorosCallback() {
     return true;
   } catch (e) {
     console.error('COROS token exchange error:', e);
+    alert('Eroare logare COROS: ' + (e.message || String(e)));
     return false;
   } finally {
     // ALWAYS clean URL
