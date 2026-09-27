@@ -859,7 +859,7 @@ async function loadAndRenderFitnessWidget(page) {
       return;
     }
 
-    const { ctl, atl, tsb, weeklyTSS, prevWeeklyTSS, ctlDelta, atlDelta, tsbDelta, ctlMonthDelta, source } = m;
+    const { ctl, atl, tsb, weeklyTSS, prevWeeklyTSS, ctlDelta, atlDelta, tsbDelta, ctlMonthDelta, source, sleepSecs, restingHR, hrv } = m;
 
     const tsbColor = tsb >= 5 ? '#22c55e' : tsb >= -10 ? '#f97316' : '#ef4444';
     const tsbIcon = tsb <= -20 ? '🔴' : tsb <= -10 ? '🟡' : tsb <= 5 ? '🟢' : '🚀';
