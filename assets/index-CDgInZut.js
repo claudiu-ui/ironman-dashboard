@@ -511,10 +511,18 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
       </div>
     `,h()}function f(e,t,n){let r=j.get(`gym`,{}),i=Object.keys(r).sort().reverse();for(let a of i){if(a===n)continue;let i=r[a]?.[e];if(i){let e=Array.isArray(i.exercises)?i.exercises:i.exercises&&Array.isArray(i.exercises.exercises)?i.exercises.exercises:null;if(e){let n=e.find(e=>e.name===t);if(n&&n.sets&&n.sets.length>0)return n}}}return null}function p(e,t,n){let r=j.getGymSession(n,t);return`
       <div class="card animate-in">
-        <div class="card-header">
-          <div>
-            <div class="card-title">${e.name}</div>
-            <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 2px">${e.day} • ${e.focus}</div>
+        <div class="card-header" style="align-items: flex-start;">
+          <div style="flex: 1; margin-right: 12px;">
+            ${N?`
+              <input type="text" class="form-input edit-prog-name" data-session="${t}" value="${e.name}" style="font-size: 14px; font-weight: bold; width: 100%; margin-bottom: 4px; padding: 4px 8px; text-transform: uppercase;" />
+              <div style="display: flex; gap: 4px; align-items: center;">
+                <span style="font-size: 12px; color: var(--text-tertiary); white-space: nowrap;">${e.day} •</span>
+                <input type="text" class="form-input edit-prog-focus" data-session="${t}" value="${e.focus||``}" style="font-size: 12px; width: 100%; padding: 2px 8px;" placeholder="Focus (ex: Piept, Umeri)" />
+              </div>
+            `:`
+              <div class="card-title">${e.name}</div>
+              <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 2px">${e.day} • ${e.focus}</div>
+            `}
           </div>
           ${N?``:`
             <button class="btn btn-sm ${r?`btn-ghost`:`btn-primary`} log-gym-btn" data-session="${t}" data-date="${n}">
@@ -522,7 +530,11 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
             </button>
           `}
         </div>
-        ${e.notes?`<div style="font-size: 12px; color: var(--warning); margin-bottom: var(--space-md); padding: 8px 12px; background: rgba(234,179,8,0.08); border-radius: var(--radius-md);">${e.notes}</div>`:``}
+        ${N?`
+          <div style="margin-bottom: var(--space-md);">
+            <input type="text" class="form-input edit-prog-notes" data-session="${t}" value="${e.notes||``}" placeholder="Note generale (ex: RIR 3-4...)" style="width: 100%; padding: 6px 12px; border: 1px dashed var(--warning); border-radius: var(--radius-md);" />
+          </div>
+        `:e.notes?`<div style="font-size: 12px; color: var(--warning); margin-bottom: var(--space-md); padding: 8px 12px; background: rgba(234,179,8,0.08); border-radius: var(--radius-md);">${e.notes}</div>`:``}
         
         <div class="gym-exercises" id="exercises-${t}">
           ${e.exercises.map((e,i)=>{let a=f(t,e.name,n),o=null;return r&&(o=(Array.isArray(r.exercises)?r.exercises:r.exercises&&Array.isArray(r.exercises.exercises)?r.exercises.exercises:[]).find(t=>t.name===e.name)),`
@@ -579,10 +591,18 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
       </div>
     `}function m(e,t){let n=j.getGymSession(t,`conditioning`),r=n&&n.exercises?n.exercises:n;return`
       <div class="card animate-in">
-        <div class="card-header">
-          <div>
-            <div class="card-title">${e.name}</div>
-            <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 2px">${e.day} • ${e.focus}</div>
+        <div class="card-header" style="align-items: flex-start;">
+          <div style="flex: 1; margin-right: 12px;">
+            ${N?`
+              <input type="text" class="form-input edit-prog-name" data-session="conditioning" value="${e.name}" style="font-size: 14px; font-weight: bold; width: 100%; margin-bottom: 4px; padding: 4px 8px; text-transform: uppercase;" />
+              <div style="display: flex; gap: 4px; align-items: center;">
+                <span style="font-size: 12px; color: var(--text-tertiary); white-space: nowrap;">${e.day} •</span>
+                <input type="text" class="form-input edit-prog-focus" data-session="conditioning" value="${e.focus||``}" style="font-size: 12px; width: 100%; padding: 2px 8px;" placeholder="Focus (ex: Cardio)" />
+              </div>
+            `:`
+              <div class="card-title">${e.name}</div>
+              <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 2px">${e.day} • ${e.focus}</div>
+            `}
           </div>
           ${N?``:`
             <button class="btn btn-sm ${r?`btn-ghost`:`btn-primary`} log-gym-btn" data-session="conditioning" data-date="${t}">
@@ -638,7 +658,7 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
           `).join(``)}
         </div>
       </div>
-    `}function h(){t.querySelector(`#toggle-edit-mode`)?.addEventListener(`click`,()=>{N&&(g(),j.saveCustomGymPrograms(P)),N=!N,u()}),N||t.querySelectorAll(`.log-gym-btn`).forEach(e=>{e.addEventListener(`click`,t=>{t.stopPropagation();let n=e.dataset.session,r=e.dataset.date;n===`conditioning`?y(r):v(n,P[n]?.exercises||[],r)})}),N&&(t.querySelectorAll(`.add-ex-btn`).forEach(e=>{e.addEventListener(`click`,()=>{let t=e.dataset.session;g(),P[t].exercises.push({name:`Exercițiu Nou`,sets:`3 × 10`,rest:`60s`,notes:``}),u()})}),t.querySelectorAll(`.remove-ex-btn`).forEach(e=>{e.addEventListener(`click`,t=>{let n=e.dataset.session,r=parseInt(e.dataset.index);g(),P[n].exercises.splice(r,1),u()})}),t.querySelectorAll(`.add-cond-station-btn`).forEach(e=>{e.addEventListener(`click`,()=>{let t=parseInt(e.dataset.variant);g(),P.conditioning.variants[t].stations.push(`Stație Nouă`),u()})}),t.querySelectorAll(`.remove-cond-station-btn`).forEach(e=>{e.addEventListener(`click`,()=>{let t=parseInt(e.dataset.variant),n=parseInt(e.dataset.station);g(),P.conditioning.variants[t].stations.splice(n,1),u()})}))}function g(){[`lower`,`upper1`,`upper2`,`accesorii`].forEach(e=>{t.querySelectorAll(`#exercises-${e} .gym-exercise-row`).forEach((t,n)=>{let r=t.querySelector(`.edit-ex-name`)?.value,i=t.querySelector(`.edit-ex-sets`)?.value,a=t.querySelector(`.edit-ex-rest`)?.value,o=t.querySelector(`.edit-ex-notes`)?.value;r&&P[e].exercises[n]&&(P[e].exercises[n].name=r,P[e].exercises[n].sets=i,P[e].exercises[n].rest=a,P[e].exercises[n].notes=o)})}),P.conditioning&&P.conditioning.variants.forEach((e,n)=>{let r=t.querySelector(`#cond-variant-${n}`);if(r){let t=r.querySelector(`.edit-cond-name`)?.value,n=r.querySelector(`.edit-cond-format`)?.value;t&&(e.name=t),n&&(e.format=n),r.querySelectorAll(`.edit-cond-station`).forEach((t,n)=>{e.stations[n]!==void 0&&(e.stations[n]=t.value)})}})}function v(e,t,r){let i=j.getGymSession(r,e),a=i&&Array.isArray(i.exercises)?i.exercises:i&&i.exercises&&Array.isArray(i.exercises.exercises)?i.exercises.exercises:[],o=t.map(t=>{let n=(t.sets||`3`).match(/(\d+)\s*[×x]/i),o=n?parseInt(n[1]):3,s=a.find(e=>e.name===t.name),c=f(e,t.name,r),l=[],u=s&&s.sets?Math.max(o,s.sets.length):o;for(let e=0;e<u;e++){let t=``,n=``;s&&s.sets&&s.sets[e]?(t=s.sets[e].weight,n=s.sets[e].reps):i||(t=c?.sets?.[e]?.weight||``,n=c?.sets?.[e]?.reps||``),l.push({weight:t,reps:n})}return{name:t.name,sets:l,numSets:o}}),s=document.createElement(`div`);s.className=`modal-overlay active`,s.id=`gym-log-modal`,s.innerHTML=`
+    `}function h(){t.querySelector(`#toggle-edit-mode`)?.addEventListener(`click`,()=>{N&&(g(),j.saveCustomGymPrograms(P)),N=!N,u()}),N||t.querySelectorAll(`.log-gym-btn`).forEach(e=>{e.addEventListener(`click`,t=>{t.stopPropagation();let n=e.dataset.session,r=e.dataset.date;n===`conditioning`?y(r):v(n,P[n]?.exercises||[],r)})}),N&&(t.querySelectorAll(`.add-ex-btn`).forEach(e=>{e.addEventListener(`click`,()=>{let t=e.dataset.session;g(),P[t].exercises.push({name:`Exercițiu Nou`,sets:`3 × 10`,rest:`60s`,notes:``}),u()})}),t.querySelectorAll(`.remove-ex-btn`).forEach(e=>{e.addEventListener(`click`,t=>{let n=e.dataset.session,r=parseInt(e.dataset.index);g(),P[n].exercises.splice(r,1),u()})}),t.querySelectorAll(`.add-cond-station-btn`).forEach(e=>{e.addEventListener(`click`,()=>{let t=parseInt(e.dataset.variant);g(),P.conditioning.variants[t].stations.push(`Stație Nouă`),u()})}),t.querySelectorAll(`.remove-cond-station-btn`).forEach(e=>{e.addEventListener(`click`,()=>{let t=parseInt(e.dataset.variant),n=parseInt(e.dataset.station);g(),P.conditioning.variants[t].stations.splice(n,1),u()})}))}function g(){if([`lower`,`upper1`,`upper2`,`accesorii`].forEach(e=>{let n=t.querySelector(`.edit-prog-name[data-session="${e}"]`),r=t.querySelector(`.edit-prog-focus[data-session="${e}"]`),i=t.querySelector(`.edit-prog-notes[data-session="${e}"]`);n&&P[e]&&(P[e].name=n.value),r&&P[e]&&(P[e].focus=r.value),i&&P[e]&&(P[e].notes=i.value),t.querySelectorAll(`#exercises-${e} .gym-exercise-row`).forEach((t,n)=>{let r=t.querySelector(`.edit-ex-name`)?.value,i=t.querySelector(`.edit-ex-sets`)?.value,a=t.querySelector(`.edit-ex-rest`)?.value,o=t.querySelector(`.edit-ex-notes`)?.value;r&&P[e].exercises[n]&&(P[e].exercises[n].name=r,P[e].exercises[n].sets=i,P[e].exercises[n].rest=a,P[e].exercises[n].notes=o)})}),P.conditioning){let e=t.querySelector(`.edit-prog-name[data-session="conditioning"]`),n=t.querySelector(`.edit-prog-focus[data-session="conditioning"]`);e&&(P.conditioning.name=e.value),n&&(P.conditioning.focus=n.value),P.conditioning.variants.forEach((e,n)=>{let r=t.querySelector(`#cond-variant-${n}`);if(r){let t=r.querySelector(`.edit-cond-name`)?.value,n=r.querySelector(`.edit-cond-format`)?.value;t&&(e.name=t),n&&(e.format=n),r.querySelectorAll(`.edit-cond-station`).forEach((t,n)=>{e.stations[n]!==void 0&&(e.stations[n]=t.value)})}})}}function v(e,t,r){let i=j.getGymSession(r,e),a=i&&Array.isArray(i.exercises)?i.exercises:i&&i.exercises&&Array.isArray(i.exercises.exercises)?i.exercises.exercises:[],o=t.map(t=>{let n=(t.sets||`3`).match(/(\d+)\s*[×x]/i),o=n?parseInt(n[1]):3,s=a.find(e=>e.name===t.name),c=f(e,t.name,r),l=[],u=s&&s.sets?Math.max(o,s.sets.length):o;for(let e=0;e<u;e++){let t=``,n=``;s&&s.sets&&s.sets[e]?(t=s.sets[e].weight,n=s.sets[e].reps):i||(t=c?.sets?.[e]?.weight||``,n=c?.sets?.[e]?.reps||``),l.push({weight:t,reps:n})}return{name:t.name,sets:l,numSets:o}}),s=document.createElement(`div`);s.className=`modal-overlay active`,s.id=`gym-log-modal`,s.innerHTML=`
       <div class="modal" style="max-width: 600px; max-height: 85vh; overflow-y: auto;">
         <div class="modal-title">📝 Loghează: ${P[e]?.name||`Conditioning`}</div>
         <div style="font-size: 12px; color: var(--text-tertiary); margin-bottom: var(--space-lg);">
