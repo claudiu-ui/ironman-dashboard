@@ -445,8 +445,15 @@ export async function fetchCorosWellness() {
 
 function extractRegex(str, pattern, isCommaNumber = false) {
   if (!str || typeof str !== 'string') return null;
-  const m = str.match(pattern);
-  if (!m) return null;
+  
+  // Use global regex to find all matches, then pick the last one (most recent day)
+  const gPattern = new RegExp(pattern, 'g');
+  const matches = [...str.matchAll(gPattern)];
+  
+  if (matches.length === 0) return null;
+  
+  const m = matches[matches.length - 1];
+  
   if (isCommaNumber) {
     return Number(m[1].replace(/,/g, ''));
   }
@@ -484,8 +491,17 @@ function extractSleepDuration(data) {
   let parsed = data;
   if (typeof data === 'string') {
     // Regex fallback for text output
-    const hm = data.match(/Main Sleep \(asleep\):\s*(\d+)h\s*(\d+)min/) || data.match(/Total:\s*(\d+)h\s*(\d+)min/);
-    if (hm) return Number(hm[1]) * 3600 + Number(hm[2]) * 60;
+    let hmMatches = [...data.matchAll(/Main Sleep \(asleep\):\s*(\d+)h\s*(\d+)min/g)];
+    if (hmMatches.length > 0) {
+      const hm = hmMatches[hmMatches.length - 1];
+      return Number(hm[1]) * 3600 + Number(hm[2]) * 60;
+    }
+    
+    let totalMatches = [...data.matchAll(/Total:\s*(\d+)h\s*(\d+)min/g)];
+    if (totalMatches.length > 0) {
+      const hm = totalMatches[totalMatches.length - 1];
+      return Number(hm[1]) * 3600 + Number(hm[2]) * 60;
+    }
     try { parsed = JSON.parse(data); } catch { return null; }
   }
   // Try common field names for duration in seconds or minutes
