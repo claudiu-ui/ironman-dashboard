@@ -6,7 +6,7 @@
 const COROS_CLIENT_ID = 'e4480b0e-f3b5-42ed-b175-7fe06b5ba203';
 const COROS_AUTH_URL = 'https://mcpus.coros.com/oauth2/authorize';
 const COROS_TOKEN_URL = 'https://mcpus.coros.com/oauth2/token';
-const COROS_MCP_URL = 'https://mcp.coros.com/mcp';
+const COROS_MCP_URL = 'https://mcpus.coros.com/mcp';
 const COROS_REDIRECT_URI = window.location.origin + window.location.pathname;
 const COROS_STORAGE_KEY = 'coros_mcp_tokens';
 const COROS_WELLNESS_CACHE_KEY = 'coros_wellness_cache';
