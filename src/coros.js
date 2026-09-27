@@ -6,7 +6,7 @@
 const COROS_CLIENT_ID = 'e4480b0e-f3b5-42ed-b175-7fe06b5ba203';
 const COROS_MCP_URL = 'https://mcp.coros.com/mcp';
 const COROS_DISCOVERY_URL = 'https://mcp.coros.com/.well-known/oauth-authorization-server';
-const COROS_REDIRECT_URI = window.location.origin + window.location.pathname;
+const COROS_REDIRECT_URI = 'https://claudiu-ui.github.io/ironman-dashboard/';
 const COROS_STORAGE_KEY = 'coros_mcp_tokens';
 const COROS_WELLNESS_CACHE_KEY = 'coros_wellness_cache';
 const COROS_WELLNESS_CACHE_TTL = 15 * 60 * 1000; // 15 minutes
@@ -34,7 +34,7 @@ async function getOAuthConfig() {
 }
 
 async function getOrRegisterClientId(config) {
-  let clientId = localStorage.getItem('coros_dynamic_client_id');
+  let clientId = localStorage.getItem('coros_dynamic_client_id_v2');
   if (clientId) return clientId;
 
   try {
@@ -53,7 +53,7 @@ async function getOrRegisterClientId(config) {
     if (!resp.ok) throw new Error('Registration failed');
     const data = await resp.json();
     clientId = data.client_id;
-    localStorage.setItem('coros_dynamic_client_id', clientId);
+    localStorage.setItem('coros_dynamic_client_id_v2', clientId);
     return clientId;
   } catch (e) {
     console.error('Failed to register dynamic client', e);
