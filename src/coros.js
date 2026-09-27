@@ -422,19 +422,19 @@ export async function fetchCorosWellness() {
     source: 'coros',
     fetchedAt: Date.now(),
     // Sleep
-    sleepScore: extractNum(sleepData, 'score', 'sleepScore', 'sleep_score'),
+    sleepScore: extractNum(sleepData, 'score', 'sleepScore', 'sleep_score') || extractRegex(sleepData, /Sleep Score:\s*(\d+)/),
     sleepSecs: extractSleepDuration(sleepData),
-    deepSleepPct: extractNum(sleepData, 'deepRatio', 'deep_ratio', 'deepSleepRatio'),
-    remSleepPct: extractNum(sleepData, 'remRatio', 'rem_ratio', 'remSleepRatio'),
-    lightSleepPct: extractNum(sleepData, 'lightRatio', 'light_ratio', 'lightSleepRatio'),
+    deepSleepPct: extractNum(sleepData, 'deepRatio', 'deep_ratio', 'deepSleepRatio') || extractRegex(sleepData, /Deep Sleep Ratio:\s*(\d+)/),
+    remSleepPct: extractNum(sleepData, 'remRatio', 'rem_ratio', 'remSleepRatio') || extractRegex(sleepData, /REM Ratio:\s*(\d+)/),
+    lightSleepPct: extractNum(sleepData, 'lightRatio', 'light_ratio', 'lightSleepRatio') || extractRegex(sleepData, /Light Sleep Ratio:\s*(\d+)/),
     // HRV
-    hrv: extractNum(hrvData, 'avg', 'average', 'hrvAvg', 'hrv', 'dailyAvg'),
+    hrv: extractNum(hrvData, 'avg', 'average', 'hrvAvg', 'hrv', 'dailyAvg') || extractRegex(hrvData, /HRV Avg:\s*(\d+)/),
     // RHR
-    restingHR: extractNum(rhrData, 'restingHr', 'resting_hr', 'restingHeartRate', 'avg', 'value'),
+    restingHR: extractNum(rhrData, 'restingHr', 'resting_hr', 'restingHeartRate', 'avg', 'value') || extractRegex(rhrData, /(\d+)\s*bpm/),
     // Daily Health
-    steps: extractNum(healthData, 'steps', 'step'),
-    calories: extractNum(healthData, 'calories', 'activeCalories', 'calorie'),
-    stress: extractNum(healthData, 'stress', 'avgStress', 'dailyStress'),
+    steps: extractNum(healthData, 'steps', 'step') || extractRegex(healthData, /Steps:\s*([\d,]+)/, true),
+    calories: extractNum(healthData, 'calories', 'activeCalories', 'calorie') || extractRegex(healthData, /Calories:\s*([\d,]+)/, true),
+    stress: extractNum(healthData, 'stress', 'avgStress', 'dailyStress') || extractRegex(healthData, /Stress:\s*Avg\s*(\d+)/),
     // Raw data for debugging
     _raw: { sleepData, hrvData, rhrData, healthData },
   };
@@ -443,12 +443,21 @@ export async function fetchCorosWellness() {
   return wellness;
 }
 
+function extractRegex(str, pattern, isCommaNumber = false) {
+  if (!str || typeof str !== 'string') return null;
+  const m = str.match(pattern);
+  if (!m) return null;
+  if (isCommaNumber) {
+    return Number(m[1].replace(/,/g, ''));
+  }
+  return Number(m[1]);
+}
+
 // Helper to extract a numeric value from a potentially nested/unknown structure
 function extractNum(data, ...keys) {
   if (!data) return null;
   if (typeof data === 'number') return data;
   if (typeof data === 'string') {
-    // Try parsing JSON string
     try { data = JSON.parse(data); } catch { return null; }
   }
   // Direct key lookup
@@ -460,7 +469,6 @@ function extractNum(data, ...keys) {
     for (const key of keys) {
       if (data.data[key] != null) return Number(data.data[key]);
     }
-    // If data.data is an array, try the first item
     if (Array.isArray(data.data) && data.data.length > 0) {
       const first = data.data[0];
       for (const key of keys) {
@@ -473,8 +481,12 @@ function extractNum(data, ...keys) {
 
 function extractSleepDuration(data) {
   if (!data) return null;
+  let parsed = data;
   if (typeof data === 'string') {
-    try { data = JSON.parse(data); } catch { return null; }
+    // Regex fallback for text output
+    const hm = data.match(/Main Sleep \(asleep\):\s*(\d+)h\s*(\d+)min/) || data.match(/Total:\s*(\d+)h\s*(\d+)min/);
+    if (hm) return Number(hm[1]) * 3600 + Number(hm[2]) * 60;
+    try { parsed = JSON.parse(data); } catch { return null; }
   }
   // Try common field names for duration in seconds or minutes
   const secKeys = ['totalSleepSecs', 'sleepSecs', 'totalSleepDuration', 'duration', 'mainSleepDuration'];
