@@ -69,10 +69,24 @@ export function renderDashboard() {
             completedSessions[key] = { ...log, type: normType };
           }
         } else {
-          // Merge if multiple of same type on same day (sum distance)
-          completedSessions[key].distance = (parseFloat(completedSessions[key].distance) || 0) + dist;
-          if (log.hr && (!completedSessions[key].hr || log.hr > completedSessions[key].hr)) {
-            completedSessions[key].hr = log.hr;
+          // Merge if multiple of same type on same day
+          const prevDist = parseFloat(completedSessions[key].distance) || 0;
+          const prevDur = parseFloat(completedSessions[key].duration) || 0;
+          const prevHr = parseFloat(completedSessions[key].hr) || 0;
+          
+          const newDist = parseFloat(dist) || 0;
+          const newDur = parseFloat(log.duration) || 0;
+          const newHr = parseFloat(log.hr) || 0;
+
+          completedSessions[key].distance = prevDist + newDist;
+          completedSessions[key].duration = prevDur + newDur;
+          
+          const totalDur = prevDur + newDur;
+          if (totalDur > 0 && (prevHr > 0 || newHr > 0)) {
+            // Time-weighted average HR
+            completedSessions[key].hr = Math.round(((prevHr * prevDur) + (newHr * newDur)) / totalDur);
+          } else {
+            completedSessions[key].hr = Math.max(prevHr, newHr);
           }
         }
       }
