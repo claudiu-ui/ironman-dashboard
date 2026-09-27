@@ -392,19 +392,19 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
               <div style="font-size:12px;color:var(--text-tertiary);margin-top:2px;">Loghează primul antrenament sau conectează Intervals.icu din Setări</div>
             </div>
           </div>
-        </div>`;return}let{ctl:r,atl:i,tsb:a,weeklyTSS:o,prevWeeklyTSS:c,ctlDelta:l,atlDelta:u,tsbDelta:d,ctlMonthDelta:f,source:p}=n,m=a>=5?`#22c55e`:a>=-10?`#f97316`:`#ef4444`,h=a<=-20?`🔴`:a<=-10?`🟡`:a<=5?`🟢`:`🚀`,g=a<=-20?`Risc Overtraining`:a<=-10?`Heavy Load — Productiv`:a<=5?`Formă Optimă`:`Peak Form / Taper`,_=a<=-20?`Oboseala acută îți depășește masiv baza. <b>Zi de recuperare azi</b> — fără efort intens.`:a<=-10?`TSB de <b>${a}</b> = mediu perfect de acumulare (Build). Musculatura e încărcată — normal! Prioritizează nutriția post-antrenament și somnul.`:a<=5?`Echilibru perfect între fitness și oboseală. Ești pregătit pentru antrenamente de calitate — intervale, long run, brick workouts.`:`Oboseala a dispărut, fitness-ul a rămas! Ești în formă maximă. Dacă ai cursă în weekend — e momentul.`,v=c>0?Math.round((o-c)/c*100):0,y=v>0?`+${v}%`:`${v}%`,b=v>10?`#ef4444`:v>0?`#f97316`:v<-15?`#22c55e`:`var(--text-secondary)`,x=(e,t=``)=>e===0?`<span style="color:var(--text-tertiary)">→ stabil</span>`:e>0?`<span style="color:#22c55e">↑ +${e}${t}</span>`:`<span style="color:#ef4444">↓ ${e}${t}</span>`;function S(e,t,n){return`<div style="height:4px;background:rgba(255,255,255,0.06);border-radius:2px;margin-top:6px;"><div style="height:100%;width:${Math.min(100,Math.round(e/t*100))}%;background:${n};border-radius:2px;"></div></div>`}let C=sleepSecs?(sleepSecs/3600).toFixed(1):`—`,w=restingHR?Math.round(restingHR):`—`,T=hrv?Math.round(hrv):`—`,E=p===`intervals`&&(sleepSecs||restingHR||hrv)?`
+        </div>`;return}let{ctl:r,atl:i,tsb:a,weeklyTSS:o,prevWeeklyTSS:c,ctlDelta:l,atlDelta:u,tsbDelta:d,ctlMonthDelta:f,source:p,sleepSecs:m,restingHR:h,hrv:g}=n,_=a>=5?`#22c55e`:a>=-10?`#f97316`:`#ef4444`,v=a<=-20?`🔴`:a<=-10?`🟡`:a<=5?`🟢`:`🚀`,y=a<=-20?`Risc Overtraining`:a<=-10?`Heavy Load — Productiv`:a<=5?`Formă Optimă`:`Peak Form / Taper`,b=a<=-20?`Oboseala acută îți depășește masiv baza. <b>Zi de recuperare azi</b> — fără efort intens.`:a<=-10?`TSB de <b>${a}</b> = mediu perfect de acumulare (Build). Musculatura e încărcată — normal! Prioritizează nutriția post-antrenament și somnul.`:a<=5?`Echilibru perfect între fitness și oboseală. Ești pregătit pentru antrenamente de calitate — intervale, long run, brick workouts.`:`Oboseala a dispărut, fitness-ul a rămas! Ești în formă maximă. Dacă ai cursă în weekend — e momentul.`,x=c>0?Math.round((o-c)/c*100):0,S=x>0?`+${x}%`:`${x}%`,C=x>10?`#ef4444`:x>0?`#f97316`:x<-15?`#22c55e`:`var(--text-secondary)`,w=(e,t=``)=>e===0?`<span style="color:var(--text-tertiary)">→ stabil</span>`:e>0?`<span style="color:#22c55e">↑ +${e}${t}</span>`:`<span style="color:#ef4444">↓ ${e}${t}</span>`;function T(e,t,n){return`<div style="height:4px;background:rgba(255,255,255,0.06);border-radius:2px;margin-top:6px;"><div style="height:100%;width:${Math.min(100,Math.round(e/t*100))}%;background:${n};border-radius:2px;"></div></div>`}let E=m?(m/3600).toFixed(1):`—`,D=p===`intervals`&&(m||h||g)?`
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border-subtle);border-bottom:1px solid var(--border-subtle);">
         <div style="background:#0f0f0f;padding:12px 14px;text-align:center;">
           <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">💤 Somn (Azi-noapte)</div>
-          <div style="font-size:20px;font-weight:700;color:var(--text-primary);">${C} <span style="font-size:12px;color:var(--text-tertiary);font-weight:400;">ore</span></div>
+          <div style="font-size:20px;font-weight:700;color:var(--text-primary);">${E} <span style="font-size:12px;color:var(--text-tertiary);font-weight:400;">ore</span></div>
         </div>
         <div style="background:#0f0f0f;padding:12px 14px;text-align:center;">
           <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">❤️ Resting HR</div>
-          <div style="font-size:20px;font-weight:700;color:var(--text-primary);">${w} <span style="font-size:12px;color:var(--text-tertiary);font-weight:400;">bpm</span></div>
+          <div style="font-size:20px;font-weight:700;color:var(--text-primary);">${h?Math.round(h):`—`} <span style="font-size:12px;color:var(--text-tertiary);font-weight:400;">bpm</span></div>
         </div>
         <div style="background:#0f0f0f;padding:12px 14px;text-align:center;">
           <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">💓 HRV (rMSSD)</div>
-          <div style="font-size:20px;font-weight:700;color:var(--text-primary);">${T} <span style="font-size:12px;color:var(--text-tertiary);font-weight:400;">ms</span></div>
+          <div style="font-size:20px;font-weight:700;color:var(--text-primary);">${g?Math.round(g):`—`} <span style="font-size:12px;color:var(--text-tertiary);font-weight:400;">ms</span></div>
         </div>
       </div>
     `:``;t.innerHTML=`
@@ -430,28 +430,28 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
           <div style="background:#0f0f0f;padding:16px 14px;">
             <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">CTL — Fitness</div>
             <div style="font-size:32px;font-weight:800;color:#3b82f6;line-height:1;">${r}</div>
-            <div style="font-size:11px;margin-top:4px;">${x(l)} vs 7z</div>
-            ${S(r,150,`#3b82f6`)}
-            <div style="font-size:10px;color:var(--text-tertiary);margin-top:4px;">${x(f)} vs 30z</div>
+            <div style="font-size:11px;margin-top:4px;">${w(l)} vs 7z</div>
+            ${T(r,150,`#3b82f6`)}
+            <div style="font-size:10px;color:var(--text-tertiary);margin-top:4px;">${w(f)} vs 30z</div>
           </div>
 
           <!-- ATL -->
           <div style="background:#0f0f0f;padding:16px 14px;">
             <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">ATL — Oboseală</div>
             <div style="font-size:32px;font-weight:800;color:#ef4444;line-height:1;">${i}</div>
-            <div style="font-size:11px;margin-top:4px;">${x(u)} vs 7z</div>
-            ${S(i,150,`#ef4444`)}
+            <div style="font-size:11px;margin-top:4px;">${w(u)} vs 7z</div>
+            ${T(i,150,`#ef4444`)}
             <div style="font-size:10px;color:var(--text-tertiary);margin-top:4px;">oboseală acută (7z)</div>
           </div>
 
           <!-- TSB -->
           <div style="background:#0f0f0f;padding:16px 14px;">
             <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">TSB — Formă</div>
-            <div style="font-size:32px;font-weight:800;color:${m};line-height:1;">${a>0?`+`:``}${a}</div>
-            <div style="font-size:11px;margin-top:4px;">${h} ${g}</div>
+            <div style="font-size:32px;font-weight:800;color:${_};line-height:1;">${a>0?`+`:``}${a}</div>
+            <div style="font-size:11px;margin-top:4px;">${v} ${y}</div>
             <div style="height:4px;background:rgba(255,255,255,0.06);border-radius:2px;margin-top:6px;position:relative;">
               <div style="position:absolute;left:50%;top:-1px;width:2px;height:6px;background:rgba(255,255,255,0.2);border-radius:1px;"></div>
-              <div style="height:100%;width:${Math.min(100,Math.max(0,50+a))}%;background:${m};border-radius:2px;"></div>
+              <div style="height:100%;width:${Math.min(100,Math.max(0,50+a))}%;background:${_};border-radius:2px;"></div>
             </div>
           </div>
 
@@ -459,20 +459,20 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
           <div style="background:#0f0f0f;padding:16px 14px;">
             <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">TSS Săptămâna</div>
             <div style="font-size:32px;font-weight:800;color:#a855f7;line-height:1;">${o}</div>
-            <div style="font-size:11px;margin-top:4px;color:${b};">${v===0?`→`:y} vs săpt. ant.</div>
-            ${S(o,800,`#a855f7`)}
+            <div style="font-size:11px;margin-top:4px;color:${C};">${x===0?`→`:S} vs săpt. ant.</div>
+            ${T(o,800,`#a855f7`)}
             <div style="font-size:10px;color:var(--text-tertiary);margin-top:4px;">săpt. ant.: ${c}</div>
           </div>
         </div>
 
-        ${E}
+        ${D}
 
         <!-- Coaching Insight -->
         <div style="padding:14px 20px;display:flex;gap:12px;align-items:flex-start;">
-          <span style="font-size:20px;flex-shrink:0;">${h}</span>
+          <span style="font-size:20px;flex-shrink:0;">${v}</span>
           <div>
-            <div style="font-size:13px;font-weight:600;margin-bottom:4px;">${g}</div>
-            <div style="font-size:12px;color:var(--text-secondary);line-height:1.6;">${_}</div>
+            <div style="font-size:13px;font-weight:600;margin-bottom:4px;">${y}</div>
+            <div style="font-size:12px;color:var(--text-secondary);line-height:1.6;">${b}</div>
           </div>
         </div>
       </div>`,window.__changeWeek||(window.__changeWeek=e=>{_e+=e,_e<1&&(_e=1),_e>48&&(_e=48),s()},window.__resetWeek=()=>{_e=null,s()}),window._refreshFitnessWidget=async()=>{t.innerHTML=be(),await he(!0),xe(e)}}catch(e){console.error(`Fitness widget error:`,e),t.innerHTML=`<div style="padding:12px;color:var(--text-tertiary);font-size:12px;">⚠️ Eroare la încărcarea metricilor: ${e.message}</div>`}}async function Se(e){if(e){e.innerHTML=`
