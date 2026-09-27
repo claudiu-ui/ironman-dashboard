@@ -295,13 +295,6 @@ async function callMcpTool(toolName, args = {}) {
 // ── High-level Data Fetchers ──────────────────────────────────────────────────
 
 export async function fetchCorosWellness() {
-  // Check cache first
-  try {
-    const cached = JSON.parse(localStorage.getItem(COROS_WELLNESS_CACHE_KEY) || 'null');
-    if (cached && Date.now() - cached.fetchedAt < COROS_WELLNESS_CACHE_TTL) {
-      return cached;
-    }
-  } catch {}
 
   const token = await getValidToken();
   if (!token) return null;
