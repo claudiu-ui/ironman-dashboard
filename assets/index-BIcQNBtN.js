@@ -489,9 +489,18 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
           <div class="coros-card">
             <div class="coros-title">Training Status <span style="font-size:12px;color:#6b7280;cursor:help;" title="${C}">ℹ️</span></div>
             <div style="font-size: 18px; font-weight: 500; color: ${S}; margin-bottom: 6px; letter-spacing: -0.02em;">${x}</div>
-            <div style="font-size: 11px; color: #9ca3af; margin-bottom: 20px; line-height: 1.5;">
+            <div style="font-size: 11px; color: #9ca3af; margin-bottom: 12px; line-height: 1.5;">
               ${C}
             </div>
+            
+            <!-- Intensity Trend Legend -->
+            <div style="display: flex; gap: 4px; margin-bottom: 20px; font-size: 9px; text-transform: uppercase; text-align: center; color: #6b7280; letter-spacing: 0.05em;">
+              <div style="flex: 1; border-top: 2px solid #ef4444; padding-top: 4px; opacity: ${c<=-20?`1`:`0.4`};">Overreach<br>< -20</div>
+              <div style="flex: 1; border-top: 2px solid #f97316; padding-top: 4px; opacity: ${c<=-10&&c>-20?`1`:`0.4`};">Productiv<br>-20 la -10</div>
+              <div style="flex: 1; border-top: 2px solid #2ed573; padding-top: 4px; opacity: ${c<=5&&c>-10?`1`:`0.4`};">Optim<br>-10 la +5</div>
+              <div style="flex: 1; border-top: 2px solid #3b82f6; padding-top: 4px; opacity: ${c>5?`1`:`0.4`};">Peak<br>> +5</div>
+            </div>
+
             <div style="display: flex; justify-content: space-between; margin-top: auto; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px;">
               <div>
                 <div class="coros-label">Load Impact</div>
@@ -513,7 +522,7 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
             <div class="coros-title">Recovery <span style="font-size:12px;color:#6b7280;cursor:help;" title="via ${O||`calc`}">ℹ️</span></div>
             <div style="display: flex; align-items: center; justify-content: center; height: 80px;">
                <!-- Redesigned figure SVG -->
-               <svg width="40" height="50" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 16px;">
+               <svg width="40" height="50" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 16px;">
                  <circle cx="12" cy="5" r="2.5"></circle>
                  <path d="M7 11l4-2.5 4 2.5"></path>
                  <path d="M12 16v-7.5"></path>
