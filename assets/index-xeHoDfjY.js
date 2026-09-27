@@ -509,7 +509,7 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
           ${p(P.accesorii,`accesorii`,c.accesorii)}
         </div>
       </div>
-    `,h()}function f(e,t,n,r){let i=j.get(`gym`,{}),a=Object.keys(i).sort().reverse();console.log(`getLastSessionData for ${e} - ${t} (index ${n}), currentDate: ${r}. Available dates:`,a);for(let o of a){if(o===r)continue;let a=i[o]?.[e];if(a){let e=Array.isArray(a.exercises)?a.exercises:a.exercises&&Array.isArray(a.exercises.exercises)?a.exercises.exercises:null;if(e){let r=e.find(e=>e.name===t);if(!r){let n=t.toLowerCase();r=e.find(e=>e.name&&(e.name.toLowerCase().includes(n)||n.includes(e.name.toLowerCase())))}if(!r&&e.length>n&&(r=e[n]),r&&r.sets&&r.sets.length>0)return console.log(`Found past session for ${t} on date ${o}:`,r),r}}}return console.log(`No past session found for ${t}`),null}function p(e,t,n){let r=j.getGymSession(n,t);return`
+    `,h()}function f(e,t,n,r){let i=j.get(`gym`,{}),a=Object.keys(i).sort().reverse();console.log(`getLastSessionData for ${e} - ${t} (index ${n}), currentDate: ${r}. Available dates:`,a);for(let o of a){if(o>=r)continue;let a=i[o]?.[e];if(a){let e=Array.isArray(a.exercises)?a.exercises:a.exercises&&Array.isArray(a.exercises.exercises)?a.exercises.exercises:null;if(e){let r=e.find(e=>e.name===t);if(!r){let n=t.toLowerCase();r=e.find(e=>e.name&&(e.name.toLowerCase().includes(n)||n.includes(e.name.toLowerCase())))}if(!r&&e.length>n&&(r=e[n]),r&&r.sets&&r.sets.length>0)return console.log(`Found past session for ${t} on date ${o}:`,r),r}}}return console.log(`No past session found for ${t}`),null}function p(e,t,n){let r=j.getGymSession(n,t);return`
       <div class="card animate-in">
         <div class="card-header" style="align-items: flex-start;">
           <div style="flex: 1; margin-right: 12px;">
@@ -569,9 +569,7 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
                       `).join(``)}
                       ${a.totalVolume?`<span class="last-session-volume">Vol: ${a.totalVolume}kg</span>`:``}
                     </div>
-                  `:`<div style="font-size: 9px; color: var(--text-tertiary); margin-top: 4px; opacity: 0.5;">
-                        Debug: no past data. Key: ${t}. Name: ${e.name}. Dates: ${Object.keys(j.get(`gym`,{})).join(`, `)}
-                      </div>`}
+                  `:``}
                   
                   ${o&&o.sets?`
                     <div class="gym-today-session">
