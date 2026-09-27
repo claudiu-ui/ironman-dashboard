@@ -4,13 +4,33 @@
 // ============================================
 
 const COROS_CLIENT_ID = 'e4480b0e-f3b5-42ed-b175-7fe06b5ba203';
-const COROS_AUTH_URL = 'https://mcpus.coros.com/oauth2/authorize';
-const COROS_TOKEN_URL = 'https://mcpus.coros.com/oauth2/token';
-const COROS_MCP_URL = 'https://mcpus.coros.com/mcp';
+const COROS_MCP_URL = 'https://mcp.coros.com/mcp';
+const COROS_DISCOVERY_URL = 'https://mcp.coros.com/.well-known/oauth-authorization-server';
 const COROS_REDIRECT_URI = window.location.origin + window.location.pathname;
 const COROS_STORAGE_KEY = 'coros_mcp_tokens';
 const COROS_WELLNESS_CACHE_KEY = 'coros_wellness_cache';
 const COROS_WELLNESS_CACHE_TTL = 15 * 60 * 1000; // 15 minutes
+
+let cachedOAuthConfig = null;
+async function getOAuthConfig() {
+  if (cachedOAuthConfig) return cachedOAuthConfig;
+  try {
+    const res = await fetch(COROS_DISCOVERY_URL);
+    const data = await res.json();
+    cachedOAuthConfig = {
+      authUrl: data.authorization_endpoint,
+      tokenUrl: data.token_endpoint
+    };
+    return cachedOAuthConfig;
+  } catch (e) {
+    console.error('Failed to discover Coros OAuth endpoints', e);
+    // Fallback to EU since user is in EU, but ideally it succeeds
+    return {
+      authUrl: 'https://mcpeu.coros.com/oauth2/authorize',
+      tokenUrl: 'https://mcpeu.coros.com/oauth2/token'
+    };
+  }
+}
 
 // ── PKCE Helpers ──────────────────────────────────────────────────────────────
 
@@ -74,8 +94,10 @@ async function refreshAccessToken(tokens) {
     refresh_token: tokens.refresh_token,
   });
 
+  const config = await getOAuthConfig();
+  
   try {
-    const resp = await fetch(COROS_TOKEN_URL, {
+    const resp = await fetch(config.tokenUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: body.toString(),
@@ -124,7 +146,8 @@ export async function startCorosAuth() {
     code_challenge_method: 'S256',
   });
 
-  window.location.href = `${COROS_AUTH_URL}?${params.toString()}`;
+  const config = await getOAuthConfig();
+  window.location.href = `${config.authUrl}?${params.toString()}`;
 }
 
 export async function handleCorosCallback() {
@@ -148,6 +171,8 @@ export async function handleCorosCallback() {
   }
 
   // Exchange code for tokens
+  const config = await getOAuthConfig();
+
   const body = new URLSearchParams({
     grant_type: 'authorization_code',
     client_id: COROS_CLIENT_ID,
@@ -157,7 +182,7 @@ export async function handleCorosCallback() {
   });
 
   try {
-    const resp = await fetch(COROS_TOKEN_URL, {
+    const resp = await fetch(config.tokenUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: body.toString(),
