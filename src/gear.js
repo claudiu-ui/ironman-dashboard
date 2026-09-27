@@ -6,6 +6,29 @@ export function renderGearPage() {
 
   let gearList = storage.getGear();
 
+  // Auto-sync: Assign unassigned workouts to active gear
+  const allWorkouts = storage.get('workouts', {});
+  let didUpdate = false;
+  
+  Object.keys(allWorkouts).forEach(date => {
+    allWorkouts[date].forEach(w => {
+      if (!w.gearId && parseFloat(w.distance) > 0) {
+        const activeGear = gearList.filter(g => g.type === w.type && g.active);
+        if (activeGear.length > 0) {
+          const targetGear = activeGear[0];
+          w.gearId = targetGear.id;
+          targetGear.distance += parseFloat(w.distance);
+          didUpdate = true;
+        }
+      }
+    });
+  });
+  
+  if (didUpdate) {
+    storage.set('workouts', allWorkouts);
+    storage.saveGear(gearList);
+  }
+
   const renderGearCards = () => {
     return gearList.map(g => {
       const pct = Math.min(100, Math.round((g.distance / g.maxDistance) * 100));
