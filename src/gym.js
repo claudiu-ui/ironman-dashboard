@@ -211,8 +211,6 @@ export function renderGymPage(forceDateStr = null) {
           `;
           }).join('')}
         </div>
-        
-        </div>
         ${isEditMode ? `
           <button class="btn btn-ghost btn-sm add-ex-btn" data-session="${key}" style="margin-top: var(--space-md); width: 100%; border-style: dashed;">
             ➕ Adaugă Exercițiu
