@@ -193,13 +193,7 @@ export function renderGymPage(forceDateStr = null) {
                       `).join('')}
                       ${lastSession.totalVolume ? `<span class="last-session-volume">Vol: ${lastSession.totalVolume}kg</span>` : ''}
                     </div>
-                  ` : (key === 'lower' ? `<div style="background: red; color: white; padding: 10px; border-radius: 8px; font-size: 10px; font-family: monospace; overflow-x: auto;">
-                        DEBUG LOWER FAIL:<br>
-                        Current Date: ${dateStr}<br>
-                        All Dates: ${Object.keys(storage.get('gym', {})).join(', ')}<br>
-                        Log from 21 Sept: ${JSON.stringify(storage.get('gym', {})['2026-09-21']?.['lower']?.exercises || 'Nu exista')}<br>
-                        Ex name searched: ${ex.name}
-                      </div>` : '')}
+                  ` : ''}
                   
                   ${loggedEx && loggedEx.sets ? `
                     <div class="gym-today-session">
