@@ -400,42 +400,23 @@ export async function fetchCorosWellness() {
     callMcpTool('queryDailyHealthData', { date: today })
   ]);
 
-  // Parse sleep data from MCP response
-  let sleepData = null;
-  if (sleepResult?.content) {
-    for (const item of sleepResult.content) {
+  function parseMcpContent(result) {
+    if (!result?.content) return null;
+    for (const item of result.content) {
       if (item.type === 'text') {
-        try { sleepData = JSON.parse(item.text); } catch { sleepData = item.text; }
+        let text = item.text;
+        const match = text.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+        if (match) text = match[1];
+        try { return JSON.parse(text); } catch { return item.text; }
       }
     }
+    return null;
   }
 
-  let hrvData = null;
-  if (hrvResult?.content) {
-    for (const item of hrvResult.content) {
-      if (item.type === 'text') {
-        try { hrvData = JSON.parse(item.text); } catch { hrvData = item.text; }
-      }
-    }
-  }
-
-  let rhrData = null;
-  if (rhrResult?.content) {
-    for (const item of rhrResult.content) {
-      if (item.type === 'text') {
-        try { rhrData = JSON.parse(item.text); } catch { rhrData = item.text; }
-      }
-    }
-  }
-
-  let healthData = null;
-  if (healthResult?.content) {
-    for (const item of healthResult.content) {
-      if (item.type === 'text') {
-        try { healthData = JSON.parse(item.text); } catch { healthData = item.text; }
-      }
-    }
-  }
+  const sleepData = parseMcpContent(sleepResult);
+  const hrvData = parseMcpContent(hrvResult);
+  const rhrData = parseMcpContent(rhrResult);
+  const healthData = parseMcpContent(healthResult);
 
   const wellness = {
     source: 'coros',
