@@ -284,8 +284,11 @@ async function callMcpTool(toolName, args = {}) {
       if (line.startsWith('data: ')) {
         try {
           const data = JSON.parse(line.slice(6));
+          if (data.error) throw new Error(`MCP tool ${toolName} JSON-RPC error: ${JSON.stringify(data.error)}`);
           if (data.result) return data.result;
-        } catch {}
+        } catch (e) {
+          if (e.message.includes('JSON-RPC error')) throw e;
+        }
       }
     }
     return null;
@@ -293,6 +296,9 @@ async function callMcpTool(toolName, args = {}) {
 
   // Handle direct JSON response
   const data = await resp.json();
+  if (data.error) {
+    throw new Error(`MCP tool ${toolName} JSON-RPC error: ${JSON.stringify(data.error)}`);
+  }
   return data.result || data;
 }
 
