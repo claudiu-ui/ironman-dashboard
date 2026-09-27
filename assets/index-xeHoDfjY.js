@@ -569,13 +569,7 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
                       `).join(``)}
                       ${a.totalVolume?`<span class="last-session-volume">Vol: ${a.totalVolume}kg</span>`:``}
                     </div>
-                  `:t===`lower`?`<div style="background: red; color: white; padding: 10px; border-radius: 8px; font-size: 10px; font-family: monospace; overflow-x: auto;">
-                        DEBUG LOWER FAIL:<br>
-                        Current Date: ${n}<br>
-                        All Dates: ${Object.keys(j.get(`gym`,{})).join(`, `)}<br>
-                        Log from 21 Sept: ${JSON.stringify(j.get(`gym`,{})[`2026-09-21`]?.lower?.exercises||`Nu exista`)}<br>
-                        Ex name searched: ${e.name}
-                      </div>`:``}
+                  `:``}
                   
                   ${o&&o.sets?`
                     <div class="gym-today-session">
