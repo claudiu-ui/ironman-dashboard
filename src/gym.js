@@ -63,15 +63,15 @@ export function renderGymPage(forceDateStr = null) {
         </div>
 
         <!-- Gym Program Cards -->
-        <div class="grid-2" style="margin-bottom: var(--space-lg)">
+        <div class="grid-2" style="margin-bottom: var(--space-lg); align-items: start;">
           ${renderGymCard(currentPrograms.lower, 'lower', scheduledDates.lower)}
           ${renderConditioningCard(currentPrograms.conditioning, scheduledDates.conditioning)}
         </div>
-        <div class="grid-2" style="margin-bottom: var(--space-lg)">
+        <div class="grid-2" style="margin-bottom: var(--space-lg); align-items: start;">
           ${renderGymCard(currentPrograms.upper1, 'upper1', scheduledDates.upper1)}
           ${renderGymCard(currentPrograms.upper2, 'upper2', scheduledDates.upper2)}
         </div>
-        <div class="grid-2">
+        <div class="grid-2" style="align-items: start;">
           ${renderGymCard(currentPrograms.accesorii, 'accesorii', scheduledDates.accesorii)}
         </div>
       </div>
