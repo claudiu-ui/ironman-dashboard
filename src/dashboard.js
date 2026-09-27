@@ -885,6 +885,7 @@ async function loadAndRenderFitnessWidget(page) {
     const restingHR = corosData?.restingHR ?? m.restingHR;
     const hrv = corosData?.hrv ?? m.hrv;
     const sleepScore = corosData?.sleepScore ?? null;
+    const corosRecovery = corosData?.recovery ?? null;
     const readiness = m.readiness; // computed from Intervals data
 
     const tsbColor = tsb >= 5 ? '#22c55e' : tsb >= -10 ? '#f97316' : '#ef4444';
@@ -924,8 +925,8 @@ async function loadAndRenderFitnessWidget(page) {
     
     const rhr = restingHR ? Math.round(restingHR) : '—';
     const hrvVal = hrv ? Math.round(hrv) : '—';
-    const recScore = sleepScore != null ? Math.round(sleepScore) : (readiness != null ? Math.round(readiness) : null);
-    const recSource = sleepScore != null ? 'COROS' : (readiness != null ? 'calc' : null);
+    const recScore = corosRecovery != null ? Math.round(corosRecovery) : (readiness != null ? Math.round(readiness) : null);
+    const recSource = corosRecovery != null ? 'COROS' : (readiness != null ? 'calc' : null);
 
     const wellnessHtml = (sleepSecs || restingHR || hrv) ? `
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:1px;background:var(--border-subtle);border-bottom:1px solid var(--border-subtle);">

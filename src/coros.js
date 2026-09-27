@@ -392,12 +392,13 @@ export async function fetchCorosWellness() {
 
   const today = new Date().toISOString().split('T')[0];
 
-  // Fetch sleep data and HRV in parallel
-  const [sleepResult, hrvResult, rhrResult, healthResult] = await Promise.all([
+  // Fetch sleep data, HRV, and Recovery in parallel
+  const [sleepResult, hrvResult, rhrResult, healthResult, recoveryResult] = await Promise.all([
     callMcpTool('querySleepOverview', { date: today }),
     callMcpTool('querySleepHrv', { date: today }),
     callMcpTool('queryRestingHeartRate', { startDate: today, endDate: today }),
-    callMcpTool('queryDailyHealthData', { date: today })
+    callMcpTool('queryDailyHealthData', { date: today }),
+    callMcpTool('queryRecoveryStatus', { date: today })
   ]);
 
   function parseMcpContent(result) {
@@ -417,6 +418,7 @@ export async function fetchCorosWellness() {
   const hrvData = parseMcpContent(hrvResult);
   const rhrData = parseMcpContent(rhrResult);
   const healthData = parseMcpContent(healthResult);
+  const recoveryData = parseMcpContent(recoveryResult);
 
   const wellness = {
     source: 'coros',
@@ -435,8 +437,10 @@ export async function fetchCorosWellness() {
     steps: extractNum(healthData, 'steps', 'step') || extractRegex(healthData, /Steps:\s*([\d,]+)/, true),
     calories: extractNum(healthData, 'calories', 'activeCalories', 'calorie') || extractRegex(healthData, /Calories:\s*([\d,]+)/, true),
     stress: extractNum(healthData, 'stress', 'avgStress', 'dailyStress') || extractRegex(healthData, /Stress:\s*Avg\s*(\d+)/),
+    // Recovery
+    recovery: extractNum(recoveryData, 'recovery', 'recoveryLevel', 'score') || extractRegex(recoveryData, /Recovery:\s*([\d\.]+)%/i) || extractRegex(recoveryData, /Recovery Percentage:\s*([\d\.]+)%/i) || extractRegex(recoveryData, /(\d+)%/),
     // Raw data for debugging
-    _raw: { sleepData, hrvData, rhrData, healthData },
+    _raw: { sleepData, hrvData, rhrData, healthData, recoveryData },
   };
 
   localStorage.setItem(COROS_WELLNESS_CACHE_KEY, JSON.stringify(wellness));
