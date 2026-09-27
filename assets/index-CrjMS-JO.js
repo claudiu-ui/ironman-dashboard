@@ -487,7 +487,14 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
 
         ${ie}
         ${ae}
-
+        ${r&&r._raw?`
+          <div style="padding:14px 20px;background:#111;border-bottom:1px solid var(--border-subtle);">
+            <details style="font-size:11px;color:var(--text-tertiary);">
+              <summary style="cursor:pointer;user-select:none;font-weight:600;">🛠️ DEBUG: Arată datele brute trimise de ceasul COROS</summary>
+              <pre style="margin-top:8px;padding:8px;background:#000;border-radius:4px;overflow-x:auto;white-space:pre-wrap;color:#aaa;">${JSON.stringify(r._raw,null,2)}</pre>
+            </details>
+          </div>
+        `:``}
         <!-- Coaching Insight -->
         <div style="padding:14px 20px;display:flex;gap:12px;align-items:flex-start;">
           <span style="font-size:20px;flex-shrink:0;">${S}</span>
