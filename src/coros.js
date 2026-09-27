@@ -309,10 +309,11 @@ export async function fetchCorosWellness() {
   const today = new Date().toISOString().split('T')[0];
 
   // Fetch sleep data and HRV in parallel
-  const [sleepResult, hrvResult, rhrResult] = await Promise.all([
+  const [sleepResult, hrvResult, rhrResult, healthResult] = await Promise.all([
     callMcpTool('querySleepData', { date: today }),
     callMcpTool('querySleepHrv', { date: today }),
     callMcpTool('queryRestingHeartRate', { startDate: today, endDate: today }),
+    callMcpTool('queryDailyHealthData', { date: today })
   ]);
 
   // Parse sleep data from MCP response
@@ -343,6 +344,15 @@ export async function fetchCorosWellness() {
     }
   }
 
+  let healthData = null;
+  if (healthResult?.content) {
+    for (const item of healthResult.content) {
+      if (item.type === 'text') {
+        try { healthData = JSON.parse(item.text); } catch { healthData = item.text; }
+      }
+    }
+  }
+
   const wellness = {
     source: 'coros',
     fetchedAt: Date.now(),
@@ -356,8 +366,12 @@ export async function fetchCorosWellness() {
     hrv: extractNum(hrvData, 'avg', 'average', 'hrvAvg', 'hrv', 'dailyAvg'),
     // RHR
     restingHR: extractNum(rhrData, 'restingHr', 'resting_hr', 'restingHeartRate', 'avg', 'value'),
+    // Daily Health
+    steps: extractNum(healthData, 'steps', 'step'),
+    calories: extractNum(healthData, 'calories', 'activeCalories', 'calorie'),
+    stress: extractNum(healthData, 'stress', 'avgStress', 'dailyStress'),
     // Raw data for debugging
-    _raw: { sleepData, hrvData, rhrData },
+    _raw: { sleepData, hrvData, rhrData, healthData },
   };
 
   localStorage.setItem(COROS_WELLNESS_CACHE_KEY, JSON.stringify(wellness));

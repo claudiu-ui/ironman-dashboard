@@ -941,6 +941,23 @@ async function loadAndRenderFitnessWidget(page) {
       </div>
     ` : '';
 
+    const dailyHealthHtml = (corosData && (corosData.steps || corosData.calories || corosData.stress)) ? `
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border-subtle);border-bottom:1px solid var(--border-subtle);">
+        <div style="background:#0f0f0f;padding:12px 14px;text-align:center;">
+          <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">🚶‍♂️ Pași</div>
+          <div style="font-size:20px;font-weight:700;color:var(--text-primary);">${corosData.steps || '—'}</div>
+        </div>
+        <div style="background:#0f0f0f;padding:12px 14px;text-align:center;">
+          <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">🔥 Calorii</div>
+          <div style="font-size:20px;font-weight:700;color:var(--text-primary);">${corosData.calories ? Math.round(corosData.calories) : '—'} <span style="font-size:12px;color:var(--text-tertiary);font-weight:400;">kcal</span></div>
+        </div>
+        <div style="background:#0f0f0f;padding:12px 14px;text-align:center;">
+          <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">🧠 Stres Zilnic</div>
+          <div style="font-size:20px;font-weight:700;color:var(--text-primary);">${corosData.stress ? Math.round(corosData.stress) : '—'}</div>
+        </div>
+      </div>
+    ` : '';
+
     container.innerHTML = `
       <div class="card animate-in" style="background:linear-gradient(145deg,#1a1a1a 0%,#0f0f0f 100%);border:1px solid var(--border-subtle);margin-bottom:var(--space-md);">
         
@@ -1000,6 +1017,7 @@ async function loadAndRenderFitnessWidget(page) {
         </div>
 
         ${wellnessHtml}
+        ${dailyHealthHtml}
 
         <!-- Coaching Insight -->
         <div style="padding:14px 20px;display:flex;gap:12px;align-items:flex-start;">
