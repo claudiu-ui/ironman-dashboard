@@ -509,7 +509,7 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
           ${p(P.accesorii,`accesorii`,c.accesorii)}
         </div>
       </div>
-    `,h()}function f(e,t,n){let r=j.get(`gym`,{}),i=Object.keys(r).sort().reverse();for(let a of i){if(a===n)continue;let i=r[a]?.[e];if(i){let e=Array.isArray(i.exercises)?i.exercises:i.exercises&&Array.isArray(i.exercises.exercises)?i.exercises.exercises:null;if(e){let n=e.find(e=>e.name===t);if(n&&n.sets&&n.sets.length>0)return n}}}return null}function p(e,t,n){let r=j.getGymSession(n,t);return`
+    `,h()}function f(e,t,n,r){let i=j.get(`gym`,{}),a=Object.keys(i).sort().reverse();for(let o of a){if(o===r)continue;let a=i[o]?.[e];if(a){let e=Array.isArray(a.exercises)?a.exercises:a.exercises&&Array.isArray(a.exercises.exercises)?a.exercises.exercises:null;if(e){let r=e.find(e=>e.name===t);if(!r){let n=t.toLowerCase();r=e.find(e=>e.name&&(e.name.toLowerCase().includes(n)||n.includes(e.name.toLowerCase())))}if(!r&&e.length>n&&(r=e[n]),r&&r.sets&&r.sets.length>0)return r}}}return null}function p(e,t,n){let r=j.getGymSession(n,t);return`
       <div class="card animate-in">
         <div class="card-header" style="align-items: flex-start;">
           <div style="flex: 1; margin-right: 12px;">
@@ -537,7 +537,7 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
         `:e.notes?`<div style="font-size: 12px; color: var(--warning); margin-bottom: var(--space-md); padding: 8px 12px; background: rgba(234,179,8,0.08); border-radius: var(--radius-md);">${e.notes}</div>`:``}
         
         <div class="gym-exercises" id="exercises-${t}">
-          ${e.exercises.map((e,i)=>{let a=f(t,e.name,n),o=null;return r&&(o=(Array.isArray(r.exercises)?r.exercises:r.exercises&&Array.isArray(r.exercises.exercises)?r.exercises.exercises:[]).find(t=>t.name===e.name)),`
+          ${e.exercises.map((e,i)=>{let a=f(t,e.name,i,n),o=null;return r&&(o=(Array.isArray(r.exercises)?r.exercises:r.exercises&&Array.isArray(r.exercises.exercises)?r.exercises.exercises:[]).find(t=>t.name===e.name)),`
             <div class="gym-exercise-row" data-index="${i}">
               ${N?`
                 <div style="display: flex; flex-direction: column; gap: var(--space-sm); width: 100%;">
