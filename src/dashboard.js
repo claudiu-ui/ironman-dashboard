@@ -888,33 +888,19 @@ async function loadAndRenderFitnessWidget(page) {
     const corosRecovery = corosData?.recovery ?? null;
     const readiness = m.readiness; // computed from Intervals data
 
-    const tsbColor = tsb >= 5 ? '#22c55e' : tsb >= -10 ? '#f97316' : '#ef4444';
-    const tsbIcon = tsb <= -20 ? '🔴' : tsb <= -10 ? '🟡' : tsb <= 5 ? '🟢' : '🚀';
-    const tsbLabel = tsb <= -20 ? 'Risc Overtraining'
-      : tsb <= -10 ? 'Heavy Load — Productiv'
-      : tsb <= 5 ? 'Formă Optimă'
-      : 'Peak Form / Taper';
-
+    const tsbLabel = tsb <= -20 ? 'Overreaching'
+      : tsb <= -10 ? 'Productive'
+      : tsb <= 5 ? 'Optimized'
+      : 'Peak Form';
+    const tsbColor = tsb <= -20 ? '#ef4444' : tsb <= -10 ? '#f97316' : tsb <= 5 ? '#2ed573' : '#3b82f6';
+    
     const tsbAdvice = tsb <= -20
-      ? 'Oboseala acută îți depășește masiv baza. <b>Zi de recuperare azi</b> — fără efort intens.'
+      ? "Oboseala acută îți depășește masiv baza. Ești la risc de supra-antrenament. Fără efort intens azi."
       : tsb <= -10
-      ? `TSB de <b>${tsb}</b> = mediu perfect de acumulare (Build). Musculatura e încărcată — normal! Prioritizează nutriția post-antrenament și somnul.`
+      ? "Te antrenezi consistent și fitness-ul crește rapid. Menține rutina pentru a mări Baza Aerobă."
       : tsb <= 5
-      ? `Echilibru perfect între fitness și oboseală. Ești pregătit pentru antrenamente de calitate — intervale, long run, brick workouts.`
-      : `Oboseala a dispărut, fitness-ul a rămas! Ești în formă maximă. Dacă ai cursă în weekend — e momentul.`;
-
-    const tssChange = prevWeeklyTSS > 0 ? Math.round(((weeklyTSS - prevWeeklyTSS) / prevWeeklyTSS) * 100) : 0;
-    const tssChangeStr = tssChange > 0 ? `+${tssChange}%` : `${tssChange}%`;
-    const tssChangeColor = tssChange > 10 ? '#ef4444' : tssChange > 0 ? '#f97316' : tssChange < -15 ? '#22c55e' : 'var(--text-secondary)';
-
-    const delta = (val, unit = '') => val === 0 ? `<span style="color:var(--text-tertiary)">→ stabil</span>`
-      : val > 0 ? `<span style="color:#22c55e">↑ +${val}${unit}</span>`
-      : `<span style="color:#ef4444">↓ ${val}${unit}</span>`;
-
-    function miniBar(val, max, color) {
-      const pct = Math.min(100, Math.round((val / max) * 100));
-      return `<div style="height:4px;background:rgba(255,255,255,0.06);border-radius:2px;margin-top:6px;"><div style="height:100%;width:${pct}%;background:${color};border-radius:2px;"></div></div>`;
-    }
+      ? "Echilibru perfect. Ești pregătit pentru antrenamente de calitate."
+      : "Oboseala a dispărut, ești în formă maximă (Taper). Perfect pentru cursă.";
 
     let sleepStr = '—';
     if (sleepSecs) {
@@ -928,53 +914,121 @@ async function loadAndRenderFitnessWidget(page) {
     const recScore = corosRecovery != null ? Math.round(corosRecovery) : (readiness != null ? Math.round(readiness) : null);
     const recSource = corosRecovery != null ? 'COROS' : (readiness != null ? 'calc' : null);
 
-    const wellnessHtml = (sleepSecs || restingHR || hrv) ? `
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:1px;background:var(--border-subtle);border-bottom:1px solid var(--border-subtle);">
-        <div style="background:#0f0f0f;padding:12px 14px;text-align:center;">
-          <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">💤 Somn${corosData?.sleepSecs ? ' (COROS)' : ''}</div>
-          <div style="font-size:20px;font-weight:700;color:${sleepSecs && sleepSecs >= 8*3600 ? '#22c55e' : sleepSecs && sleepSecs >= 7*3600 ? '#f97316' : sleepSecs ? '#ef4444' : 'var(--text-primary)'};">${sleepStr}</div>
+    const corosStyle = `
+      <style>
+        .coros-grid { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 24px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        @media (min-width: 768px) { .coros-grid { grid-template-columns: repeat(2, 1fr); } }
+        .coros-card { background: #1b1e28; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; position: relative; border: 1px solid rgba(255,255,255,0.05); }
+        .coros-title { font-size: 14px; font-weight: 500; color: #9ca3af; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;}
+        .coros-val { font-size: 24px; font-weight: 700; color: #fff; line-height: 1; }
+        .coros-label { font-size: 12px; color: #6b7280; margin-bottom: 4px; }
+      </style>
+    `;
+
+    function renderRecoveryBar(pct) {
+      if (pct == null) return '';
+      return `
+        <div style="position: relative; margin-top: auto; padding-top: 24px;">
+          <div style="position: absolute; left: ${pct}%; top: 12px; transform: translateX(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid #fff;"></div>
+          <div style="display: flex; height: 6px; border-radius: 3px; overflow: hidden;">
+            <div style="flex: 1; background: #ef4444; margin-right: 2px;"></div>
+            <div style="flex: 1; background: #f97316; margin-right: 2px;"></div>
+            <div style="flex: 1; background: #eab308; margin-right: 2px;"></div>
+            <div style="flex: 1; background: #22c55e;"></div>
+          </div>
+          <div style="display:flex; justify-content: space-between; font-size: 11px; color: #9ca3af; margin-top: 6px;">
+            <span>Exhausted</span>
+            <span>Fresh</span>
+          </div>
         </div>
-        <div style="background:#0f0f0f;padding:12px 14px;text-align:center;">
-          <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">❤️ RHR</div>
-          <div style="font-size:20px;font-weight:700;color:var(--text-primary);">${rhr} <span style="font-size:12px;color:var(--text-tertiary);font-weight:400;">bpm</span></div>
+      `;
+    }
+
+    function renderHrvChart(history) {
+      if (!history || history.length === 0) return '';
+      
+      const values = history.map(h => h.value);
+      const minVal = Math.min(...values) - 5;
+      const maxVal = Math.max(...values) + 5;
+      const range = maxVal - minVal || 1;
+      
+      const width = 100;
+      const height = 100;
+      const stepX = width / (history.length > 1 ? history.length - 1 : 1);
+      
+      const points = history.map((h, i) => {
+        const x = i * stepX;
+        const y = height - ((h.value - minVal) / range) * height;
+        return { x, y, val: h.value, label: h.label };
+      });
+      
+      let pathD = `M${points[0].x},${points[0].y}`;
+      for(let i=1; i<points.length; i++) {
+        pathD += ` L${points[i].x},${points[i].y}`;
+      }
+      const areaD = `${pathD} L${width},${height} L0,${height} Z`;
+      const labelsHtml = points.map(p => `<span style="position:absolute;left:${p.x}%;bottom:-20px;transform:translateX(-50%);font-size:10px;color:#6b7280;">${p.label}</span>`).join('');
+      
+      return `
+        <div style="position:relative; width:100%; height:140px; padding-bottom: 25px; margin-top: 10px; padding-left: 20px;">
+          <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style="overflow:visible;">
+            <defs>
+              <linearGradient id="hrvGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.3" />
+                <stop offset="100%" stop-color="#00e5ff" stop-opacity="0" />
+              </linearGradient>
+            </defs>
+            <line x1="0" y1="0" x2="100" y2="0" stroke="#374151" stroke-width="0.5" stroke-dasharray="2,2"/>
+            <line x1="0" y1="50" x2="100" y2="50" stroke="#374151" stroke-width="0.5" stroke-dasharray="2,2"/>
+            <line x1="0" y1="100" x2="100" y2="100" stroke="#374151" stroke-width="0.5" stroke-dasharray="2,2"/>
+            
+            <text x="-5" y="4" fill="#6b7280" font-size="6" text-anchor="end">${Math.round(maxVal)}</text>
+            <text x="-5" y="52" fill="#6b7280" font-size="6" text-anchor="end">${Math.round((maxVal+minVal)/2)}</text>
+            <text x="-5" y="102" fill="#6b7280" font-size="6" text-anchor="end">${Math.round(minVal)}</text>
+
+            <path d="${areaD}" fill="url(#hrvGrad)" />
+            <path d="${pathD}" fill="none" stroke="#00e5ff" stroke-width="2" vector-effect="non-scaling-stroke" />
+          </svg>
+          <div style="position:absolute; top:0; left:20px; right:0; height:100%;">
+            ${points.map(p => `<div style="position:absolute;left:${p.x}%;top:${p.y}%;width:6px;height:6px;background:#00e5ff;border-radius:50%;transform:translate(-50%, -50%);box-shadow:0 0 4px #00e5ff;"></div>`).join('')}
+          </div>
+          <div style="position:absolute; bottom:0; left:20px; right:0; height:20px;">
+            ${labelsHtml}
+          </div>
         </div>
-        <div style="background:#0f0f0f;padding:12px 14px;text-align:center;">
-          <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">💓 HRV</div>
-          <div style="font-size:20px;font-weight:700;color:var(--text-primary);">${hrvVal} <span style="font-size:12px;color:var(--text-tertiary);font-weight:400;">ms</span></div>
-        </div>
-        <div style="background:#0f0f0f;padding:12px 14px;text-align:center;">
-          <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">🔋 Recovery${recSource ? ` (${recSource})` : ''}</div>
-          <div style="font-size:20px;font-weight:700;color:${recScore >= 80 ? '#22c55e' : (recScore >= 60 ? '#f97316' : (recScore ? '#ef4444' : 'var(--text-primary)'))};">${recScore != null ? recScore : '—'} <span style="font-size:12px;color:var(--text-tertiary);font-weight:400;">${recScore != null ? '%' : ''}</span></div>
-        </div>
-      </div>
-    ` : '';
+      `;
+    }
 
     const dailyHealthHtml = (corosData && (corosData.steps || corosData.calories || corosData.stress)) ? `
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border-subtle);border-bottom:1px solid var(--border-subtle);">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:1px;background:var(--border-subtle);border-bottom:1px solid var(--border-subtle);">
+        <div style="background:#0f0f0f;padding:12px 14px;text-align:center;">
+          <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">💤 Somn</div>
+          <div style="font-size:18px;font-weight:700;color:var(--text-primary);">${sleepStr}</div>
+        </div>
         <div style="background:#0f0f0f;padding:12px 14px;text-align:center;">
           <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">🚶‍♂️ Pași</div>
-          <div style="font-size:20px;font-weight:700;color:var(--text-primary);">${corosData.steps || '—'}</div>
+          <div style="font-size:18px;font-weight:700;color:var(--text-primary);">${corosData.steps || '—'}</div>
         </div>
         <div style="background:#0f0f0f;padding:12px 14px;text-align:center;">
           <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">🔥 Calorii</div>
-          <div style="font-size:20px;font-weight:700;color:var(--text-primary);">${corosData.calories ? Math.round(corosData.calories) : '—'} <span style="font-size:12px;color:var(--text-tertiary);font-weight:400;">kcal</span></div>
+          <div style="font-size:18px;font-weight:700;color:var(--text-primary);">${corosData.calories ? Math.round(corosData.calories) : '—'}</div>
         </div>
         <div style="background:#0f0f0f;padding:12px 14px;text-align:center;">
-          <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">🧠 Stres Zilnic</div>
-          <div style="font-size:20px;font-weight:700;color:var(--text-primary);">${corosData.stress ? Math.round(corosData.stress) : '—'}</div>
+          <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">🧠 Stres</div>
+          <div style="font-size:18px;font-weight:700;color:var(--text-primary);">${corosData.stress ? Math.round(corosData.stress) : '—'}</div>
         </div>
       </div>
     ` : '';
 
     container.innerHTML = `
-      <div class="card animate-in" style="background:linear-gradient(145deg,#1a1a1a 0%,#0f0f0f 100%);border:1px solid var(--border-subtle);margin-bottom:var(--space-md);">
+      <div class="card animate-in" style="background:#0f0f0f; border:none; padding:0; margin-bottom:var(--space-md);">
         
         <!-- Header -->
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px 0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:0 0 16px 0;">
           <div style="display:flex;align-items:center;gap:8px;">
             <div style="width:8px;height:8px;border-radius:50%;background:${source === 'intervals' ? 'var(--success)' : '#3b82f6'};box-shadow:0 0 8px ${source === 'intervals' ? 'var(--success)' : '#3b82f6'};"></div>
             <span style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;">
-              ${source === 'intervals' ? 'Intervals.icu — Date Reale' : 'Fitness Local — Calcul din Loguri'}
+              ${source === 'intervals' ? 'Intervals.icu / EvoLab' : 'EvoLab Metrics'}
             </span>
           </div>
           <button onclick="window._refreshFitnessWidget()" style="background:none;border:none;color:var(--text-tertiary);font-size:11px;cursor:pointer;padding:4px 8px;border-radius:4px;border:1px solid var(--border-subtle);">
@@ -982,65 +1036,73 @@ async function loadAndRenderFitnessWidget(page) {
           </button>
         </div>
 
-        <!-- Main metrics grid -->
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:1px;background:var(--border-subtle);margin:16px 0 0;border-top:1px solid var(--border-subtle);border-bottom:1px solid var(--border-subtle);">
+        ${corosStyle}
+        <div class="coros-grid">
           
-          <!-- CTL -->
-          <div style="background:#0f0f0f;padding:16px 14px;">
-            <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">CTL — Fitness</div>
-            <div style="font-size:32px;font-weight:800;color:#3b82f6;line-height:1;">${ctl}</div>
-            <div style="font-size:11px;margin-top:4px;">${delta(ctlDelta)} vs 7z</div>
-            ${miniBar(ctl, 150, '#3b82f6')}
-            <div style="font-size:10px;color:var(--text-tertiary);margin-top:4px;">${delta(ctlMonthDelta)} vs 30z</div>
-          </div>
-
-          <!-- ATL -->
-          <div style="background:#0f0f0f;padding:16px 14px;">
-            <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">ATL — Oboseală</div>
-            <div style="font-size:32px;font-weight:800;color:#ef4444;line-height:1;">${atl}</div>
-            <div style="font-size:11px;margin-top:4px;">${delta(atlDelta)} vs 7z</div>
-            ${miniBar(atl, 150, '#ef4444')}
-            <div style="font-size:10px;color:var(--text-tertiary);margin-top:4px;">oboseală acută (7z)</div>
-          </div>
-
-          <!-- TSB -->
-          <div style="background:#0f0f0f;padding:16px 14px;">
-            <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">TSB — Formă</div>
-            <div style="font-size:32px;font-weight:800;color:${tsbColor};line-height:1;">${tsb > 0 ? '+' : ''}${tsb}</div>
-            <div style="font-size:11px;margin-top:4px;">${tsbIcon} ${tsbLabel}</div>
-            <div style="height:4px;background:rgba(255,255,255,0.06);border-radius:2px;margin-top:6px;position:relative;">
-              <div style="position:absolute;left:50%;top:-1px;width:2px;height:6px;background:rgba(255,255,255,0.2);border-radius:1px;"></div>
-              <div style="height:100%;width:${Math.min(100, Math.max(0, 50 + tsb))}%;background:${tsbColor};border-radius:2px;"></div>
+          <!-- Training Status -->
+          <div class="coros-card">
+            <div class="coros-title">Training Status <span style="font-size:12px;color:#6b7280;cursor:help;" title="${tsbAdvice}">ℹ</span></div>
+            <div style="font-size: 24px; font-weight: 600; color: ${tsbColor}; margin-bottom: 8px;">${tsbLabel}</div>
+            <div style="font-size: 13px; color: #9ca3af; margin-bottom: 24px; line-height: 1.4;">
+              ${tsbAdvice}
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: auto;">
+              <div>
+                <div class="coros-label">Load Impact</div>
+                <div class="coros-val">${atl}</div>
+              </div>
+              <div>
+                <div class="coros-label">Base Fitness</div>
+                <div class="coros-val">${ctl}</div>
+              </div>
+              <div>
+                <div class="coros-label">Intensity Trend</div>
+                <div class="coros-val">${tsb > 0 ? '+' : ''}${tsb}</div>
+              </div>
             </div>
           </div>
 
-          <!-- TSS Saptamana -->
-          <div style="background:#0f0f0f;padding:16px 14px;">
-            <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">TSS Săptămâna</div>
-            <div style="font-size:32px;font-weight:800;color:#a855f7;line-height:1;">${weeklyTSS}</div>
-            <div style="font-size:11px;margin-top:4px;color:${tssChangeColor};">${tssChange !== 0 ? tssChangeStr : '→'} vs săpt. ant.</div>
-            ${miniBar(weeklyTSS, 800, '#a855f7')}
-            <div style="font-size:10px;color:var(--text-tertiary);margin-top:4px;">săpt. ant.: ${prevWeeklyTSS}</div>
+          <!-- Recovery -->
+          <div class="coros-card">
+            <div class="coros-title">Recovery</div>
+            <div style="display: flex; align-items: center; justify-content: center; height: 100px;">
+               <svg width="48" height="60" viewBox="0 0 24 24" fill="none" stroke="#e5e7eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 24px; opacity: 0.8;">
+                 <circle cx="12" cy="5" r="3"></circle>
+                 <path d="M6 12l2-3 4-1 4 1 2 3"></path>
+                 <path d="M12 11v6l-3 4"></path>
+                 <path d="M12 17l3 4"></path>
+               </svg>
+               <div>
+                 <div style="font-size: 48px; font-weight: 700; color: #fff; line-height: 1;">${recScore != null ? recScore : '—'}<span style="font-size: 20px;">%</span></div>
+                 <div style="font-size: 12px; color: #9ca3af; margin-top: 4px;">RHR: ${rhr} bpm</div>
+               </div>
+            </div>
+            ${renderRecoveryBar(recScore)}
           </div>
+
+          <!-- Overnight HRV -->
+          ${corosData?.hrvHistory ? `
+          <div class="coros-card">
+            <div class="coros-title" style="margin-bottom:0;">
+              <div>Overnight HRV <span style="font-size:12px;color:#6b7280">(7 Days)</span></div>
+              <div style="color: #fff; font-size: 14px;">Avg: <span style="font-weight: 600; font-size: 16px;">${hrvVal}</span><span style="font-size:12px;color:#9ca3af;font-weight:normal;">ms</span></div>
+            </div>
+            ${renderHrvChart(corosData.hrvHistory)}
+          </div>
+          ` : ''}
+          
         </div>
 
-        ${wellnessHtml}
-        ${dailyHealthHtml}
-        ${corosData && corosData._raw ? `
-          <div style="padding:14px 20px;background:#111;border-bottom:1px solid var(--border-subtle);">
-            <details style="font-size:11px;color:var(--text-tertiary);">
-              <summary style="cursor:pointer;user-select:none;font-weight:600;">🛠️ DEBUG: Arată datele brute trimise de ceasul COROS</summary>
-              <pre style="margin-top:8px;padding:8px;background:#000;border-radius:4px;overflow-x:auto;white-space:pre-wrap;color:#aaa;">${JSON.stringify(corosData._raw, null, 2)}</pre>
-            </details>
-          </div>
-        ` : ''}
-        <!-- Coaching Insight -->
-        <div style="padding:14px 20px;display:flex;gap:12px;align-items:flex-start;">
-          <span style="font-size:20px;flex-shrink:0;">${tsbIcon}</span>
-          <div>
-            <div style="font-size:13px;font-weight:600;margin-bottom:4px;">${tsbLabel}</div>
-            <div style="font-size:12px;color:var(--text-secondary);line-height:1.6;">${tsbAdvice}</div>
-          </div>
+        <div style="border:1px solid var(--border-subtle); border-radius: 8px; overflow: hidden;">
+          ${dailyHealthHtml}
+          ${corosData && corosData._raw ? `
+            <div style="padding:14px 20px;background:#111;">
+              <details style="font-size:11px;color:var(--text-tertiary);">
+                <summary style="cursor:pointer;user-select:none;font-weight:600;">🛠️ DEBUG: Arată datele brute trimise de ceasul COROS</summary>
+                <pre style="margin-top:8px;padding:8px;background:#000;border-radius:4px;overflow-x:auto;white-space:pre-wrap;color:#aaa;">${JSON.stringify(corosData._raw, null, 2)}</pre>
+              </details>
+            </div>
+          ` : ''}
         </div>
       </div>`;
 

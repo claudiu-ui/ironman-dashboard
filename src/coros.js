@@ -431,6 +431,7 @@ export async function fetchCorosWellness() {
     lightSleepPct: extractNum(sleepData, 'lightRatio', 'light_ratio', 'lightSleepRatio') || extractRegex(sleepData, /Light Sleep Ratio:\s*(\d+)/),
     // HRV
     hrv: extractNum(hrvData, 'avg', 'average', 'hrvAvg', 'hrv', 'dailyAvg') || extractRegex(hrvData, /HRV Avg:\s*(\d+)/),
+    hrvHistory: extractHrvHistory(hrvData),
     // RHR
     restingHR: extractNum(rhrData, 'restingHr', 'resting_hr', 'restingHeartRate', 'avg', 'value') || extractRegex(rhrData, /(\d+)\s*bpm/),
     // Daily Health
@@ -445,6 +446,20 @@ export async function fetchCorosWellness() {
 
   localStorage.setItem(COROS_WELLNESS_CACHE_KEY, JSON.stringify(wellness));
   return wellness;
+}
+
+function extractHrvHistory(str) {
+  if (!str || typeof str !== 'string') return null;
+  const history = [];
+  const dateRegex = /(\d{4}-\d{2}-\d{2}):\s*[\s\S]*?HRV Avg:\s*(\d+)/g;
+  const matches = [...str.matchAll(dateRegex)];
+  for (const m of matches) {
+    const dateStr = m[1];
+    const val = Number(m[2]);
+    const [_, mm, dd] = dateStr.split('-');
+    history.push({ label: `${mm}/${dd}`, value: val });
+  }
+  return history.reverse();
 }
 
 function extractRegex(str, pattern, isCommaNumber = false) {
