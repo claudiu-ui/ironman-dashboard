@@ -581,8 +581,6 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
             </div>
           `}).join(``)}
         </div>
-        
-        </div>
         ${N?`
           <button class="btn btn-ghost btn-sm add-ex-btn" data-session="${t}" style="margin-top: var(--space-md); width: 100%; border-style: dashed;">
             ➕ Adaugă Exercițiu
