@@ -92,7 +92,7 @@ export function renderGymPage(forceDateStr = null) {
     console.log(`getLastSessionData for ${sessionKey} - ${exerciseName} (index ${exerciseIndex}), currentDate: ${currentDateStr}. Available dates:`, dates);
     
     for (const date of dates) {
-      if (date === currentDateStr) continue; // Skip current planned date
+      if (date >= currentDateStr) continue; // Skip current planned date AND future dates
       const session = gymLogs[date]?.[sessionKey];
       if (session) {
         // Handle potentially corrupted data (nested exercises object)
@@ -193,9 +193,7 @@ export function renderGymPage(forceDateStr = null) {
                       `).join('')}
                       ${lastSession.totalVolume ? `<span class="last-session-volume">Vol: ${lastSession.totalVolume}kg</span>` : ''}
                     </div>
-                  ` : `<div style="font-size: 9px; color: var(--text-tertiary); margin-top: 4px; opacity: 0.5;">
-                        Debug: no past data. Key: ${key}. Name: ${ex.name}. Dates: ${Object.keys(storage.get('gym', {})).join(', ')}
-                      </div>`}
+                  ` : ''}
                   
                   ${loggedEx && loggedEx.sets ? `
                     <div class="gym-today-session">
