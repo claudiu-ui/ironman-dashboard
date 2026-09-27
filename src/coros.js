@@ -265,8 +265,9 @@ async function callMcpTool(toolName, args = {}) {
   });
 
   if (!resp.ok) {
-    console.error(`MCP tool ${toolName} failed:`, resp.status);
-    return null;
+    const errText = await resp.text();
+    console.error(`MCP tool ${toolName} failed:`, resp.status, errText);
+    throw new Error(`MCP tool ${toolName} failed (${resp.status}): ${errText}`);
   }
 
   // Update session ID from response
