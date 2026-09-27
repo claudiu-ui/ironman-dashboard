@@ -859,7 +859,7 @@ async function loadAndRenderFitnessWidget(page) {
       return;
     }
 
-    const { ctl, atl, tsb, weeklyTSS, prevWeeklyTSS, ctlDelta, atlDelta, tsbDelta, ctlMonthDelta, source, sleepSecs, restingHR, hrv } = m;
+    const { ctl, atl, tsb, weeklyTSS, prevWeeklyTSS, ctlDelta, atlDelta, tsbDelta, ctlMonthDelta, source, sleepSecs, restingHR, hrv, sleepScore, readiness } = m;
 
     const tsbColor = tsb >= 5 ? '#22c55e' : tsb >= -10 ? '#f97316' : '#ef4444';
     const tsbIcon = tsb <= -20 ? '🔴' : tsb <= -10 ? '🟡' : tsb <= 5 ? '🟢' : '🚀';
@@ -889,23 +889,34 @@ async function loadAndRenderFitnessWidget(page) {
       return `<div style="height:4px;background:rgba(255,255,255,0.06);border-radius:2px;margin-top:6px;"><div style="height:100%;width:${pct}%;background:${color};border-radius:2px;"></div></div>`;
     }
 
-    const sleepHrs = sleepSecs ? (sleepSecs / 3600).toFixed(1) : '—';
+    let sleepStr = '—';
+    if (sleepSecs) {
+      const h = Math.floor(sleepSecs / 3600);
+      const m = Math.floor((sleepSecs % 3600) / 60);
+      sleepStr = `${h}h ${m}m`;
+    }
+    
     const rhr = restingHR ? Math.round(restingHR) : '—';
     const hrvVal = hrv ? Math.round(hrv) : '—';
+    const recScore = readiness != null ? Math.round(readiness) : (sleepScore != null ? Math.round(sleepScore) : null);
 
     const wellnessHtml = (source === 'intervals' && (sleepSecs || restingHR || hrv)) ? `
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border-subtle);border-bottom:1px solid var(--border-subtle);">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:1px;background:var(--border-subtle);border-bottom:1px solid var(--border-subtle);">
         <div style="background:#0f0f0f;padding:12px 14px;text-align:center;">
-          <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">💤 Somn (Azi-noapte)</div>
-          <div style="font-size:20px;font-weight:700;color:var(--text-primary);">${sleepHrs} <span style="font-size:12px;color:var(--text-tertiary);font-weight:400;">ore</span></div>
+          <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">💤 Somn</div>
+          <div style="font-size:20px;font-weight:700;color:var(--text-primary);">${sleepStr}</div>
         </div>
         <div style="background:#0f0f0f;padding:12px 14px;text-align:center;">
-          <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">❤️ Resting HR</div>
+          <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">❤️ RHR</div>
           <div style="font-size:20px;font-weight:700;color:var(--text-primary);">${rhr} <span style="font-size:12px;color:var(--text-tertiary);font-weight:400;">bpm</span></div>
         </div>
         <div style="background:#0f0f0f;padding:12px 14px;text-align:center;">
-          <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">💓 HRV (rMSSD)</div>
+          <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">💓 HRV</div>
           <div style="font-size:20px;font-weight:700;color:var(--text-primary);">${hrvVal} <span style="font-size:12px;color:var(--text-tertiary);font-weight:400;">ms</span></div>
+        </div>
+        <div style="background:#0f0f0f;padding:12px 14px;text-align:center;">
+          <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">🔋 Recovery</div>
+          <div style="font-size:20px;font-weight:700;color:${recScore >= 80 ? '#22c55e' : (recScore >= 60 ? '#f97316' : (recScore ? '#ef4444' : 'var(--text-primary)'))};">${recScore != null ? recScore : '—'} <span style="font-size:12px;color:var(--text-tertiary);font-weight:400;">${recScore != null ? '%' : ''}</span></div>
         </div>
       </div>
     ` : '';

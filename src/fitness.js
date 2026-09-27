@@ -147,7 +147,7 @@ async function fetchIntervalsMetrics(athleteId, apiKey) {
   const headers = new Headers();
   headers.set('Authorization', 'Basic ' + btoa('API_KEY:' + apiKey));
 
-  const url = `https://intervals.icu/api/v1/athlete/${athleteId}/wellness?oldest=${oldestIso}&newest=${newestIso}&cols=ctl,atl,rampRate,sportInfo,sleepSecs,restingHR,hrv,hrvRmssd`;
+  const url = `https://intervals.icu/api/v1/athlete/${athleteId}/wellness?oldest=${oldestIso}&newest=${newestIso}&cols=ctl,atl,rampRate,sportInfo,sleepSecs,restingHR,hrv,hrvRmssd,sleepScore,readiness`;
 
   const resp = await fetch(url, { headers });
   if (!resp.ok) throw new Error(`Intervals API error: ${resp.status}`);
@@ -200,9 +200,11 @@ async function fetchIntervalsMetrics(athleteId, apiKey) {
       atl: Math.round(d.atl || 0),
       tsb: Math.round((d.ctl || 0) - (d.atl || 0)),
     })),
-    sleepSecs: latest.sleepSecs || null,
-    restingHR: latest.restingHR || null,
-    hrv: latest.hrv || latest.hrvRmssd || null
+    sleepSecs: (sorted.find(d => d.sleepSecs != null) || {}).sleepSecs || null,
+    restingHR: (sorted.find(d => d.restingHR != null) || {}).restingHR || null,
+    hrv: (sorted.find(d => d.hrv != null || d.hrvRmssd != null) || {}).hrv || (sorted.find(d => d.hrv != null || d.hrvRmssd != null) || {}).hrvRmssd || null,
+    sleepScore: (sorted.find(d => d.sleepScore != null) || {}).sleepScore || null,
+    readiness: (sorted.find(d => d.readiness != null) || {}).readiness || null
   };
 }
 
