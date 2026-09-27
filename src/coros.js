@@ -257,6 +257,10 @@ async function callMcpTool(toolName, args = {}) {
   const token = await getValidToken();
   if (!token) return null;
 
+  const config = await getOAuthConfig();
+  // e.g. https://mcpeu.coros.com/oauth2/token -> https://mcpeu.coros.com/mcp
+  const mcpUrl = config.tokenUrl.replace('/oauth2/token', '/mcp');
+
   const headers = {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${token}`,
@@ -271,7 +275,7 @@ async function callMcpTool(toolName, args = {}) {
   // First, try to initialize if we don't have a session
   if (!mcpSessionId) {
     try {
-      const initResp = await fetch(COROS_MCP_URL, {
+      const initResp = await fetch(mcpUrl, {
         method: 'POST',
         headers,
         body: JSON.stringify({
@@ -294,7 +298,7 @@ async function callMcpTool(toolName, args = {}) {
         }
 
         // Send initialized notification
-        await fetch(COROS_MCP_URL, {
+        await fetch(mcpUrl, {
           method: 'POST',
           headers,
           body: JSON.stringify({
@@ -309,7 +313,7 @@ async function callMcpTool(toolName, args = {}) {
   }
 
   // Now call the tool
-  const resp = await fetch(COROS_MCP_URL, {
+  const resp = await fetch(mcpUrl, {
     method: 'POST',
     headers,
     body: JSON.stringify({
