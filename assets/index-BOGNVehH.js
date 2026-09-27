@@ -485,13 +485,8 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
       </div>
     `}}}var Ce=`modulepreload`,we=function(e){return`/ironman-dashboard/`+e},Te={},M=function(e,t,n){let r=Promise.resolve();if(t&&t.length>0){let e=document.getElementsByTagName(`link`),i=document.querySelector(`meta[property=csp-nonce]`),a=i?.nonce||i?.getAttribute(`nonce`);function o(e){return Promise.all(e.map(e=>Promise.resolve(e).then(e=>({status:`fulfilled`,value:e}),e=>({status:`rejected`,reason:e}))))}function s(e){return import.meta.resolve?import.meta.resolve(e):new URL(e,import.meta.url).href}r=o(t.map(t=>{if(t=we(t,n),t=s(t),t in Te)return;Te[t]=!0;let r=t.endsWith(`.css`);for(let n=e.length-1;n>=0;n--){let i=e[n];if(i.href===t&&(!r||i.rel===`stylesheet`))return}let i=document.createElement(`link`);if(i.rel=r?`stylesheet`:Ce,r||(i.as=`script`),i.crossOrigin=``,i.href=t,a&&i.setAttribute(`nonce`,a),document.head.appendChild(i),r)return new Promise((e,n)=>{i.addEventListener(`load`,e),i.addEventListener(`error`,()=>n(Error(`Unable to preload CSS for ${t}`)))})}).filter(e=>e!==void 0))}function i(e){let t=new Event(`vite:preloadError`,{cancelable:!0});if(t.payload=e,window.dispatchEvent(t),!t.defaultPrevented)throw e}return r.then(t=>{for(let e of t||[])e.status===`rejected`&&i(e.reason);return e().catch(i)})},Ee=t({getDashboardGymCardNode:()=>Oe,renderGymPage:()=>De}),N=!1,P=null;function De(e=null){let t=document.createElement(`div`);t.className=`gym-page animate-in`,P=j.getCustomGymPrograms(E);let r=_(e),i=`week_schedule_${r}`,a=j.get(i)||re(r),o=new Date(d);o.setDate(d.getDate()+(r-1)*7);let s=e||new Date().toISOString().split(`T`)[0],c={lower:s,upper1:s,upper2:s,conditioning:s,accesorii:s},l={lower:`Nelogat`,upper1:`Nelogat`,upper2:`Nelogat`,conditioning:`Nelogat`,accesorii:`Nelogat`};a.forEach((e,t)=>{let n=new Date(o);n.setDate(n.getDate()+t);let r=n.toISOString().split(`T`)[0];e.sessions.forEach(t=>{t.type===`gym`&&t.title.includes(`Lower`)?(c.lower=r,l.lower=e.day):t.type===`gym`&&t.title.includes(`Upper 1`)?(c.upper1=r,l.upper1=e.day):t.type===`gym`&&t.title.includes(`Upper 2`)?(c.upper2=r,l.upper2=e.day):t.type===`gym`&&t.title.includes(`Accesorii`)?(c.accesorii=r,l.accesorii=e.day):t.type===`conditioning`&&(c.conditioning=r,l.conditioning=e.day)})}),P.lower.day=l.lower,P.upper1.day=l.upper1,P.upper2.day=l.upper2,P.conditioning.day=l.conditioning,P.accesorii.day=l.accesorii;function u(){t.innerHTML=`
       <div class="page-body">
-        <div class="gym-intro animate-in" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-lg);">
-          <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.7; flex: 1;">
-            <strong style="color: var(--text-primary)">Program Dinamic:</strong> Zilele sunt preluate direct din <a href="#/" style="color: var(--accent)">Dashboard</a>.
-            <br>
-            <span style="color: var(--warning)">⚠️ Niciodată la eșec pe picioare (RIR 3-4). Femuralul drept — greutate ușoară pe curls.</span>
-          </p>
-          <button class="btn btn-ghost" id="toggle-edit-mode" style="margin-left: var(--space-md);">
+        <div class="gym-intro animate-in" style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: var(--space-lg);">
+          <button class="btn btn-ghost" id="toggle-edit-mode">
             ${N?`💾 Salvează Programul`:`✏️ Editează Programul`}
           </button>
         </div>
@@ -509,10 +504,10 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
           ${p(P.accesorii,`accesorii`,c.accesorii)}
         </div>
       </div>
-    `,h()}function f(e,t,n,r){let i=j.get(`gym`,{}),a=Object.keys(i).sort().reverse();console.log(`getLastSessionData for ${e} - ${t} (index ${n}), currentDate: ${r}. Available dates:`,a);for(let o of a){if(o>=r)continue;let a=i[o]?.[e];if(a){let e=Array.isArray(a.exercises)?a.exercises:a.exercises&&Array.isArray(a.exercises.exercises)?a.exercises.exercises:null;if(e){let r=e.find(e=>e.name===t);if(!r){let n=t.toLowerCase();r=e.find(e=>e.name&&(e.name.toLowerCase().includes(n)||n.includes(e.name.toLowerCase())))}if(!r&&e.length>n&&(r=e[n]),r&&r.sets&&r.sets.length>0)return console.log(`Found past session for ${t} on date ${o}:`,r),r}}}return console.log(`No past session found for ${t}`),null}function p(e,t,n){let r=j.getGymSession(n,t);return`
+    `,h()}function f(e,t,n,r){let i=j.get(`gym`,{}),a=Object.keys(i).sort().reverse();console.log(`getLastSessionData for ${e} - ${t} (index ${n}), currentDate: ${r}. Available dates:`,a);for(let o of a){if(o>=r)continue;let a=i[o]?.[e];if(a){let e=Array.isArray(a.exercises)?a.exercises:a.exercises&&Array.isArray(a.exercises.exercises)?a.exercises.exercises:null;if(e){let r=e.find(e=>e.name===t);if(!r){let n=t.toLowerCase();r=e.find(e=>e.name&&(e.name.toLowerCase().includes(n)||n.includes(e.name.toLowerCase())))}if(!r&&e.length>n&&(r=e[n]),r&&r.sets&&r.sets.length>0)return console.log(`Found past session for ${t} on date ${o}:`,r),r}}}return console.log(`No past session found for ${t}`),null}function p(e,t,n){let r=j.getGymSession(n,t),i=localStorage.getItem(`gym_collapsed_${t}`)===`true`;return`
       <div class="card animate-in">
         <div class="card-header" style="align-items: flex-start;">
-          <div style="flex: 1; margin-right: 12px;">
+          <div style="flex: 1; margin-right: 12px; cursor: ${N?`default`:`pointer`};" class="${N?``:`gym-card-toggle`}" data-key="${t}">
             ${N?`
               <input type="text" class="form-input edit-prog-name" data-session="${t}" value="${e.name}" style="font-size: 14px; font-weight: bold; width: 100%; margin-bottom: 4px; padding: 4px 8px; text-transform: uppercase;" />
               <div style="display: flex; gap: 4px; align-items: center;">
@@ -520,7 +515,10 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
                 <input type="text" class="form-input edit-prog-focus" data-session="${t}" value="${e.focus||``}" style="font-size: 12px; width: 100%; padding: 2px 8px;" placeholder="Focus (ex: Piept, Umeri)" />
               </div>
             `:`
-              <div class="card-title">${e.name}</div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div class="card-title">${e.name}</div>
+                <div class="toggle-icon" id="toggle-icon-${t}" style="font-size: 12px; color: var(--text-tertiary);">${i?`▼`:`▲`}</div>
+              </div>
               <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 2px">${e.day} • ${e.focus}</div>
             `}
           </div>
@@ -530,6 +528,7 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
             </button>
           `}
         </div>
+        <div id="exercises-container-${t}" style="display: ${i&&!N?`none`:`block`};">
         ${N?`
           <div style="margin-bottom: var(--space-md);">
             <input type="text" class="form-input edit-prog-notes" data-session="${t}" value="${e.notes||``}" placeholder="Note generale (ex: RIR 3-4...)" style="width: 100%; padding: 6px 12px; border: 1px dashed var(--warning); border-radius: var(--radius-md);" />
@@ -583,16 +582,18 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
           `}).join(``)}
         </div>
         
+        </div>
         ${N?`
           <button class="btn btn-ghost btn-sm add-ex-btn" data-session="${t}" style="margin-top: var(--space-md); width: 100%; border-style: dashed;">
             ➕ Adaugă Exercițiu
           </button>
         `:``}
+        </div>
       </div>
-    `}function m(e,t){let n=j.getGymSession(t,`conditioning`),r=n&&n.exercises?n.exercises:n;return`
+    `}function m(e,t){let n=j.getGymSession(t,`conditioning`),r=n&&n.exercises?n.exercises:n,i=localStorage.getItem(`gym_collapsed_conditioning`)===`true`;return`
       <div class="card animate-in">
         <div class="card-header" style="align-items: flex-start;">
-          <div style="flex: 1; margin-right: 12px;">
+          <div style="flex: 1; margin-right: 12px; cursor: ${N?`default`:`pointer`};" class="${N?``:`gym-card-toggle`}" data-key="conditioning">
             ${N?`
               <input type="text" class="form-input edit-prog-name" data-session="conditioning" value="${e.name}" style="font-size: 14px; font-weight: bold; width: 100%; margin-bottom: 4px; padding: 4px 8px; text-transform: uppercase;" />
               <div style="display: flex; gap: 4px; align-items: center;">
@@ -600,7 +601,10 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
                 <input type="text" class="form-input edit-prog-focus" data-session="conditioning" value="${e.focus||``}" style="font-size: 12px; width: 100%; padding: 2px 8px;" placeholder="Focus (ex: Cardio)" />
               </div>
             `:`
-              <div class="card-title">${e.name}</div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <div class="card-title">${e.name}</div>
+                <div class="toggle-icon" id="toggle-icon-conditioning" style="font-size: 12px; color: var(--text-tertiary);">${i?`▼`:`▲`}</div>
+              </div>
               <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 2px">${e.day} • ${e.focus}</div>
             `}
           </div>
@@ -610,6 +614,7 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
             </button>
           `}
         </div>
+        <div id="exercises-container-conditioning" style="display: ${i&&!N?`none`:`block`};">
         <div class="conditioning-variants">
           ${r&&r.stations&&r.stations.length>0?`
             <div class="conditioning-variant">
@@ -657,8 +662,9 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
             </div>
           `).join(``)}
         </div>
+        </div>
       </div>
-    `}function h(){t.querySelector(`#toggle-edit-mode`)?.addEventListener(`click`,()=>{N&&(g(),j.saveCustomGymPrograms(P)),N=!N,u()}),N||t.querySelectorAll(`.log-gym-btn`).forEach(e=>{e.addEventListener(`click`,t=>{t.stopPropagation();let n=e.dataset.session,r=e.dataset.date;n===`conditioning`?y(r):v(n,P[n]?.exercises||[],r)})}),N&&(t.querySelectorAll(`.add-ex-btn`).forEach(e=>{e.addEventListener(`click`,()=>{let t=e.dataset.session;g(),P[t].exercises.push({name:`Exercițiu Nou`,sets:`3 × 10`,rest:`60s`,notes:``}),u()})}),t.querySelectorAll(`.remove-ex-btn`).forEach(e=>{e.addEventListener(`click`,t=>{let n=e.dataset.session,r=parseInt(e.dataset.index);g(),P[n].exercises.splice(r,1),u()})}),t.querySelectorAll(`.add-cond-station-btn`).forEach(e=>{e.addEventListener(`click`,()=>{let t=parseInt(e.dataset.variant);g(),P.conditioning.variants[t].stations.push(`Stație Nouă`),u()})}),t.querySelectorAll(`.remove-cond-station-btn`).forEach(e=>{e.addEventListener(`click`,()=>{let t=parseInt(e.dataset.variant),n=parseInt(e.dataset.station);g(),P.conditioning.variants[t].stations.splice(n,1),u()})}))}function g(){if([`lower`,`upper1`,`upper2`,`accesorii`].forEach(e=>{let n=t.querySelector(`.edit-prog-name[data-session="${e}"]`),r=t.querySelector(`.edit-prog-focus[data-session="${e}"]`),i=t.querySelector(`.edit-prog-notes[data-session="${e}"]`);n&&P[e]&&(P[e].name=n.value),r&&P[e]&&(P[e].focus=r.value),i&&P[e]&&(P[e].notes=i.value),t.querySelectorAll(`#exercises-${e} .gym-exercise-row`).forEach((t,n)=>{let r=t.querySelector(`.edit-ex-name`)?.value,i=t.querySelector(`.edit-ex-sets`)?.value,a=t.querySelector(`.edit-ex-rest`)?.value,o=t.querySelector(`.edit-ex-notes`)?.value;r&&P[e].exercises[n]&&(P[e].exercises[n].name=r,P[e].exercises[n].sets=i,P[e].exercises[n].rest=a,P[e].exercises[n].notes=o)})}),P.conditioning){let e=t.querySelector(`.edit-prog-name[data-session="conditioning"]`),n=t.querySelector(`.edit-prog-focus[data-session="conditioning"]`);e&&(P.conditioning.name=e.value),n&&(P.conditioning.focus=n.value),P.conditioning.variants.forEach((e,n)=>{let r=t.querySelector(`#cond-variant-${n}`);if(r){let t=r.querySelector(`.edit-cond-name`)?.value,n=r.querySelector(`.edit-cond-format`)?.value;t&&(e.name=t),n&&(e.format=n),r.querySelectorAll(`.edit-cond-station`).forEach((t,n)=>{e.stations[n]!==void 0&&(e.stations[n]=t.value)})}})}}function v(e,t,r){let i=j.getGymSession(r,e),a=i&&Array.isArray(i.exercises)?i.exercises:i&&i.exercises&&Array.isArray(i.exercises.exercises)?i.exercises.exercises:[],o=t.map(t=>{let n=(t.sets||`3`).match(/(\d+)\s*[×x]/i),o=n?parseInt(n[1]):3,s=a.find(e=>e.name===t.name),c=f(e,t.name,ei,r),l=[],u=s&&s.sets?Math.max(o,s.sets.length):o;for(let e=0;e<u;e++){let t=``,n=``;s&&s.sets&&s.sets[e]?(t=s.sets[e].weight,n=s.sets[e].reps):i||(t=c?.sets?.[e]?.weight||``,n=c?.sets?.[e]?.reps||``),l.push({weight:t,reps:n})}return{name:t.name,sets:l,numSets:o}}),s=document.createElement(`div`);s.className=`modal-overlay active`,s.id=`gym-log-modal`,s.innerHTML=`
+    `}function h(){t.querySelector(`#toggle-edit-mode`)?.addEventListener(`click`,()=>{N&&(g(),j.saveCustomGymPrograms(P)),N=!N,u()}),N||t.querySelectorAll(`.gym-card-toggle`).forEach(e=>{e.addEventListener(`click`,()=>{let n=e.dataset.key,r=t.querySelector(`#exercises-container-${n}`),i=t.querySelector(`#toggle-icon-${n}`);r&&i&&(r.style.display===`none`?(r.style.display=`block`,i.textContent=`▲`,localStorage.setItem(`gym_collapsed_${n}`,`false`)):(r.style.display=`none`,i.textContent=`▼`,localStorage.setItem(`gym_collapsed_${n}`,`true`)))})}),N||t.querySelectorAll(`.log-gym-btn`).forEach(e=>{e.addEventListener(`click`,t=>{t.stopPropagation();let n=e.dataset.session,r=e.dataset.date;n===`conditioning`?y(r):v(n,P[n]?.exercises||[],r)})}),N&&(t.querySelectorAll(`.add-ex-btn`).forEach(e=>{e.addEventListener(`click`,()=>{let t=e.dataset.session;g(),P[t].exercises.push({name:`Exercițiu Nou`,sets:`3 × 10`,rest:`60s`,notes:``}),u()})}),t.querySelectorAll(`.remove-ex-btn`).forEach(e=>{e.addEventListener(`click`,t=>{let n=e.dataset.session,r=parseInt(e.dataset.index);g(),P[n].exercises.splice(r,1),u()})}),t.querySelectorAll(`.add-cond-station-btn`).forEach(e=>{e.addEventListener(`click`,()=>{let t=parseInt(e.dataset.variant);g(),P.conditioning.variants[t].stations.push(`Stație Nouă`),u()})}),t.querySelectorAll(`.remove-cond-station-btn`).forEach(e=>{e.addEventListener(`click`,()=>{let t=parseInt(e.dataset.variant),n=parseInt(e.dataset.station);g(),P.conditioning.variants[t].stations.splice(n,1),u()})}))}function g(){if([`lower`,`upper1`,`upper2`,`accesorii`].forEach(e=>{let n=t.querySelector(`.edit-prog-name[data-session="${e}"]`),r=t.querySelector(`.edit-prog-focus[data-session="${e}"]`),i=t.querySelector(`.edit-prog-notes[data-session="${e}"]`);n&&P[e]&&(P[e].name=n.value),r&&P[e]&&(P[e].focus=r.value),i&&P[e]&&(P[e].notes=i.value),t.querySelectorAll(`#exercises-${e} .gym-exercise-row`).forEach((t,n)=>{let r=t.querySelector(`.edit-ex-name`)?.value,i=t.querySelector(`.edit-ex-sets`)?.value,a=t.querySelector(`.edit-ex-rest`)?.value,o=t.querySelector(`.edit-ex-notes`)?.value;r&&P[e].exercises[n]&&(P[e].exercises[n].name=r,P[e].exercises[n].sets=i,P[e].exercises[n].rest=a,P[e].exercises[n].notes=o)})}),P.conditioning){let e=t.querySelector(`.edit-prog-name[data-session="conditioning"]`),n=t.querySelector(`.edit-prog-focus[data-session="conditioning"]`);e&&(P.conditioning.name=e.value),n&&(P.conditioning.focus=n.value),P.conditioning.variants.forEach((e,n)=>{let r=t.querySelector(`#cond-variant-${n}`);if(r){let t=r.querySelector(`.edit-cond-name`)?.value,n=r.querySelector(`.edit-cond-format`)?.value;t&&(e.name=t),n&&(e.format=n),r.querySelectorAll(`.edit-cond-station`).forEach((t,n)=>{e.stations[n]!==void 0&&(e.stations[n]=t.value)})}})}}function v(e,t,r){let i=j.getGymSession(r,e),a=i&&Array.isArray(i.exercises)?i.exercises:i&&i.exercises&&Array.isArray(i.exercises.exercises)?i.exercises.exercises:[],o=t.map(t=>{let n=(t.sets||`3`).match(/(\d+)\s*[×x]/i),o=n?parseInt(n[1]):3,s=a.find(e=>e.name===t.name),c=f(e,t.name,ei,r),l=[],u=s&&s.sets?Math.max(o,s.sets.length):o;for(let e=0;e<u;e++){let t=``,n=``;s&&s.sets&&s.sets[e]?(t=s.sets[e].weight,n=s.sets[e].reps):i||(t=c?.sets?.[e]?.weight||``,n=c?.sets?.[e]?.reps||``),l.push({weight:t,reps:n})}return{name:t.name,sets:l,numSets:o}}),s=document.createElement(`div`);s.className=`modal-overlay active`,s.id=`gym-log-modal`,s.innerHTML=`
       <div class="modal" style="max-width: 600px; max-height: 85vh; overflow-y: auto;">
         <div class="modal-title">📝 Loghează: ${P[e]?.name||`Conditioning`}</div>
         <div style="font-size: 12px; color: var(--text-tertiary); margin-bottom: var(--space-lg);">
