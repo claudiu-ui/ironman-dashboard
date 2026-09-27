@@ -386,7 +386,14 @@ function buildApp() {
       // Check if workout is completed — populate results tab
       import('./storage.js').then(({ storage }) => {
         const logs = storage.getWorkoutLog(dateStr);
-        const completedLogs = logs?.filter(l => l.type === type) || [];
+        let completedLogs = logs?.filter(l => l.type === type) || [];
+        
+        // Sort chronologically (ascending) so morning sessions are first
+        completedLogs.sort((a, b) => {
+          if (a.timestamp && b.timestamp) return new Date(a.timestamp) - new Date(b.timestamp);
+          if (a.intervalsId && b.intervalsId) return a.intervalsId - b.intervalsId;
+          return 0; // If no timestamps, keep original order
+        });
         
         if (completedLogs.length > 0) {
           tabResults.style.display = '';

@@ -215,7 +215,8 @@ export async function syncIntervalsWorkouts(athleteId, apiKey) {
       speed: null, // Calculated below  
       notes: activity.name || '',
       source: 'intervals',
-      intervalsId: activity.id || ''
+      intervalsId: activity.id || '',
+      timestamp: activity.start_date_local
     };
 
     // Calculate pace (for run) or speed (for bike)
