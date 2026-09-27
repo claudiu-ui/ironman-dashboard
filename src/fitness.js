@@ -181,6 +181,48 @@ async function fetchIntervalsMetrics(athleteId, apiKey) {
     });
   }
 
+  // For wellness metrics (sleep, RHR, HRV), look specifically at today and yesterday
+  // because Coros posts sleep for the current day after waking up
+  const todayIso = new Date().toISOString().split('T')[0];
+  const yesterIso = (() => { const d = new Date(); d.setDate(d.getDate() - 1); return d.toISOString().split('T')[0]; })();
+
+  const todayEntry = sorted.find(d => d.id === todayIso) || null;
+  const yesterEntry = sorted.find(d => d.id === yesterIso) || null;
+
+  // Take today's if available, else yesterday's
+  const wellnessEntry = (todayEntry?.sleepSecs != null ? todayEntry : null)
+    || (yesterEntry?.sleepSecs != null ? yesterEntry : null)
+    || sorted.find(d => d.sleepSecs != null)
+    || sorted[0];
+
+  const rawSleepSecs = wellnessEntry?.sleepSecs || null;
+  const rawRestingHR = wellnessEntry?.restingHR || (sorted.find(d => d.restingHR != null) || {}).restingHR || null;
+  const rawHrv = wellnessEntry?.hrv || wellnessEntry?.hrvRmssd
+    || (sorted.find(d => d.hrv != null || d.hrvRmssd != null) || {}).hrv
+    || (sorted.find(d => d.hrv != null || d.hrvRmssd != null) || {}).hrvRmssd
+    || null;
+
+  // Compute a recovery score (0-100) from available signals
+  // Uses HRV (good = high), Resting HR (good = low), TSB (good = closer to 0)
+  let computedRecovery = null;
+  if (rawHrv || rawRestingHR) {
+    let score = 50; // baseline
+    // HRV contribution (0-40 pts): normalized around 40ms as average
+    if (rawHrv) {
+      const hrvScore = Math.min(40, Math.round((rawHrv / 60) * 40));
+      score = 10 + hrvScore;
+    }
+    // RHR contribution (0-30 pts): lower is better, 40bpm=30pts, 80bpm=0pts
+    if (rawRestingHR) {
+      const rhrScore = Math.max(0, Math.round(30 - ((rawRestingHR - 40) / 40) * 30));
+      score += rhrScore;
+    }
+    // TSB contribution (0-30 pts): 0=fresh=30pts, -30=tired=0pts
+    const tsbScore = Math.max(0, Math.min(30, Math.round(30 + tsb)));
+    score += tsbScore;
+    computedRecovery = Math.min(100, Math.max(0, score));
+  }
+
   return {
     source: 'intervals',
     ctl,
@@ -200,11 +242,10 @@ async function fetchIntervalsMetrics(athleteId, apiKey) {
       atl: Math.round(d.atl || 0),
       tsb: Math.round((d.ctl || 0) - (d.atl || 0)),
     })),
-    sleepSecs: (sorted.find(d => d.sleepSecs != null) || {}).sleepSecs || null,
-    restingHR: (sorted.find(d => d.restingHR != null) || {}).restingHR || null,
-    hrv: (sorted.find(d => d.hrv != null || d.hrvRmssd != null) || {}).hrv || (sorted.find(d => d.hrv != null || d.hrvRmssd != null) || {}).hrvRmssd || null,
-    sleepScore: (sorted.find(d => d.sleepScore != null) || {}).sleepScore || null,
-    readiness: (sorted.find(d => d.readiness != null) || {}).readiness || null
+    sleepSecs: rawSleepSecs,
+    restingHR: rawRestingHR,
+    hrv: rawHrv,
+    readiness: computedRecovery
   };
 }
 
