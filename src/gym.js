@@ -88,6 +88,9 @@ export function renderGymPage(forceDateStr = null) {
     const gymLogs = storage.get('gym', {});
     const dates = Object.keys(gymLogs).sort().reverse();
     
+    // DEBUG LOG FOR USER TO CHECK
+    console.log(`getLastSessionData for ${sessionKey} - ${exerciseName} (index ${exerciseIndex}), currentDate: ${currentDateStr}. Available dates:`, dates);
+    
     for (const date of dates) {
       if (date === currentDateStr) continue; // Skip current planned date
       const session = gymLogs[date]?.[sessionKey];
@@ -108,11 +111,13 @@ export function renderGymPage(forceDateStr = null) {
           }
 
           if (ex && ex.sets && ex.sets.length > 0) {
+            console.log(`Found past session for ${exerciseName} on date ${date}:`, ex);
             return ex;
           }
         }
       }
     }
+    console.log(`No past session found for ${exerciseName}`);
     return null;
   }
 
@@ -443,7 +448,7 @@ export function renderGymPage(forceDateStr = null) {
       const numSets = setsMatch ? parseInt(setsMatch[1]) : 3;
       
       const loggedEx = currentLogExercises.find(e => e.name === ex.name);
-      const lastData = getLastSessionData(sessionType, ex.name, dateStr);
+      const lastData = getLastSessionData(sessionType, ex.name, ei, dateStr);
       
       const sets = [];
       const targetSetsCount = loggedEx && loggedEx.sets ? Math.max(numSets, loggedEx.sets.length) : numSets;
