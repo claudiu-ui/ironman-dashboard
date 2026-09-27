@@ -174,16 +174,16 @@ export async function handleCorosCallback() {
     // Cleanup
     sessionStorage.removeItem('coros_pkce_verifier');
     sessionStorage.removeItem('coros_oauth_state');
-
-    // Clean URL
-    url.searchParams.delete('code');
-    url.searchParams.delete('state');
-    window.history.replaceState({}, '', url.pathname + url.hash);
-
+    
     return true;
   } catch (e) {
     console.error('COROS token exchange error:', e);
     return false;
+  } finally {
+    // ALWAYS clean URL
+    url.searchParams.delete('code');
+    url.searchParams.delete('state');
+    window.history.replaceState({}, '', url.pathname + url.hash);
   }
 }
 
