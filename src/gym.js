@@ -112,10 +112,18 @@ export function renderGymPage(forceDateStr = null) {
     const logged = storage.getGymSession(dateStr, key);
     return `
       <div class="card animate-in">
-        <div class="card-header">
-          <div>
-            <div class="card-title">${program.name}</div>
-            <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 2px">${program.day} • ${program.focus}</div>
+        <div class="card-header" style="align-items: flex-start;">
+          <div style="flex: 1; margin-right: 12px;">
+            ${isEditMode ? `
+              <input type="text" class="form-input edit-prog-name" data-session="${key}" value="${program.name}" style="font-size: 14px; font-weight: bold; width: 100%; margin-bottom: 4px; padding: 4px 8px; text-transform: uppercase;" />
+              <div style="display: flex; gap: 4px; align-items: center;">
+                <span style="font-size: 12px; color: var(--text-tertiary); white-space: nowrap;">${program.day} •</span>
+                <input type="text" class="form-input edit-prog-focus" data-session="${key}" value="${program.focus || ''}" style="font-size: 12px; width: 100%; padding: 2px 8px;" placeholder="Focus (ex: Piept, Umeri)" />
+              </div>
+            ` : `
+              <div class="card-title">${program.name}</div>
+              <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 2px">${program.day} • ${program.focus}</div>
+            `}
           </div>
           ${!isEditMode ? `
             <button class="btn btn-sm ${logged ? 'btn-ghost' : 'btn-primary'} log-gym-btn" data-session="${key}" data-date="${dateStr}">
@@ -123,7 +131,11 @@ export function renderGymPage(forceDateStr = null) {
             </button>
           ` : ''}
         </div>
-        ${program.notes ? `<div style="font-size: 12px; color: var(--warning); margin-bottom: var(--space-md); padding: 8px 12px; background: rgba(234,179,8,0.08); border-radius: var(--radius-md);">${program.notes}</div>` : ''}
+        ${isEditMode ? `
+          <div style="margin-bottom: var(--space-md);">
+            <input type="text" class="form-input edit-prog-notes" data-session="${key}" value="${program.notes || ''}" placeholder="Note generale (ex: RIR 3-4...)" style="width: 100%; padding: 6px 12px; border: 1px dashed var(--warning); border-radius: var(--radius-md);" />
+          </div>
+        ` : (program.notes ? `<div style="font-size: 12px; color: var(--warning); margin-bottom: var(--space-md); padding: 8px 12px; background: rgba(234,179,8,0.08); border-radius: var(--radius-md);">${program.notes}</div>` : '')}
         
         <div class="gym-exercises" id="exercises-${key}">
           ${program.exercises.map((ex, i) => {
@@ -201,10 +213,18 @@ export function renderGymPage(forceDateStr = null) {
     const logged = rawLog && rawLog.exercises ? rawLog.exercises : rawLog;
     return `
       <div class="card animate-in">
-        <div class="card-header">
-          <div>
-            <div class="card-title">${program.name}</div>
-            <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 2px">${program.day} • ${program.focus}</div>
+        <div class="card-header" style="align-items: flex-start;">
+          <div style="flex: 1; margin-right: 12px;">
+            ${isEditMode ? `
+              <input type="text" class="form-input edit-prog-name" data-session="conditioning" value="${program.name}" style="font-size: 14px; font-weight: bold; width: 100%; margin-bottom: 4px; padding: 4px 8px; text-transform: uppercase;" />
+              <div style="display: flex; gap: 4px; align-items: center;">
+                <span style="font-size: 12px; color: var(--text-tertiary); white-space: nowrap;">${program.day} •</span>
+                <input type="text" class="form-input edit-prog-focus" data-session="conditioning" value="${program.focus || ''}" style="font-size: 12px; width: 100%; padding: 2px 8px;" placeholder="Focus (ex: Cardio)" />
+              </div>
+            ` : `
+              <div class="card-title">${program.name}</div>
+              <div style="font-size: 12px; color: var(--text-tertiary); margin-top: 2px">${program.day} • ${program.focus}</div>
+            `}
           </div>
           ${!isEditMode ? `
             <button class="btn btn-sm ${logged ? 'btn-ghost' : 'btn-primary'} log-gym-btn" data-session="conditioning" data-date="${dateStr}">
@@ -352,6 +372,16 @@ export function renderGymPage(forceDateStr = null) {
   function saveEdits() {
     // Save standard sessions
     ['lower', 'upper1', 'upper2', 'accesorii'].forEach(sessionKey => {
+      // Save header data
+      const progNameInput = page.querySelector(`.edit-prog-name[data-session="${sessionKey}"]`);
+      const progFocusInput = page.querySelector(`.edit-prog-focus[data-session="${sessionKey}"]`);
+      const progNotesInput = page.querySelector(`.edit-prog-notes[data-session="${sessionKey}"]`);
+      
+      if (progNameInput && currentPrograms[sessionKey]) currentPrograms[sessionKey].name = progNameInput.value;
+      if (progFocusInput && currentPrograms[sessionKey]) currentPrograms[sessionKey].focus = progFocusInput.value;
+      if (progNotesInput && currentPrograms[sessionKey]) currentPrograms[sessionKey].notes = progNotesInput.value;
+
+      // Save exercises
       const rows = page.querySelectorAll(`#exercises-${sessionKey} .gym-exercise-row`);
       rows.forEach((row, i) => {
         const name = row.querySelector('.edit-ex-name')?.value;
@@ -369,6 +399,12 @@ export function renderGymPage(forceDateStr = null) {
 
     // Save conditioning
     if (currentPrograms.conditioning) {
+      // Save header data
+      const condNameInput = page.querySelector(`.edit-prog-name[data-session="conditioning"]`);
+      const condFocusInput = page.querySelector(`.edit-prog-focus[data-session="conditioning"]`);
+      if (condNameInput) currentPrograms.conditioning.name = condNameInput.value;
+      if (condFocusInput) currentPrograms.conditioning.focus = condFocusInput.value;
+
       currentPrograms.conditioning.variants.forEach((v, vi) => {
         const variantDiv = page.querySelector(`#cond-variant-${vi}`);
         if (variantDiv) {
