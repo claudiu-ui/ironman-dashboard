@@ -492,15 +492,15 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
         </div>
 
         <!-- Gym Program Cards -->
-        <div class="grid-2" style="margin-bottom: var(--space-lg)">
+        <div class="grid-2" style="margin-bottom: var(--space-lg); align-items: start;">
           ${p(P.lower,`lower`,c.lower)}
           ${m(P.conditioning,c.conditioning)}
         </div>
-        <div class="grid-2" style="margin-bottom: var(--space-lg)">
+        <div class="grid-2" style="margin-bottom: var(--space-lg); align-items: start;">
           ${p(P.upper1,`upper1`,c.upper1)}
           ${p(P.upper2,`upper2`,c.upper2)}
         </div>
-        <div class="grid-2">
+        <div class="grid-2" style="align-items: start;">
           ${p(P.accesorii,`accesorii`,c.accesorii)}
         </div>
       </div>
