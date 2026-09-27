@@ -393,102 +393,106 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
               <div style="font-size:12px;color:var(--text-tertiary);margin-top:2px;">Loghează primul antrenament sau conectează Intervals.icu din Setări</div>
             </div>
           </div>
-        </div>`;return}let{ctl:a,atl:o,tsb:c,weeklyTSS:l,prevWeeklyTSS:u,ctlDelta:d,atlDelta:f,tsbDelta:p,ctlMonthDelta:m,source:h}=n,g=r?.sleepSecs??n.sleepSecs,_=r?.restingHR??n.restingHR,v=r?.hrv??n.hrv;r?.sleepScore;let y=r?.recovery??null,b=n.readiness,x=c<=-20?`Overreaching`:c<=-10?`Productive`:c<=5?`Optimized`:`Peak Form`,S=c<=-20?`#ef4444`:c<=-10?`#f97316`:c<=5?`#2ed573`:`#3b82f6`,C=c<=-20?`Oboseala acută îți depășește masiv baza. Ești la risc de supra-antrenament. Fără efort intens azi.`:c<=-10?`Te antrenezi consistent și fitness-ul crește rapid. Menține rutina pentru a mări Baza Aerobă.`:c<=5?`Echilibru perfect. Ești pregătit pentru antrenamente de calitate.`:`Oboseala a dispărut, ești în formă maximă (Taper). Perfect pentru cursă.`,w=`—`;g&&(w=`${Math.floor(g/3600)}h ${Math.floor(g%3600/60)}m`);let T=_?Math.round(_):`—`,E=v?Math.round(v):`—`,D=y==null?b==null?null:Math.round(b):Math.round(y);function O(e){return e==null?``:`
-        <div style="position: relative; margin-top: auto; padding-top: 24px;">
-          <div style="position: absolute; left: ${e}%; top: 12px; transform: translateX(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 6px solid #fff;"></div>
-          <div style="display: flex; height: 6px; border-radius: 3px; overflow: hidden;">
-            <div style="flex: 1; background: #ef4444; margin-right: 2px;"></div>
-            <div style="flex: 1; background: #f97316; margin-right: 2px;"></div>
-            <div style="flex: 1; background: #eab308; margin-right: 2px;"></div>
+        </div>`;return}let{ctl:a,atl:o,tsb:c,weeklyTSS:l,prevWeeklyTSS:u,ctlDelta:d,atlDelta:f,tsbDelta:p,ctlMonthDelta:m,source:h}=n,g=r?.sleepSecs??n.sleepSecs,_=r?.restingHR??n.restingHR,v=r?.hrv??n.hrv;r?.sleepScore;let y=r?.recovery??null,b=n.readiness,x=c<=-20?`Overreaching`:c<=-10?`Productive`:c<=5?`Optimized`:`Peak Form`,S=c<=-20?`#ef4444`:c<=-10?`#f97316`:c<=5?`#2ed573`:`#3b82f6`,C=c<=-20?`Oboseala acută îți depășește masiv baza. Ești la risc de supra-antrenament. Fără efort intens azi.`:c<=-10?`Te antrenezi consistent și fitness-ul crește rapid. Menține rutina pentru a mări Baza Aerobă.`:c<=5?`Echilibru perfect. Ești pregătit pentru antrenamente de calitate.`:`Oboseala a dispărut, ești în formă maximă (Taper). Perfect pentru cursă.`,w=`—`;g&&(w=`${Math.floor(g/3600)}h ${Math.floor(g%3600/60)}m`);let T=_?Math.round(_):`—`,E=v?Math.round(v):`—`,D=y==null?b==null?null:Math.round(b):Math.round(y),O=y==null?b==null?null:`calc`:`COROS`;function k(e){return e==null?``:`
+        <div style="position: relative; margin-top: auto; padding-top: 16px;">
+          <div style="position: absolute; left: ${e}%; top: 4px; transform: translateX(-50%); width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid #fff; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5)); transition: left 1s ease-out;"></div>
+          <div style="display: flex; height: 4px; border-radius: 2px; overflow: hidden; background: #333;">
+            <div style="flex: 1; background: #ef4444; margin-right: 1px;"></div>
+            <div style="flex: 1; background: #f97316; margin-right: 1px;"></div>
+            <div style="flex: 1; background: #eab308; margin-right: 1px;"></div>
             <div style="flex: 1; background: #22c55e;"></div>
           </div>
-          <div style="display:flex; justify-content: space-between; font-size: 11px; color: #9ca3af; margin-top: 6px;">
+          <div style="display:flex; justify-content: space-between; font-size: 10px; color: #6b7280; margin-top: 6px; text-transform: uppercase; letter-spacing: 0.05em;">
             <span>Exhausted</span>
             <span>Fresh</span>
           </div>
         </div>
-      `}function k(e){if(!e||e.length===0)return``;let t=e.map(e=>e.value),n=Math.min(...t)-5,r=Math.max(...t)+5,i=r-n||1,a=100/(e.length>1?e.length-1:1),o=e.map((e,t)=>({x:t*a,y:100-(e.value-n)/i*100,val:e.value,label:e.label})),s=`M${o[0].x},${o[0].y}`;for(let e=1;e<o.length;e++)s+=` L${o[e].x},${o[e].y}`;let c=`${s} L100,100 L0,100 Z`,l=o.map(e=>`<span style="position:absolute;left:${e.x}%;bottom:-20px;transform:translateX(-50%);font-size:10px;color:#6b7280;">${e.label}</span>`).join(``);return`
-        <div style="position:relative; width:100%; height:140px; padding-bottom: 25px; margin-top: 10px; padding-left: 20px;">
+      `}function A(e){if(!e||e.length===0)return``;let t=e.map(e=>e.value),n=Math.min(...t)-5,r=Math.max(...t)+5,i=r-n||1,a=100/(e.length>1?e.length-1:1),o=e.map((e,t)=>({x:t*a,y:100-(e.value-n)/i*100,val:e.value,label:e.label})),s=`M${o[0].x},${o[0].y}`;for(let e=1;e<o.length;e++)s+=` L${o[e].x},${o[e].y}`;let c=`${s} L100,100 L0,100 Z`,l=o.map(e=>`<span style="position:absolute;left:${e.x}%;bottom:-16px;transform:translateX(-50%);font-size:9px;color:#6b7280;">${e.label}</span>`).join(``);return`
+        <div style="position:relative; width:100%; height:120px; padding-bottom: 20px; margin-top: 8px; padding-left: 24px; box-sizing: border-box;">
           <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style="overflow:visible;">
             <defs>
               <linearGradient id="hrvGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.3" />
+                <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.25" />
                 <stop offset="100%" stop-color="#00e5ff" stop-opacity="0" />
               </linearGradient>
             </defs>
-            <line x1="0" y1="0" x2="100" y2="0" stroke="#374151" stroke-width="0.5" stroke-dasharray="2,2"/>
-            <line x1="0" y1="50" x2="100" y2="50" stroke="#374151" stroke-width="0.5" stroke-dasharray="2,2"/>
-            <line x1="0" y1="100" x2="100" y2="100" stroke="#374151" stroke-width="0.5" stroke-dasharray="2,2"/>
+            <line x1="0" y1="0" x2="100" y2="0" stroke="#374151" stroke-width="0.3" stroke-dasharray="2,2"/>
+            <line x1="0" y1="50" x2="100" y2="50" stroke="#374151" stroke-width="0.3" stroke-dasharray="2,2"/>
+            <line x1="0" y1="100" x2="100" y2="100" stroke="#374151" stroke-width="0.3" stroke-dasharray="2,2"/>
             
-            <text x="-5" y="4" fill="#6b7280" font-size="6" text-anchor="end">${Math.round(r)}</text>
-            <text x="-5" y="52" fill="#6b7280" font-size="6" text-anchor="end">${Math.round((r+n)/2)}</text>
-            <text x="-5" y="102" fill="#6b7280" font-size="6" text-anchor="end">${Math.round(n)}</text>
+            <text x="-4" y="3" fill="#6b7280" font-size="5" text-anchor="end">${Math.round(r)}</text>
+            <text x="-4" y="52" fill="#6b7280" font-size="5" text-anchor="end">${Math.round((r+n)/2)}</text>
+            <text x="-4" y="102" fill="#6b7280" font-size="5" text-anchor="end">${Math.round(n)}</text>
 
             <path d="${c}" fill="url(#hrvGrad)" />
-            <path d="${s}" fill="none" stroke="#00e5ff" stroke-width="2" vector-effect="non-scaling-stroke" />
+            <path d="${s}" fill="none" stroke="#00e5ff" stroke-width="1.5" vector-effect="non-scaling-stroke" style="stroke-dasharray: 1000; stroke-dashoffset: 1000; animation: drawLine 1.5s ease-out forwards;" />
           </svg>
-          <div style="position:absolute; top:0; left:20px; right:0; height:100%;">
-            ${o.map(e=>`<div style="position:absolute;left:${e.x}%;top:${e.y}%;width:6px;height:6px;background:#00e5ff;border-radius:50%;transform:translate(-50%, -50%);box-shadow:0 0 4px #00e5ff;"></div>`).join(``)}
+          <div style="position:absolute; top:0; left:24px; right:0; height:100%;">
+            ${o.map(e=>`<div style="position:absolute;left:${e.x}%;top:${e.y}%;width:4px;height:4px;background:#00e5ff;border-radius:50%;transform:translate(-50%, -50%);box-shadow:0 0 4px rgba(0,229,255,0.5); opacity: 0; animation: fadeIn 0.3s ease-out forwards; animation-delay: 1.2s;"></div>`).join(``)}
+            <style>@keyframes fadeIn { to { opacity: 1; } }</style>
           </div>
-          <div style="position:absolute; bottom:0; left:20px; right:0; height:20px;">
+          <div style="position:absolute; bottom:0; left:24px; right:0; height:16px;">
             ${l}
           </div>
         </div>
-      `}let A=r&&(r.steps||r.calories||r.stress)?`
+      `}let ee=r&&(r.steps||r.calories||r.stress)?`
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:1px;background:var(--border-subtle);border-bottom:1px solid var(--border-subtle);">
         <div style="background:#0f0f0f;padding:12px 14px;text-align:center;">
           <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">💤 Somn</div>
-          <div style="font-size:18px;font-weight:700;color:var(--text-primary);">${w}</div>
+          <div style="font-size:16px;font-weight:600;color:var(--text-primary);">${w}</div>
         </div>
         <div style="background:#0f0f0f;padding:12px 14px;text-align:center;">
           <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">🚶‍♂️ Pași</div>
-          <div style="font-size:18px;font-weight:700;color:var(--text-primary);">${r.steps||`—`}</div>
+          <div style="font-size:16px;font-weight:600;color:var(--text-primary);">${r.steps||`—`}</div>
         </div>
         <div style="background:#0f0f0f;padding:12px 14px;text-align:center;">
           <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">🔥 Calorii</div>
-          <div style="font-size:18px;font-weight:700;color:var(--text-primary);">${r.calories?Math.round(r.calories):`—`}</div>
+          <div style="font-size:16px;font-weight:600;color:var(--text-primary);">${r.calories?Math.round(r.calories):`—`}</div>
         </div>
         <div style="background:#0f0f0f;padding:12px 14px;text-align:center;">
           <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">🧠 Stres</div>
-          <div style="font-size:18px;font-weight:700;color:var(--text-primary);">${r.stress?Math.round(r.stress):`—`}</div>
+          <div style="font-size:16px;font-weight:600;color:var(--text-primary);">${r.stress?Math.round(r.stress):`—`}</div>
         </div>
       </div>
     `:``;t.innerHTML=`
-      <div class="card animate-in" style="background:#0f0f0f; border:none; padding:0; margin-bottom:var(--space-md);">
+      <div class="card animate-in" style="background:#0a0a0a; border:none; padding:0; margin-bottom:var(--space-md);">
         
         <!-- Header -->
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:0 0 16px 0;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:0 0 12px 0;">
           <div style="display:flex;align-items:center;gap:8px;">
-            <div style="width:8px;height:8px;border-radius:50%;background:${h===`intervals`?`var(--success)`:`#3b82f6`};box-shadow:0 0 8px ${h===`intervals`?`var(--success)`:`#3b82f6`};"></div>
-            <span style="font-size:12px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;">
+            <div style="width:6px;height:6px;border-radius:50%;background:${h===`intervals`?`var(--success)`:`#3b82f6`};box-shadow:0 0 6px ${h===`intervals`?`var(--success)`:`#3b82f6`};"></div>
+            <span style="font-size:11px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;color:var(--text-secondary);">
               ${h===`intervals`?`Intervals.icu / EvoLab`:`EvoLab Metrics`}
             </span>
           </div>
-          <button onclick="window._refreshFitnessWidget()" style="background:none;border:none;color:var(--text-tertiary);font-size:11px;cursor:pointer;padding:4px 8px;border-radius:4px;border:1px solid var(--border-subtle);">
+          <button onclick="window._refreshFitnessWidget()" style="background:none;border:none;color:var(--text-tertiary);font-size:10px;cursor:pointer;padding:4px 8px;border-radius:4px;border:1px solid rgba(255,255,255,0.1);transition:background 0.2s;">
             🔄 Refresh
           </button>
         </div>
 
         
       <style>
-        .coros-grid { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 24px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        .coros-grid { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 24px; font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
         @media (min-width: 768px) { .coros-grid { grid-template-columns: repeat(2, 1fr); } }
-        .coros-card { background: #1b1e28; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; position: relative; border: 1px solid rgba(255,255,255,0.05); }
-        .coros-title { font-size: 14px; font-weight: 500; color: #9ca3af; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;}
-        .coros-val { font-size: 24px; font-weight: 700; color: #fff; line-height: 1; }
-        .coros-label { font-size: 12px; color: #6b7280; margin-bottom: 4px; }
+        @media (min-width: 1024px) { .coros-grid { grid-template-columns: repeat(3, 1fr); } }
+        .coros-card { background: #161821; border-radius: 8px; padding: 16px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); display: flex; flex-direction: column; position: relative; border: 1px solid rgba(255,255,255,0.02); transition: transform 0.2s; }
+        .coros-card:hover { transform: translateY(-2px); }
+        .coros-title { font-size: 13px; font-weight: 400; color: #9ca3af; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;}
+        .coros-val { font-size: 20px; font-weight: 600; color: #fff; line-height: 1.2; }
+        .coros-label { font-size: 11px; color: #6b7280; margin-bottom: 2px; }
+        @keyframes drawLine { from { stroke-dashoffset: 1000; } to { stroke-dashoffset: 0; } }
       </style>
     
         <div class="coros-grid">
           
           <!-- Training Status -->
           <div class="coros-card">
-            <div class="coros-title">Training Status <span style="font-size:12px;color:#6b7280;cursor:help;" title="${C}">ℹ</span></div>
-            <div style="font-size: 24px; font-weight: 600; color: ${S}; margin-bottom: 8px;">${x}</div>
-            <div style="font-size: 13px; color: #9ca3af; margin-bottom: 24px; line-height: 1.4;">
+            <div class="coros-title">Training Status <span style="font-size:12px;color:#6b7280;cursor:help;" title="${C}">ℹ️</span></div>
+            <div style="font-size: 18px; font-weight: 500; color: ${S}; margin-bottom: 6px; letter-spacing: -0.02em;">${x}</div>
+            <div style="font-size: 11px; color: #9ca3af; margin-bottom: 20px; line-height: 1.5;">
               ${C}
             </div>
-            <div style="display: flex; justify-content: space-between; margin-top: auto;">
+            <div style="display: flex; justify-content: space-between; margin-top: auto; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px;">
               <div>
                 <div class="coros-label">Load Impact</div>
                 <div class="coros-val">${o}</div>
@@ -506,41 +510,42 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
 
           <!-- Recovery -->
           <div class="coros-card">
-            <div class="coros-title">Recovery</div>
-            <div style="display: flex; align-items: center; justify-content: center; height: 100px;">
-               <svg width="48" height="60" viewBox="0 0 24 24" fill="none" stroke="#e5e7eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 24px; opacity: 0.8;">
-                 <circle cx="12" cy="5" r="3"></circle>
-                 <path d="M6 12l2-3 4-1 4 1 2 3"></path>
-                 <path d="M12 11v6l-3 4"></path>
-                 <path d="M12 17l3 4"></path>
+            <div class="coros-title">Recovery <span style="font-size:12px;color:#6b7280;cursor:help;" title="via ${O||`calc`}">ℹ️</span></div>
+            <div style="display: flex; align-items: center; justify-content: center; height: 80px;">
+               <!-- Redesigned figure SVG -->
+               <svg width="40" height="50" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 16px;">
+                 <circle cx="12" cy="5" r="2.5"></circle>
+                 <path d="M7 11l4-2.5 4 2.5"></path>
+                 <path d="M12 16v-7.5"></path>
+                 <path d="M10 21l2-5 2 5"></path>
                </svg>
-               <div>
-                 <div style="font-size: 48px; font-weight: 700; color: #fff; line-height: 1;">${D??`—`}<span style="font-size: 20px;">%</span></div>
-                 <div style="font-size: 12px; color: #9ca3af; margin-top: 4px;">RHR: ${T} bpm</div>
+               <div style="text-align: left;">
+                 <div style="font-size: 36px; font-weight: 600; color: #fff; line-height: 1; letter-spacing: -0.03em;">${D??`—`}<span style="font-size: 16px; font-weight: 400; margin-left: 2px;">%</span></div>
+                 <div style="font-size: 11px; color: #9ca3af; margin-top: 4px;">RHR: <span style="color:#e5e7eb;">${T} bpm</span></div>
                </div>
             </div>
-            ${O(D)}
+            ${k(D)}
           </div>
 
           <!-- Overnight HRV -->
           ${r?.hrvHistory?`
           <div class="coros-card">
             <div class="coros-title" style="margin-bottom:0;">
-              <div>Overnight HRV <span style="font-size:12px;color:#6b7280">(7 Days)</span></div>
-              <div style="color: #fff; font-size: 14px;">Avg: <span style="font-weight: 600; font-size: 16px;">${E}</span><span style="font-size:12px;color:#9ca3af;font-weight:normal;">ms</span></div>
+              <div>Overnight HRV <span style="font-size:11px;color:#6b7280;font-weight:normal;">(7 Days)</span></div>
+              <div style="color: #e5e7eb; font-size: 11px;">Avg: <span style="font-weight: 600; font-size: 13px; color:#fff;">${E}</span> ms</div>
             </div>
-            ${k(r.hrvHistory)}
+            ${A(r.hrvHistory)}
           </div>
           `:``}
           
         </div>
 
         <div style="border:1px solid var(--border-subtle); border-radius: 8px; overflow: hidden;">
-          ${A}
+          ${ee}
           ${r&&r._raw?`
-            <div style="padding:14px 20px;background:#111;">
-              <details style="font-size:11px;color:var(--text-tertiary);">
-                <summary style="cursor:pointer;user-select:none;font-weight:600;">🛠️ DEBUG: Arată datele brute trimise de ceasul COROS</summary>
+            <div style="padding:12px 16px;background:#111;">
+              <details style="font-size:10px;color:var(--text-tertiary);">
+                <summary style="cursor:pointer;user-select:none;font-weight:600;">🛠️ DEBUG: Date Coros brute</summary>
                 <pre style="margin-top:8px;padding:8px;background:#000;border-radius:4px;overflow-x:auto;white-space:pre-wrap;color:#aaa;">${JSON.stringify(r._raw,null,2)}</pre>
               </details>
             </div>
