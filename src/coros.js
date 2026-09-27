@@ -394,7 +394,7 @@ export async function fetchCorosWellness() {
 
   // Fetch sleep data and HRV in parallel
   const [sleepResult, hrvResult, rhrResult, healthResult] = await Promise.all([
-    callMcpTool('querySleepData', { date: today }),
+    callMcpTool('querySleepOverview', { date: today }),
     callMcpTool('querySleepHrv', { date: today }),
     callMcpTool('queryRestingHeartRate', { startDate: today, endDate: today }),
     callMcpTool('queryDailyHealthData', { date: today })
