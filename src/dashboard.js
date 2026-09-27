@@ -889,6 +889,27 @@ async function loadAndRenderFitnessWidget(page) {
       return `<div style="height:4px;background:rgba(255,255,255,0.06);border-radius:2px;margin-top:6px;"><div style="height:100%;width:${pct}%;background:${color};border-radius:2px;"></div></div>`;
     }
 
+    const sleepHrs = sleepSecs ? (sleepSecs / 3600).toFixed(1) : '—';
+    const rhr = restingHR ? Math.round(restingHR) : '—';
+    const hrvVal = hrv ? Math.round(hrv) : '—';
+
+    const wellnessHtml = (source === 'intervals' && (sleepSecs || restingHR || hrv)) ? `
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border-subtle);border-bottom:1px solid var(--border-subtle);">
+        <div style="background:#0f0f0f;padding:12px 14px;text-align:center;">
+          <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">💤 Somn (Azi-noapte)</div>
+          <div style="font-size:20px;font-weight:700;color:var(--text-primary);">${sleepHrs} <span style="font-size:12px;color:var(--text-tertiary);font-weight:400;">ore</span></div>
+        </div>
+        <div style="background:#0f0f0f;padding:12px 14px;text-align:center;">
+          <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">❤️ Resting HR</div>
+          <div style="font-size:20px;font-weight:700;color:var(--text-primary);">${rhr} <span style="font-size:12px;color:var(--text-tertiary);font-weight:400;">bpm</span></div>
+        </div>
+        <div style="background:#0f0f0f;padding:12px 14px;text-align:center;">
+          <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">💓 HRV (rMSSD)</div>
+          <div style="font-size:20px;font-weight:700;color:var(--text-primary);">${hrvVal} <span style="font-size:12px;color:var(--text-tertiary);font-weight:400;">ms</span></div>
+        </div>
+      </div>
+    ` : '';
+
     container.innerHTML = `
       <div class="card animate-in" style="background:linear-gradient(145deg,#1a1a1a 0%,#0f0f0f 100%);border:1px solid var(--border-subtle);margin-bottom:var(--space-md);">
         
@@ -946,6 +967,8 @@ async function loadAndRenderFitnessWidget(page) {
             <div style="font-size:10px;color:var(--text-tertiary);margin-top:4px;">săpt. ant.: ${prevWeeklyTSS}</div>
           </div>
         </div>
+
+        ${wellnessHtml}
 
         <!-- Coaching Insight -->
         <div style="padding:14px 20px;display:flex;gap:12px;align-items:flex-start;">
