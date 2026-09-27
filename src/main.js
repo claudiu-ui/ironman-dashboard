@@ -391,7 +391,7 @@ function buildApp() {
         // Sort chronologically (ascending) so morning sessions are first
         completedLogs.sort((a, b) => {
           if (a.timestamp && b.timestamp) return new Date(a.timestamp) - new Date(b.timestamp);
-          if (a.intervalsId && b.intervalsId) return a.intervalsId - b.intervalsId;
+          if (a.intervalsId && b.intervalsId) return String(a.intervalsId).localeCompare(String(b.intervalsId));
           return 0; // If no timestamps, keep original order
         });
         
