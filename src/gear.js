@@ -34,6 +34,9 @@ export function renderGearPage() {
             </div>
           </div>
           <div style="display: flex; gap: 8px;">
+            <button type="button" class="btn btn-ghost btn-sm gear-edit-dist-btn" data-id="${g.id}">
+              ✏️ Editează
+            </button>
             <button type="button" class="btn btn-ghost btn-sm gear-toggle-btn" data-id="${g.id}">
               ${g.active ? '🗑️ Retrage' : '✅ Activează'}
             </button>
@@ -107,6 +110,26 @@ export function renderGearPage() {
             storage.saveGear(gearList);
             listContainer.innerHTML = renderGearCards();
             attachListEvents();
+          }
+        });
+      });
+
+      page.querySelectorAll('.gear-edit-dist-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          const id = e.currentTarget.dataset.id;
+          const item = gearList.find(g => g.id === id);
+          if (item) {
+            const newDist = prompt(`Editează distanța curentă pentru ${item.name} (km):`, item.distance.toFixed(1));
+            if (newDist !== null) {
+              const parsed = parseFloat(newDist);
+              if (!isNaN(parsed) && parsed >= 0) {
+                item.distance = parsed;
+                storage.saveGear(gearList);
+                listContainer.innerHTML = renderGearCards();
+                attachListEvents();
+              }
+            }
           }
         });
       });

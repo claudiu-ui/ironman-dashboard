@@ -727,7 +727,7 @@ function buildApp() {
       if (gear.length > 0) {
         logGearGroup.style.display = 'block';
         logGearInput.innerHTML = '<option value="">-- Fără Echipament --</option>' + 
-          gear.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
+          gear.map((g, i) => `<option value="${g.id}" ${i === 0 ? 'selected' : ''}>${g.name}</option>`).join('');
       } else {
         logGearGroup.style.display = 'none';
         logGearInput.innerHTML = '<option value="">-- Fără Echipament --</option>';
