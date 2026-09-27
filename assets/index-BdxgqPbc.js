@@ -1519,7 +1519,7 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
             <div class="wd-step-name">${e.name}</div>
             <div class="wd-step-desc">${e.desc}</div>
           </div>
-        `).join(``));let h=O(t,r,e,d,c);document.getElementById(`wd-coaching-notes`).innerHTML=h,M(async()=>{let{storage:e}=await Promise.resolve().then(()=>ie);return{storage:e}},void 0).then(({storage:e})=>{let r=e.getWorkoutLog(a)?.filter(e=>e.type===t)||[];if(r.sort((e,t)=>e.timestamp&&t.timestamp?new Date(e.timestamp)-new Date(t.timestamp):e.intervalsId&&t.intervalsId?e.intervalsId-t.intervalsId:0),r.length>0){T.style.display=``;let i=document.getElementById(`wd-results-content`);r[0].isSkipped?(i.innerHTML=`
+        `).join(``));let h=O(t,r,e,d,c);document.getElementById(`wd-coaching-notes`).innerHTML=h,M(async()=>{let{storage:e}=await Promise.resolve().then(()=>ie);return{storage:e}},void 0).then(({storage:e})=>{let r=e.getWorkoutLog(a)?.filter(e=>e.type===t)||[];if(r.sort((e,t)=>e.timestamp&&t.timestamp?new Date(e.timestamp)-new Date(t.timestamp):e.intervalsId&&t.intervalsId?String(e.intervalsId).localeCompare(String(t.intervalsId)):0),r.length>0){T.style.display=``;let i=document.getElementById(`wd-results-content`);r[0].isSkipped?(i.innerHTML=`
               <div style="text-align: center; padding: var(--space-xl);">
                 <div style="font-size: 32px; margin-bottom: 16px;">⏭️</div>
                 <h3 style="color: var(--text-primary); margin-bottom: 8px;">Sesiune Sărită (Skipped)</h3>
