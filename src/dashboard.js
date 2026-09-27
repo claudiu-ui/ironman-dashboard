@@ -849,12 +849,19 @@ async function loadAndRenderFitnessWidget(page) {
 
     // Also try to fetch COROS wellness data (sleep, HRV, RHR with real scores)
     let corosData = null;
+    let corosError = null;
     if (isCorosConnected()) {
       try {
         corosData = await fetchCorosWellness();
       } catch (e) {
+        corosError = e.message || String(e);
         console.warn('COROS wellness fetch failed:', e);
       }
+    }
+
+    if (corosError || (isCorosConnected() && !corosData)) {
+      container.innerHTML = `<div style="padding:20px; background:#ef4444; color:white;">COROS ERROR: ${corosError || 'fetch returned null'}</div>`;
+      return;
     }
 
     if (!m) {
