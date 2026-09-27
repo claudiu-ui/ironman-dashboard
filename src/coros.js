@@ -19,16 +19,46 @@ async function getOAuthConfig() {
     const data = await res.json();
     cachedOAuthConfig = {
       authUrl: data.authorization_endpoint,
-      tokenUrl: data.token_endpoint
+      tokenUrl: data.token_endpoint,
+      registerUrl: data.registration_endpoint
     };
     return cachedOAuthConfig;
   } catch (e) {
     console.error('Failed to discover Coros OAuth endpoints', e);
-    // Fallback to EU since user is in EU, but ideally it succeeds
     return {
       authUrl: 'https://mcpeu.coros.com/oauth2/authorize',
-      tokenUrl: 'https://mcpeu.coros.com/oauth2/token'
+      tokenUrl: 'https://mcpeu.coros.com/oauth2/token',
+      registerUrl: 'https://mcpeu.coros.com/connect/register'
     };
+  }
+}
+
+async function getOrRegisterClientId(config) {
+  let clientId = localStorage.getItem('coros_dynamic_client_id');
+  if (clientId) return clientId;
+
+  try {
+    const resp = await fetch(config.registerUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        client_name: 'Ironman Dashboard',
+        redirect_uris: [COROS_REDIRECT_URI],
+        grant_types: ['authorization_code', 'refresh_token'],
+        response_types: ['code'],
+        scope: 'openid mcp.tools offline_access',
+        token_endpoint_auth_method: 'none'
+      })
+    });
+    if (!resp.ok) throw new Error('Registration failed');
+    const data = await resp.json();
+    clientId = data.client_id;
+    localStorage.setItem('coros_dynamic_client_id', clientId);
+    return clientId;
+  } catch (e) {
+    console.error('Failed to register dynamic client', e);
+    // Fallback to the hardcoded US one if registration fails, though it might 400
+    return COROS_CLIENT_ID;
   }
 }
 
@@ -88,13 +118,14 @@ function isTokenExpired(tokens) {
 async function refreshAccessToken(tokens) {
   if (!tokens.refresh_token) return null;
 
+  const config = await getOAuthConfig();
+  const clientId = await getOrRegisterClientId(config);
+
   const body = new URLSearchParams({
     grant_type: 'refresh_token',
-    client_id: COROS_CLIENT_ID,
+    client_id: clientId,
     refresh_token: tokens.refresh_token,
   });
-
-  const config = await getOAuthConfig();
   
   try {
     const resp = await fetch(config.tokenUrl, {
@@ -136,9 +167,12 @@ export async function startCorosAuth() {
   sessionStorage.setItem('coros_pkce_verifier', verifier);
   sessionStorage.setItem('coros_oauth_state', state);
 
+  const config = await getOAuthConfig();
+  const clientId = await getOrRegisterClientId(config);
+
   const params = new URLSearchParams({
     response_type: 'code',
-    client_id: COROS_CLIENT_ID,
+    client_id: clientId,
     redirect_uri: COROS_REDIRECT_URI,
     scope: 'openid mcp.tools offline_access',
     state: state,
@@ -146,7 +180,6 @@ export async function startCorosAuth() {
     code_challenge_method: 'S256',
   });
 
-  const config = await getOAuthConfig();
   window.location.href = `${config.authUrl}?${params.toString()}`;
 }
 
@@ -172,10 +205,11 @@ export async function handleCorosCallback() {
 
   // Exchange code for tokens
   const config = await getOAuthConfig();
+  const clientId = await getOrRegisterClientId(config);
 
   const body = new URLSearchParams({
     grant_type: 'authorization_code',
-    client_id: COROS_CLIENT_ID,
+    client_id: clientId,
     code: code,
     redirect_uri: COROS_REDIRECT_URI,
     code_verifier: verifier,
