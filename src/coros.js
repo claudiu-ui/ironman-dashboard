@@ -347,7 +347,17 @@ async function callMcpTool(toolName, args = {}) {
       if (line.startsWith('data: ')) {
         try {
           const data = JSON.parse(line.slice(6));
-          if (data.error) throw new Error(`MCP tool ${toolName} JSON-RPC error: ${JSON.stringify(data.error)}`);
+          if (data.error) {
+            let errMsg = JSON.stringify(data.error);
+            if (errMsg.includes('Unknown tool') || errMsg.includes('invalid_tool_name')) {
+              try {
+                const listResp = await fetch(mcpUrl, { method: 'POST', headers, body: JSON.stringify({ jsonrpc: '2.0', id: Date.now(), method: 'tools/list' }) });
+                const listData = await listResp.json();
+                if (listData.result && listData.result.tools) errMsg += ` | Available: ` + listData.result.tools.map(t => t.name).join(', ');
+              } catch (e) {}
+            }
+            throw new Error(`MCP tool ${toolName} JSON-RPC error: ${errMsg}`);
+          }
           if (data.result) return data.result;
         } catch (e) {
           if (e.message.includes('JSON-RPC error')) throw e;
@@ -360,7 +370,15 @@ async function callMcpTool(toolName, args = {}) {
   // Handle direct JSON response
   const data = await resp.json();
   if (data.error) {
-    throw new Error(`MCP tool ${toolName} JSON-RPC error: ${JSON.stringify(data.error)}`);
+    let errMsg = JSON.stringify(data.error);
+    if (errMsg.includes('Unknown tool') || errMsg.includes('invalid_tool_name')) {
+      try {
+        const listResp = await fetch(mcpUrl, { method: 'POST', headers, body: JSON.stringify({ jsonrpc: '2.0', id: Date.now(), method: 'tools/list' }) });
+        const listData = await listResp.json();
+        if (listData.result && listData.result.tools) errMsg += ` | Available: ` + listData.result.tools.map(t => t.name).join(', ');
+      } catch (e) {}
+    }
+    throw new Error(`MCP tool ${toolName} JSON-RPC error: ${errMsg}`);
   }
   return data.result || data;
 }
