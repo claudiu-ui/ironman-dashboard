@@ -386,13 +386,13 @@ function buildApp() {
       // Check if workout is completed — populate results tab
       import('./storage.js').then(({ storage }) => {
         const logs = storage.getWorkoutLog(dateStr);
-        const completedLog = logs?.find(l => l.type === type);
+        const completedLogs = logs?.filter(l => l.type === type) || [];
         
-        if (completedLog) {
+        if (completedLogs.length > 0) {
           tabResults.style.display = '';
           const resultsContent = document.getElementById('wd-results-content');
           
-          if (completedLog.isSkipped) {
+          if (completedLogs[0].isSkipped) {
             resultsContent.innerHTML = `
               <div style="text-align: center; padding: var(--space-xl);">
                 <div style="font-size: 32px; margin-bottom: 16px;">⏭️</div>
@@ -405,14 +405,19 @@ function buildApp() {
               const undoBtn = document.getElementById('wd-undo-skip-btn');
               if (undoBtn) {
                 undoBtn.addEventListener('click', () => {
-                  storage.deleteWorkout(dateStr, completedLog.id);
+                  storage.deleteWorkout(dateStr, completedLogs[0].id);
                   document.getElementById('workout-details-modal').classList.remove('active');
                   import('./router.js').then(({ renderCurrentRoute }) => renderCurrentRoute());
                 });
               }
             }, 0);
           } else {
-            resultsContent.innerHTML = renderCompletedMetrics(completedLog, type, HR_ZONES);
+            resultsContent.innerHTML = completedLogs.map((log, idx) => `
+              <div style="${idx > 0 ? 'margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border-subtle);' : ''}">
+                ${completedLogs.length > 1 ? `<div style="font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; color: var(--accent);">🔄 Sesiunea ${idx + 1}</div>` : ''}
+                ${renderCompletedMetrics(log, type, HR_ZONES)}
+              </div>
+            `).join('');
           }
           
           // Auto-switch to results if completed or skipped
