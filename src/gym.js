@@ -193,7 +193,9 @@ export function renderGymPage(forceDateStr = null) {
                       `).join('')}
                       ${lastSession.totalVolume ? `<span class="last-session-volume">Vol: ${lastSession.totalVolume}kg</span>` : ''}
                     </div>
-                  ` : ''}
+                  ` : `<div style="font-size: 9px; color: var(--text-tertiary); margin-top: 4px; opacity: 0.5;">
+                        Debug: no past data. Key: ${key}. Name: ${ex.name}. Dates: ${Object.keys(storage.get('gym', {})).join(', ')}
+                      </div>`}
                   
                   ${loggedEx && loggedEx.sets ? `
                     <div class="gym-today-session">
