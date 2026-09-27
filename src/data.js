@@ -40,10 +40,14 @@ export function getCurrentPhase(weekNum) {
 
 export function getCurrentWeek(dateStr = null) {
   const now = dateStr ? new Date(dateStr) : new Date();
-  // Set to midnight to avoid timezone issues when calculating difference
-  now.setHours(0, 0, 0, 0);
-  const diff = now - PLAN_START;
-  const weekNum = Math.floor(diff / (7 * 24 * 60 * 60 * 1000)) + 1;
+  
+  // Normalize both to UTC midnight of their local date to prevent timezone shift (which pushed Mondays back by 3 hours)
+  const startUTC = new Date(Date.UTC(PLAN_START.getFullYear(), PLAN_START.getMonth(), PLAN_START.getDate()));
+  const currentUTC = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+  
+  const diffDays = Math.round((currentUTC - startUTC) / (24 * 60 * 60 * 1000));
+  const weekNum = Math.floor(diffDays / 7) + 1;
+  
   return Math.max(1, Math.min(48, weekNum));
 }
 
