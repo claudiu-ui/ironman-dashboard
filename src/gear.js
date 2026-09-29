@@ -112,6 +112,63 @@ export function renderGearPage() {
             ${renderGearCards()}
           </div>
         </div>
+    </div>
+    
+    <!-- Timeline Achizitii -->
+    <div class="card animate-in animate-in-delay-2" style="margin-top: var(--space-lg);">
+      <div class="card-header">
+        <div class="card-title">📈 Road to IRONMAN: Ghid de Achiziții Echipament</div>
+        <div class="card-badge" style="background: var(--bg-glass); color: var(--text-secondary);">Planificare Financiară</div>
+      </div>
+      <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: var(--space-lg);">
+        Un IRONMAN necesită o mulțime de echipamente, dar NU ai nevoie de toate în prima zi. Iată o progresie logică a investițiilor pentru a-ți eșalona costurile de-a lungul celor 48 de săptămâni.
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <!-- Phase 1 -->
+        <div style="background: rgba(255,255,255,0.02); border-left: 4px solid #3b82f6; padding: 16px; border-radius: 0 8px 8px 0;">
+          <h4 style="color: #3b82f6; font-size: 15px; margin-bottom: 8px;">Faza 1: Fundație (Lunile 1-3)</h4>
+          <p style="color: var(--text-tertiary); font-size: 13px; margin-bottom: 12px;">Concentrează-te pe construirea unui obicei solid. Echipament de bază.</p>
+          <ul style="color: var(--text-secondary); font-size: 13px; margin-left: 20px; line-height: 1.6;">
+            <li><strong>Alergare:</strong> O pereche bună de adidași "Daily Trainer" (ex: Asics Nimbus, Hoka Clifton). Acoperă grosul kilometrilor.</li>
+            <li><strong>Înot:</strong> Slip/costum de antrenament, ochelari de înot confortabili, cască.</li>
+            <li><strong>Ciclism:</strong> Bicicletă (cursieră sau gravel cu cauciucuri de șosea), cască de protecție obligatorie, pantaloni cu bazon.</li>
+            <li><strong>Tehnologie:</strong> Ceas GPS multisport (Coros/Garmin) și centură HR (opțional, dar recomandat).</li>
+          </ul>
+        </div>
+
+        <!-- Phase 2 -->
+        <div style="background: rgba(255,255,255,0.02); border-left: 4px solid #10b981; padding: 16px; border-radius: 0 8px 8px 0;">
+          <h4 style="color: #10b981; font-size: 15px; margin-bottom: 8px;">Faza 2: Construcție (Lunile 4-6)</h4>
+          <p style="color: var(--text-tertiary); font-size: 13px; margin-bottom: 12px;">Antrenamentele devin specifice. Ai nevoie de echipament de tranziție.</p>
+          <ul style="color: var(--text-secondary); font-size: 13px; margin-left: 20px; line-height: 1.6;">
+            <li><strong>Ciclism:</strong> Pedale clipless (automate) și pantofi de ciclism. Vor crește enorm eficiența pe bicicletă.</li>
+            <li><strong>Înot:</strong> Wetsuit (Neopren) de triatlon pentru antrenamente în ape deschise (dacă apa e sub 22 grade).</li>
+            <li><strong>Nutriție:</strong> Bidoane suplimentare pentru bicicletă, primele comenzi de geluri/izotonic (Maurten, SiS, Precision) pentru a testa toleranța.</li>
+          </ul>
+        </div>
+
+        <!-- Phase 3 -->
+        <div style="background: rgba(255,255,255,0.02); border-left: 4px solid #f59e0b; padding: 16px; border-radius: 0 8px 8px 0;">
+          <h4 style="color: #f59e0b; font-size: 15px; margin-bottom: 8px;">Faza 3: Specificitate / Vârf (Lunile 7-9)</h4>
+          <p style="color: var(--text-tertiary); font-size: 13px; margin-bottom: 12px;">Se apropie cursele de simulare și long ride-urile de +150km.</p>
+          <ul style="color: var(--text-secondary); font-size: 13px; margin-left: 20px; line-height: 1.6;">
+            <li><strong>Ciclism:</strong> Aerobars (Clip-on) adăugate pe cursieră SAU trecerea la bicicletă de Triatlon (TT). Bike fitting profesional obligatoriu.</li>
+            <li><strong>Alergare:</strong> O a doua pereche de adidași (de viteză/cursă) pe care să-i rodezi (ex: pantofi cu placă de carbon).</li>
+            <li><strong>Echipament cursă:</strong> Costum de triatlon (Trisuit - dintr-o singură piesă), centură port-număr.</li>
+          </ul>
+        </div>
+
+        <!-- Phase 4 -->
+        <div style="background: rgba(255,255,255,0.02); border-left: 4px solid #ef4444; padding: 16px; border-radius: 0 8px 8px 0;">
+          <h4 style="color: #ef4444; font-size: 15px; margin-bottom: 8px;">Faza 4: Taper & Race Day (Lună 10-12)</h4>
+          <p style="color: var(--text-tertiary); font-size: 13px; margin-bottom: 12px;">Ultimele retușuri. Nu se mai cumpără echipament nou care necesită rodaj.</p>
+          <ul style="color: var(--text-secondary); font-size: 13px; margin-left: 20px; line-height: 1.6;">
+            <li><strong>Kit reparație:</strong> CO2, leviere, cameră de rezervă (exersată schimbarea).</li>
+            <li><strong>Marginal Gains:</strong> Cască Aero de contratimp, șosete aero (opțional, dacă bugetul permite).</li>
+            <li><strong>Nutriție Cursă:</strong> Stocul final de geluri pentru Race Day.</li>
+          </ul>
+        </div>
       </div>
     </div>
   `;
