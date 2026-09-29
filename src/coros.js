@@ -549,16 +549,16 @@ export async function fetchEvoLab() {
   const todayStr = today.toISOString().split('T')[0];
   const pastStr = fourWeeksAgo.toISOString().split('T')[0];
 
-  // We will try a few hypothetical tools to gather 4-week data.
-  // If they fail, the error message will contain the actual available tools!
   const results = await Promise.all([
-    callMcpTool('queryTrainingLoad', { startDate: pastStr, endDate: todayStr }).catch(e => e.message),
-    callMcpTool('queryActivityList', { startDate: pastStr, endDate: todayStr }).catch(e => e.message)
+    callMcpTool('queryTrainingLoadAssessment', { date: todayStr }).catch(e => e.message),
+    callMcpTool('querySportRecords', { startDate: pastStr, endDate: todayStr }).catch(e => e.message),
+    callMcpTool('queryFitnessAssessmentOverview', { date: todayStr }).catch(e => e.message)
   ]);
 
   return {
     trainingLoad: results[0],
-    activityList: results[1]
+    sportRecords: results[1],
+    fitnessOverview: results[2]
   };
 }
 
