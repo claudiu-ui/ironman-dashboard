@@ -238,10 +238,22 @@ export const storage = {
     }
   },
 
+  // Race Day Checklist
+  getRaceChecklist() {
+    return this.get('raceChecklist', {});
+  },
+
+  toggleRaceChecklist(itemId) {
+    const list = this.get('raceChecklist', {});
+    list[itemId] = !list[itemId];
+    this.set('raceChecklist', list);
+    return list[itemId];
+  },
+
   // Export all data
   exportAll() {
     const data = {};
-    const legacyKeys = ['workouts', 'gear', 'daily', 'benchmarks', 'equipment', 'gym', 'customGymPrograms', 'intervalsSettings', 'customSupplements', 'supplements', 'gutTraining', 'niggles', 'week_schedule_1', 'week_schedule_2', 'week_schedule_3', 'week_schedule_4', 'week_schedule_5', 'week_schedule_6', 'week_schedule_7', 'week_schedule_8', 'week_schedule_9', 'week_schedule_10'];
+    const legacyKeys = ['workouts', 'gear', 'daily', 'benchmarks', 'equipment', 'gym', 'customGymPrograms', 'intervalsSettings', 'customSupplements', 'supplements', 'gutTraining', 'niggles', 'raceChecklist', 'week_schedule_1', 'week_schedule_2', 'week_schedule_3', 'week_schedule_4', 'week_schedule_5', 'week_schedule_6', 'week_schedule_7', 'week_schedule_8', 'week_schedule_9', 'week_schedule_10'];
 
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);

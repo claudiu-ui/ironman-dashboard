@@ -158,6 +158,43 @@ export function renderFuelingPage() {
           <!-- Rendered via JS -->
         </div>
       </div>
+
+      <!-- RACE DAY CHECKLIST -->
+      <div class="card animate-in animate-in-delay-2" style="margin-top: var(--space-lg);">
+        <div class="card-header">
+          <div class="card-title">✅ Race Day Checklist</div>
+          <div class="card-badge" style="background: var(--bg-glass); color: var(--text-secondary);">Echipament Final</div>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: var(--space-md);">
+          Lista completă pentru ziua cursei (IRONMAN). Bifează-le pe măsură ce îți faci bagajele.
+        </p>
+        
+        <div class="grid-2">
+          <!-- Categoria Swim / T1 -->
+          <div>
+            <h4 style="margin-bottom: 8px; color: #06b6d4; font-size: 14px; text-transform: uppercase;">🏊 Swim & T1 (Tranziție 1)</h4>
+            <div id="check-group-swim" class="checklist-group" style="display: flex; flex-direction: column; gap: 8px;"></div>
+          </div>
+          
+          <!-- Categoria Bike / T2 -->
+          <div>
+            <h4 style="margin-bottom: 8px; color: #3b82f6; font-size: 14px; text-transform: uppercase;">🚴 Bike & T2 (Tranziție 2)</h4>
+            <div id="check-group-bike" class="checklist-group" style="display: flex; flex-direction: column; gap: 8px;"></div>
+          </div>
+          
+          <!-- Categoria Run & Gen -->
+          <div>
+            <h4 style="margin-bottom: 8px; color: #a855f7; font-size: 14px; text-transform: uppercase;">🏃 Run & Finish</h4>
+            <div id="check-group-run" class="checklist-group" style="display: flex; flex-direction: column; gap: 8px;"></div>
+          </div>
+
+          <!-- Categoria Nutritie -->
+          <div>
+            <h4 style="margin-bottom: 8px; color: #f59e0b; font-size: 14px; text-transform: uppercase;">⚡ Nutriție & Special Needs</h4>
+            <div id="check-group-nutrition" class="checklist-group" style="display: flex; flex-direction: column; gap: 8px;"></div>
+          </div>
+        </div>
+      </div>
     </div>
   `;
 
@@ -284,6 +321,61 @@ export function renderFuelingPage() {
     });
 
     renderGutList();
+
+    // Render Checklist
+    const renderChecklist = () => {
+      const state = storage.getRaceChecklist();
+      
+      const items = {
+        swim: [
+          'Neopren (Wetsuit)', 'Costum Triatlon (Trisuit)', 'Ochelari de înot (2 perechi pt siguranță)', 
+          'Cască înot (oferită de organizator)', 'Cremă anti-frecare (BodyGlide)', 'Prosop mic T1', 
+          'Cip de cronometrare (pe gleznă stângă)'
+        ],
+        bike: [
+          'Bicicletă (verificată mecanic)', 'Cască bicicletă (aero)', 'Pantofi ciclism', 'Ochelari de soare',
+          'Șosete ciclism (opțional)', 'Număr concurs + Cordon', 'Kit pană (cameră, CO2, leviere)',
+          'Computer bicicletă (încărcat)'
+        ],
+        run: [
+          'Pantofi alergare (cu șireturi rapide)', 'Șosete alergare (curate pt T2)', 'Șapcă / Vizieră', 
+          'Prosop mic T2', 'Cremă anti-frecare (extra)', 'Haine de schimb post-cursă (Morning Bag)'
+        ],
+        nutrition: [
+          'Bidoane bicicletă (umplute)', 'Bidoane extra (Special Needs Bike)', 'Geluri (pe cadru/top tube)',
+          'Geluri alergare (în buzunare/cordon)', 'Pastile de sare / Electroliți', 'Micul dejun pre-cursă'
+        ]
+      };
+
+      const createHtml = (categoryItems, categoryName) => {
+        return categoryItems.map((item, idx) => {
+          const id = `chk_${categoryName}_${idx}`;
+          const isChecked = state[id];
+          return `
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: ${isChecked ? 'var(--text-tertiary)' : 'var(--text-primary)'}; text-decoration: ${isChecked ? 'line-through' : 'none'}; font-size: 13px;">
+              <input type="checkbox" class="checklist-cb" data-id="${id}" ${isChecked ? 'checked' : ''} style="width: 16px; height: 16px; accent-color: var(--accent);">
+              ${item}
+            </label>
+          `;
+        }).join('');
+      };
+
+      page.querySelector('#check-group-swim').innerHTML = createHtml(items.swim, 'swim');
+      page.querySelector('#check-group-bike').innerHTML = createHtml(items.bike, 'bike');
+      page.querySelector('#check-group-run').innerHTML = createHtml(items.run, 'run');
+      page.querySelector('#check-group-nutrition').innerHTML = createHtml(items.nutrition, 'nutri');
+
+      // Attach events
+      page.querySelectorAll('.checklist-cb').forEach(cb => {
+        cb.addEventListener('change', (e) => {
+          storage.toggleRaceChecklist(e.target.dataset.id);
+          renderChecklist(); // Re-render for strikethrough effect
+        });
+      });
+    };
+
+    renderChecklist();
+
   }, 0);
 
   return page;

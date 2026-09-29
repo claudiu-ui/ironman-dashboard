@@ -133,6 +133,17 @@ export function renderAnalyticsPage() {
           </div>
         </div>
       </div>
+
+      <!-- Eficiență Înot (SWOLF Trend) -->
+      <div class="evo-card animate-in animate-in-delay-3" style="margin-top: var(--space-lg);">
+        <div class="evo-header" style="display: flex; justify-content: space-between; align-items: center;">
+          <div class="evo-title" style="before:background-color: #06b6d4;">Eficiență Înot (SWOLF Trend)</div>
+          <div style="font-size: 11px; color: var(--text-tertiary);">Scor mai mic = Mai eficient</div>
+        </div>
+        <div style="height: 250px; position: relative;">
+          <canvas id="swolf-chart"></canvas>
+        </div>
+      </div>
     </div>
   `;
 
@@ -658,6 +669,67 @@ export function renderAnalyticsPage() {
         plugins: [currentWeekLinePlugin]
       }));
     }
+
+    // ── SWOLF Trend Chart ───────────────────────────────────────────────────
+    const swolfCtx = page.querySelector('#swolf-chart');
+    const allWorkoutDates = Object.keys(storage.get('workouts', {})).sort((a, b) => new Date(a) - new Date(b));
+    const swolfLabels = [];
+    const swolfData = [];
+
+    allWorkoutDates.forEach(date => {
+      const logs = storage.getWorkoutLog(date);
+      logs.forEach(w => {
+        if (w.type === 'swim' && w.swolf && parseInt(w.swolf) > 0) {
+          const d = new Date(date);
+          swolfLabels.push(d.toLocaleDateString('ro-RO', { month: 'short', day: 'numeric' }));
+          swolfData.push(parseInt(w.swolf));
+        }
+      });
+    });
+
+    if (swolfCtx) {
+      if (swolfData.length === 0) {
+        swolfCtx.parentElement.innerHTML = '<div style="display: flex; height: 100%; align-items: center; justify-content: center; color: var(--text-tertiary); font-size: 13px;">Niciun scor SWOLF înregistrat încă.<br>Adaugă SWOLF când loghezi un antrenament de înot.</div>';
+      } else {
+        new Chart(swolfCtx, {
+          type: 'line',
+          data: {
+            labels: swolfLabels,
+            datasets: [
+              {
+                label: 'SWOLF',
+                data: swolfData,
+                borderColor: '#06b6d4',
+                backgroundColor: 'rgba(6, 182, 212, 0.1)',
+                borderWidth: 2,
+                pointBackgroundColor: '#161821',
+                pointBorderColor: '#06b6d4',
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                fill: true,
+                tension: 0.3
+              }
+            ]
+          },
+          options: {
+            ...chartDefaults,
+            plugins: {
+              ...chartDefaults.plugins,
+              legend: { display: false }
+            },
+            scales: {
+              ...chartDefaults.scales,
+              y: {
+                ...chartDefaults.scales.y,
+                suggestedMin: Math.max(20, Math.min(...swolfData) - 5),
+                suggestedMax: Math.max(...swolfData) + 5
+              }
+            }
+          }
+        });
+      }
+    }
+
   }, 100);
 
   return page;
