@@ -149,7 +149,70 @@ export function renderAnalyticsPage() {
         try {
           const { fetchEvoLab } = await import('./coros.js');
           const data = await fetchEvoLab();
-          resultsDiv.innerHTML = `<pre style="white-space: pre-wrap; font-family: monospace; font-size: 10px; color: #a855f7;">${JSON.stringify(data, null, 2)}</pre>`;
+          
+          resultsDiv.innerHTML = `
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 16px;">
+              <!-- Main Load -->
+              <div style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                <div style="color: var(--text-tertiary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Stare Antrenament</div>
+                <div style="font-size: 24px; font-weight: 700; color: ${data.status === 'Optimized' ? '#22c55e' : (data.status === 'Performance' ? '#3b82f6' : '#eab308')}">${data.status || 'N/A'}</div>
+                <div style="margin-top: 12px; display: flex; justify-content: space-between; font-size: 13px;">
+                  <div>
+                    <div style="color: var(--text-tertiary);">Base Fitness</div>
+                    <div style="font-weight: 600; color: #3b82f6;">${data.baseFitness || 0}</div>
+                  </div>
+                  <div>
+                    <div style="color: var(--text-tertiary);">Load Impact</div>
+                    <div style="font-weight: 600; color: #ef4444;">${data.loadImpact || 0}</div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Fitness Level -->
+              <div style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                <div style="color: var(--text-tertiary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Nivel Fitness</div>
+                <div style="display: flex; gap: 16px;">
+                  <div>
+                    <div style="font-size: 24px; font-weight: 700; color: #06b6d4;">${data.vo2max || 'N/A'}</div>
+                    <div style="color: var(--text-tertiary); font-size: 11px;">VO2 Max</div>
+                  </div>
+                  <div>
+                    <div style="font-size: 24px; font-weight: 700; color: #a855f7;">${data.runningLevel || 'N/A'}</div>
+                    <div style="color: var(--text-tertiary); font-size: 11px;">Running Level</div>
+                  </div>
+                </div>
+                <div style="margin-top: 12px; font-size: 13px;">
+                  <span style="color: var(--text-tertiary);">Pace Prag (Threshold):</span>
+                  <span style="font-weight: 600; float: right;">${data.thresholdPace || '-'} /km</span>
+                </div>
+              </div>
+
+              <!-- Race Predictor -->
+              <div style="background: rgba(255,255,255,0.02); padding: 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+                <div style="color: var(--text-tertiary); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Predicții Cursă</div>
+                <div style="display: flex; flex-direction: column; gap: 6px; font-size: 13px;">
+                  <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-secondary);">Maraton</span>
+                    <span style="font-weight: 600; color: #f97316;">${data.marathonPredict || '-'}</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-secondary);">Semimaraton</span>
+                    <span style="font-weight: 600;">${data.halfPredict || '-'}</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-secondary);">10 km</span>
+                    <span style="font-weight: 600;">${data.tenKPredict || '-'}</span>
+                  </div>
+                  <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-secondary);">5 km</span>
+                    <span style="font-weight: 600;">${data.fiveKPredict || '-'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+          
+          btnSync.style.display = 'none'; // Hide button after success
         } catch (e) {
           resultsDiv.innerHTML = `<div style="color: #ef4444;">Eroare: ${e.message}</div>`;
         } finally {

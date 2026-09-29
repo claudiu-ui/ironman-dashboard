@@ -462,16 +462,20 @@ function extractHrvHistory(str) {
   return history.reverse();
 }
 
-function extractRegex(str, pattern, isCommaNumber = false) {
+function extractRegex(str, pattern, isCommaNumber = false, isString = false) {
   if (!str || typeof str !== 'string') return null;
   
   // Use global regex to find all matches, then pick the last one (most recent day)
-  const gPattern = new RegExp(pattern, 'g');
+  const gPattern = new RegExp(pattern, 'gi');
   const matches = [...str.matchAll(gPattern)];
   
   if (matches.length === 0) return null;
   
   const m = matches[matches.length - 1];
+  
+  if (isString) {
+    return m[1];
+  }
   
   if (isCommaNumber) {
     return Number(m[1].replace(/,/g, ''));
@@ -551,15 +555,27 @@ export async function fetchEvoLab() {
 
   const results = await Promise.all([
     callMcpTool('queryTrainingLoadAssessment', { date: todayStr }).catch(e => e.message),
-    callMcpTool('querySportRecords', { startDate: pastStr, endDate: todayStr }).catch(e => e.message),
     callMcpTool('queryFitnessAssessmentOverview', { date: todayStr }).catch(e => e.message)
   ]);
 
-  return {
-    trainingLoad: results[0],
-    sportRecords: results[1],
-    fitnessOverview: results[2]
+  const loadText = results[0]?.content?.[0]?.text || '';
+  const fitText = results[1]?.content?.[0]?.text || '';
+
+  // Parse Training Load
+  const evoData = {
+    status: extractRegex(loadText, /Comment:\s*([A-Za-z]+)/i, false, true),
+    baseFitness: extractRegex(loadText, /Long-Term Load:\s*(\d+)/),
+    loadImpact: extractRegex(loadText, /Short-Term Load:\s*(\d+)/),
+    vo2max: extractRegex(fitText, /VO2max:\s*(\d+)/),
+    runningLevel: extractRegex(fitText, /Running Level:\s*([\d\.]+)/),
+    thresholdPace: extractRegex(fitText, /Threshold Pace:\s*([\d:]+)/i, false, true),
+    marathonPredict: extractRegex(fitText, /Marathon Prediction:\s*([\d:]+)/i, false, true),
+    halfPredict: extractRegex(fitText, /Half Marathon Prediction:\s*([\d:]+)/i, false, true),
+    tenKPredict: extractRegex(fitText, /10 km Prediction:\s*([\d:]+)/i, false, true),
+    fiveKPredict: extractRegex(fitText, /5 km Prediction:\s*([\d:]+)/i, false, true),
   };
+
+  return evoData;
 }
 
 // ── Status Checks ─────────────────────────────────────────────────────────────
