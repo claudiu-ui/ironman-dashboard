@@ -472,7 +472,7 @@ export function renderGymPage(forceDateStr = null) {
     const currentLogExercises = currentLog && Array.isArray(currentLog.exercises) ? currentLog.exercises 
                               : (currentLog && currentLog.exercises && Array.isArray(currentLog.exercises.exercises) ? currentLog.exercises.exercises : []);
 
-    const exercisesWithSets = exercises.map(ex => {
+    const exercisesWithSets = exercises.map((ex, ei) => {
       const setsMatch = (ex.sets || '3').match(/(\d+)\s*[×x]/i);
       const numSets = setsMatch ? parseInt(setsMatch[1]) : 3;
       
