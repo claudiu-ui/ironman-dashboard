@@ -538,6 +538,30 @@ function extractSleepDuration(data) {
   return null;
 }
 
+export async function fetchEvoLab() {
+  const token = await getValidToken();
+  if (!token) throw new Error("Nu ești conectat la Coros.");
+
+  const today = new Date();
+  const fourWeeksAgo = new Date(today);
+  fourWeeksAgo.setDate(today.getDate() - 28);
+  
+  const todayStr = today.toISOString().split('T')[0];
+  const pastStr = fourWeeksAgo.toISOString().split('T')[0];
+
+  // We will try a few hypothetical tools to gather 4-week data.
+  // If they fail, the error message will contain the actual available tools!
+  const results = await Promise.all([
+    callMcpTool('queryTrainingLoad', { startDate: pastStr, endDate: todayStr }).catch(e => e.message),
+    callMcpTool('queryActivityList', { startDate: pastStr, endDate: todayStr }).catch(e => e.message)
+  ]);
+
+  return {
+    trainingLoad: results[0],
+    activityList: results[1]
+  };
+}
+
 // ── Status Checks ─────────────────────────────────────────────────────────────
 
 export function isCorosConnected() {

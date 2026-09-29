@@ -58,6 +58,16 @@ export function renderAnalyticsPage() {
       .evo-badge { font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; background: rgba(255,255,255,0.05); color: #9ca3af; }
     </style>
     <div class="page-body">
+      <!-- EvoLab Sync Section -->
+      <div class="evo-card animate-in" style="margin-bottom: var(--space-lg); border: 1px solid rgba(59, 130, 246, 0.3);">
+        <div class="evo-header" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
+          <div class="evo-title" style="before:background-color: #3b82f6;">🧠 EvoLab Insights (4 Săptămâni)</div>
+          <button class="btn btn-sm btn-primary" id="btn-sync-evolab" style="font-size: 11px;">🔄 Sincronizează Date Reale din Coros</button>
+        </div>
+        <div id="evolab-results" style="margin-top: 16px; font-size: 12px; color: var(--text-secondary); display: none;">
+          <!-- Results will be dumped here for now -->
+        </div>
+      </div>
       <!-- PMC (Performance Management Chart) -->
       <div class="evo-card animate-in" style="margin-bottom: var(--space-lg)">
         <div class="evo-header">
@@ -125,6 +135,30 @@ export function renderAnalyticsPage() {
       </div>
     </div>
   `;
+
+  // Attach Sync EvoLab event
+  setTimeout(() => {
+    const btnSync = page.querySelector('#btn-sync-evolab');
+    const resultsDiv = page.querySelector('#evolab-results');
+    if (btnSync) {
+      btnSync.addEventListener('click', async () => {
+        btnSync.disabled = true;
+        btnSync.textContent = '⏳ Se încarcă...';
+        resultsDiv.style.display = 'block';
+        resultsDiv.innerHTML = 'Aștept răspunsul AI-ului Coros MCP...';
+        try {
+          const { fetchEvoLab } = await import('./coros.js');
+          const data = await fetchEvoLab();
+          resultsDiv.innerHTML = `<pre style="white-space: pre-wrap; font-family: monospace; font-size: 10px; color: #a855f7;">${JSON.stringify(data, null, 2)}</pre>`;
+        } catch (e) {
+          resultsDiv.innerHTML = `<div style="color: #ef4444;">Eroare: ${e.message}</div>`;
+        } finally {
+          btnSync.disabled = false;
+          btnSync.textContent = '🔄 Sincronizează Date Reale din Coros';
+        }
+      });
+    }
+  }, 100);
 
   // Render charts after DOM is ready
   setTimeout(() => {
