@@ -37,12 +37,6 @@ export const storage = {
     if (!logs[date]) logs[date] = [];
     logs[date].push({ ...workout, id: Date.now(), createdAt: new Date().toISOString() });
     this.set('workouts', logs);
-
-  // Auto-update gear distance if distance exists
-    const dist = parseFloat(workout.distance);
-    if (!isNaN(dist) && dist > 0 && workout.gearId) {
-      this.addDistanceToGear(workout.gearId, dist);
-    }
   },
 
   deleteWorkout(date, id) {
@@ -57,29 +51,40 @@ export const storage = {
   // Gear Tracker
   getGear() {
     const defaultGear = [
-      { id: 'g1', type: 'run', name: 'Asics Gel Nimbus 26 (Daily)', distance: 0, maxDistance: 600, active: true },
-      { id: 'g2', type: 'run', name: 'Nike Alphafly 3 (Race/Carbon)', distance: 0, maxDistance: 300, active: true },
-      { id: 'g3', type: 'bike', name: 'Tri Bike (ex: Cervelo P-Series)', distance: 0, maxDistance: 4000, active: true }
+      { id: 'g1', type: 'run', name: 'Asics Gel Nimbus 26 (Daily)', baseDistance: 0, maxDistance: 600, active: true },
+      { id: 'g2', type: 'run', name: 'Nike Alphafly 3 (Race/Carbon)', baseDistance: 0, maxDistance: 300, active: true },
+      { id: 'g3', type: 'bike', name: 'Tri Bike (ex: Cervelo P-Series)', baseDistance: 0, maxDistance: 4000, active: true }
     ];
-    return this.get('gear', defaultGear);
+    let gearList = this.get('gear', defaultGear);
+    
+    // Auto-calculate actual distance based on logged workouts
+    const allWorkouts = this.get('workouts', {});
+    const workoutDistances = {};
+    Object.values(allWorkouts).forEach(dayLogs => {
+      dayLogs.forEach(w => {
+        if (w.gearId && !w.isSkipped && parseFloat(w.distance) > 0) {
+          workoutDistances[w.gearId] = (workoutDistances[w.gearId] || 0) + parseFloat(w.distance);
+        }
+      });
+    });
+
+    gearList = gearList.map(g => {
+      const loggedDist = workoutDistances[g.id] || 0;
+      
+      // Migrate legacy 'distance' to 'baseDistance'
+      if (g.baseDistance === undefined) {
+          g.baseDistance = Math.max(0, (g.distance || 0) - loggedDist);
+      }
+
+      g.distance = g.baseDistance + loggedDist;
+      return g;
+    });
+
+    return gearList;
   },
 
   saveGear(gearArray) {
     this.set('gear', gearArray);
-  },
-
-  addDistanceToGear(gearId, distance) {
-    const gear = this.getGear();
-    let updated = false;
-    for (let g of gear) {
-      if (g.id === gearId) {
-        g.distance = (g.distance || 0) + distance;
-        updated = true;
-      }
-    }
-    if (updated) {
-      this.saveGear(gear);
-    }
   },
 
   getWorkoutsForWeek(weekStartDate) {

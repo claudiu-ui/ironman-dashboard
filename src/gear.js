@@ -17,7 +17,6 @@ export function renderGearPage() {
         if (activeGear.length > 0) {
           const targetGear = activeGear[0];
           w.gearId = targetGear.id;
-          targetGear.distance += parseFloat(w.distance);
           didUpdate = true;
         }
       }
@@ -26,7 +25,7 @@ export function renderGearPage() {
   
   if (didUpdate) {
     storage.set('workouts', allWorkouts);
-    storage.saveGear(gearList);
+    gearList = storage.getGear(); // Refresh with dynamic recalculation
   }
 
   const renderGearCards = () => {
@@ -147,7 +146,14 @@ export function renderGearPage() {
             if (newDist !== null) {
               const parsed = parseFloat(newDist);
               if (!isNaN(parsed) && parsed >= 0) {
-                item.distance = parsed;
+                const allWorkouts = storage.get('workouts', {});
+                let loggedDist = 0;
+                Object.values(allWorkouts).forEach(dayLogs => dayLogs.forEach(w => {
+                   if (w.gearId === item.id && !w.isSkipped && parseFloat(w.distance) > 0) {
+                     loggedDist += parseFloat(w.distance);
+                   }
+                }));
+                item.baseDistance = Math.max(0, parsed - loggedDist);
                 storage.saveGear(gearList);
                 listContainer.innerHTML = renderGearCards();
                 attachListEvents();
@@ -191,7 +197,7 @@ export function renderGearPage() {
         id: 'g' + Date.now(),
         type: page.querySelector('#gear-type').value,
         name: page.querySelector('#gear-name').value,
-        distance: parseFloat(page.querySelector('#gear-dist').value) || 0,
+        baseDistance: parseFloat(page.querySelector('#gear-dist').value) || 0,
         maxDistance: parseFloat(page.querySelector('#gear-max').value) || 600,
         active: true
       };
