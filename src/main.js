@@ -834,6 +834,14 @@ function buildApp() {
 
   // Init router
   initRouter();
+
+  // Background Syncs
+  storage.syncAppleHealth().then(updated => {
+    if (updated) {
+      showToast('S-au sincronizat antrenamente noi din Apple Health! 🍎', 'success');
+      renderCurrentRoute(); // Refresh UI to show new gym sessions
+    }
+  }).catch(e => console.error('Silent Apple Health sync failed', e));
 }
 
 function showToast(message, type = 'success') {

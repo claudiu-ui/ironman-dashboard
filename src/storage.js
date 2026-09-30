@@ -250,6 +250,71 @@ export const storage = {
     return list[itemId];
   },
 
+  // Apple Health Sync via Google Apps Script
+  async syncAppleHealth() {
+    try {
+      const url = 'https://script.google.com/macros/s/AKfycbxrFVu67PQUWJBucjasRk4P3KeOiNrddB0MpB90w8zXhAsEo3UeyVtCkN8GX2slVYjM/exec';
+      const response = await fetch(url);
+      if (!response.ok) throw new Error('Network response was not ok');
+      const data = await response.json(); // Array of arrays
+
+      const logs = this.get('workouts', {});
+      let updated = false;
+
+      // 1. Remove all previous apple_health syncs to avoid duplicates
+      Object.keys(logs).forEach(date => {
+        logs[date] = logs[date].filter(w => w.source !== 'apple_health');
+        if (logs[date].length === 0) delete logs[date];
+      });
+
+      // 2. Parse new ones
+      data.forEach(row => {
+        if (!row || row.length < 2) return;
+        
+        let dateStr = row[0];
+        // Convert JS date string from Google Sheets to YYYY-MM-DD
+        if (dateStr instanceof Date || typeof dateStr === 'string') {
+           try {
+             const d = new Date(dateStr);
+             if (isNaN(d.getTime())) return; // Skip headers
+             dateStr = d.toISOString().split('T')[0];
+           } catch {
+             return;
+           }
+        }
+        
+        const duration = parseFloat(row[1]) || 0;
+        const calories = parseFloat(row[2]) || 0;
+        const hr = parseFloat(row[3]) || 0;
+
+        if (duration > 0) {
+          if (!logs[dateStr]) logs[dateStr] = [];
+          
+          logs[dateStr].push({
+            id: 'ah_' + Date.now() + Math.random(),
+            type: 'gym',
+            duration: duration,
+            calories: calories,
+            hr: hr,
+            notes: 'Importat automat din Apple Health 🍎',
+            source: 'apple_health',
+            createdAt: new Date().toISOString()
+          });
+          updated = true;
+        }
+      });
+
+      if (updated) {
+        this.set('workouts', logs);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Failed to sync Apple Health:', error);
+      return false;
+    }
+  },
+
   // Export all data
   exportAll() {
     const data = {};
