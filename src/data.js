@@ -230,37 +230,30 @@ export const GYM_PROGRAMS = {
     ]
   },
   conditioning: {
-    name: 'Conditioning — Hyrox Upper',
+    name: 'Conditioning — Hyrox',
     day: 'Marți',
-    focus: 'Cardio + Forță (Fără Picioare/Alergare)',
+    focus: 'Cardio + Rezistență',
     variants: [
       {
-        name: 'Partea 1: Erg & Push (15 min)',
-        format: 'AMRAP 15 minute (Câte runde poți)',
+        name: 'Circuit (8 stații)',
+        format: '2 min muncă, 30s tranziție, 2-3 runde',
         stations: [
-          'Ski Erg 500m (Focus pe brațe și core)', 
-          'Sled Push (Împins sania, brațe blocate) 25m', 
-          'Push-ups (Flotări) × 15', 
-          'Plank cu greutate pe spate 45 secunde'
+          'Rowing 500m', 'Wall Balls × 15-20', 'Sled Push 25m + retur',
+          'Burpee Broad Jumps × 8-10', 'Ski Erg 30 cal', 'Farmers Walk 40m',
+          'Assault Bike 15 cal', 'Sandbag Over Shoulder × 8-10'
         ]
       },
       {
-        name: 'Partea 2: Pull & Carry (15 min)',
-        format: 'EMOM 15 min (5 runde x 3 stații)',
-        stations: [
-          'Min 1: Rowing 15 cal (fără flexia completă a picioarelor, tragi din spate/brațe)', 
-          'Min 2: Farmers Carry (Gantere f. grele) 40m', 
-          'Min 3: Push Press cu gantere (fără genuflexiune) × 15'
-        ]
+        name: 'EMOM 30 min',
+        format: '10 runde × 3 mișcări',
+        stations: ['Min 1: Rowing 12 cal', 'Min 2: KB Swings × 12', 'Min 3: Push-ups × 15 + Plank']
       },
       {
-        name: 'Partea 3: The Finisher (15 min)',
-        format: 'For Time (Termină cât mai repede în max 15m)',
+        name: 'Mini Hyrox Sim',
+        format: 'For Time (target 25-35 min)',
         stations: [
-          'Assault Bike 30 cal (Arms Only - picioarele pe suport)', 
-          'Sandbag / Medball Over Shoulder × 20', 
-          'Renegade Rows (Flotare + Ramat cu gantera) × 16', 
-          'Sprawls (Burpees fără săritură și genuflexiune) × 20'
+          'Row 1.000m', 'Sled Push 4×25m', 'Ski Erg 1.000m', 'Wall Balls × 50',
+          'Assault Bike 30 cal', 'Farmers Walk 4×25m', 'Sandbag Lunges 4×25m', 'Row 500m'
         ]
       }
     ]
