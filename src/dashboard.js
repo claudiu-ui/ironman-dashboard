@@ -837,7 +837,7 @@ function renderFitnessWidgetPlaceholder() {
       </div>
     </div>`;
 }
-import { fetchCorosWellness, isCorosConnected, startCorosAuth, disconnectCoros } from './coros.js';
+import { fetchCorosWellness, getCachedWellness, isCorosConnected, startCorosAuth, disconnectCoros, computeReadinessScore, getWellnessAlerts, getWellnessHistory } from './coros.js';
 
 // ── Fitness Widget: Real data renderer ────────────────────────────────────
 async function loadAndRenderFitnessWidget(page) {
@@ -847,20 +847,25 @@ async function loadAndRenderFitnessWidget(page) {
   try {
     const m = await getFitnessMetrics();
 
-    // Also try to fetch COROS wellness data (sleep, HRV, RHR with real scores)
+    // COROS Wellness: Cache-first, then background refresh
     let corosData = null;
     let corosError = null;
     if (isCorosConnected()) {
+      // 1. Show cached data INSTANTLY (no wait)
+      corosData = getCachedWellness();
+      
+      // 2. Fetch fresh data (will use cache if TTL not expired)
       try {
         corosData = await fetchCorosWellness();
       } catch (e) {
         corosError = e.message || String(e);
-        console.warn('COROS wellness fetch failed:', e);
+        console.warn('COROS wellness fetch failed, using cache:', e);
+        // Keep cached data even on error
       }
     }
 
-    if (corosError || (isCorosConnected() && !corosData)) {
-      container.innerHTML = `<div style="padding:20px; background:#ef4444; color:white;">COROS ERROR: ${corosError || 'fetch returned null'}</div>`;
+    if (corosError && !corosData) {
+      container.innerHTML = `<div style="padding:20px; background:rgba(239,68,68,0.1); color:#ef4444; border-radius: 8px; font-size: 13px;">⚠️ COROS: ${corosError}</div>`;
       return;
     }
 
@@ -918,11 +923,31 @@ async function loadAndRenderFitnessWidget(page) {
     const recScore = corosRecovery != null ? Math.round(corosRecovery) : (readiness != null ? Math.round(readiness) : null);
     const recSource = corosRecovery != null ? 'COROS' : (readiness != null ? 'calc' : null);
 
+    const wellnessHistory = getWellnessHistory();
+    const computedReadiness = corosData ? computeReadinessScore(corosData, wellnessHistory) : null;
+    const alerts = corosData ? getWellnessAlerts(corosData, wellnessHistory) : [];
+
+    let alertsHtml = '';
+    if (alerts.length > 0) {
+      alertsHtml = `
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
+          ${alerts.map(a => `
+            <div style="background: ${a.type === 'warning' ? 'rgba(239,68,68,0.1)' : a.type === 'caution' ? 'rgba(249,115,22,0.1)' : 'rgba(34,197,94,0.1)'}; 
+                        border: 1px solid ${a.type === 'warning' ? 'rgba(239,68,68,0.2)' : a.type === 'caution' ? 'rgba(249,115,22,0.2)' : 'rgba(34,197,94,0.2)'}; 
+                        padding: 10px 14px; border-radius: 8px; display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 16px;">${a.icon}</span>
+              <span style="font-size: 13px; color: ${a.type === 'warning' ? '#ef4444' : a.type === 'caution' ? '#f97316' : '#22c55e'}; line-height: 1.4;">${a.text}</span>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
     const corosStyle = `
       <style>
         .coros-grid { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 24px; font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
         @media (min-width: 768px) { .coros-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (min-width: 1024px) { .coros-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (min-width: 1024px) { .coros-grid { grid-template-columns: repeat(4, 1fr); } }
         .coros-card { background: #161821; border-radius: 8px; padding: 16px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); display: flex; flex-direction: column; position: relative; border: 1px solid rgba(255,255,255,0.02); transition: transform 0.2s; }
         .coros-card:hover { transform: translateY(-2px); }
         .coros-title { font-size: 13px; font-weight: 400; color: #9ca3af; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;}
@@ -932,6 +957,7 @@ async function loadAndRenderFitnessWidget(page) {
       </style>
     `;
 
+    // ... (rest of the helper functions remain the same)
     function renderRecoveryBar(pct) {
       if (pct == null) return '';
       return `
@@ -1044,9 +1070,26 @@ async function loadAndRenderFitnessWidget(page) {
           </button>
         </div>
 
+        ${alertsHtml}
+
         ${corosStyle}
         <div class="coros-grid">
           
+          <!-- Readiness Score -->
+          <div class="coros-card">
+            <div class="coros-title">Readiness Score <span style="font-size:12px;color:#6b7280;cursor:help;" title="Calculat din Somn, HRV, RHR și Recovery">ℹ️</span></div>
+            <div style="display: flex; align-items: center; justify-content: center; height: 80px;">
+               <div style="text-align: center;">
+                 <div style="font-size: 42px; font-weight: 700; color: ${computedReadiness >= 80 ? '#22c55e' : computedReadiness >= 50 ? '#f97316' : '#ef4444'}; line-height: 1; letter-spacing: -0.03em;">
+                   ${computedReadiness != null ? computedReadiness : '—'}
+                 </div>
+               </div>
+            </div>
+            <div style="text-align: center; font-size: 11px; color: #9ca3af; margin-top: 10px;">
+              ${computedReadiness >= 80 ? 'Optim pentru antrenament greu' : computedReadiness >= 50 ? 'OK pentru antrenament mediu' : 'Recomandare: Odihnă activă'}
+            </div>
+          </div>
+
           <!-- Training Status -->
           <div class="coros-card">
             <div class="coros-title">Training Status <span style="font-size:12px;color:#6b7280;cursor:help;" title="${tsbAdvice}">ℹ️</span></div>

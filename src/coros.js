@@ -385,10 +385,18 @@ async function callMcpTool(toolName, args = {}) {
 
 // ── High-level Data Fetchers ──────────────────────────────────────────────────
 
-export async function fetchCorosWellness() {
+export async function fetchCorosWellness(forceRefresh = false) {
+
+  // 1. Check cache first — return instantly if fresh enough (15 min TTL)
+  if (!forceRefresh) {
+    const cached = getCachedWellness();
+    if (cached && (Date.now() - cached.fetchedAt) < COROS_WELLNESS_CACHE_TTL) {
+      return cached;
+    }
+  }
 
   const token = await getValidToken();
-  if (!token) return null;
+  if (!token) return getCachedWellness(); // Return stale cache if no token
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -444,8 +452,150 @@ export async function fetchCorosWellness() {
     _raw: { sleepData, hrvData, rhrData, healthData, recoveryData },
   };
 
+  // Save to wellness history for trend analysis
+  saveWellnessHistory(wellness);
+
   localStorage.setItem(COROS_WELLNESS_CACHE_KEY, JSON.stringify(wellness));
   return wellness;
+}
+
+// ── Cached Wellness (instant load) ────────────────────────────────────────────
+export function getCachedWellness() {
+  try {
+    const raw = localStorage.getItem(COROS_WELLNESS_CACHE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+// ── Wellness History (for trends) ─────────────────────────────────────────────
+const WELLNESS_HISTORY_KEY = 'coros_wellness_history';
+
+function saveWellnessHistory(wellness) {
+  try {
+    const history = JSON.parse(localStorage.getItem(WELLNESS_HISTORY_KEY) || '[]');
+    const today = new Date().toISOString().split('T')[0];
+    
+    // Replace today's entry if it exists
+    const idx = history.findIndex(h => h.date === today);
+    const entry = {
+      date: today,
+      sleepScore: wellness.sleepScore,
+      sleepHours: wellness.sleepSecs ? +(wellness.sleepSecs / 3600).toFixed(1) : null,
+      hrv: wellness.hrv,
+      restingHR: wellness.restingHR,
+      recovery: wellness.recovery,
+      stress: wellness.stress,
+      steps: wellness.steps,
+    };
+    
+    if (idx >= 0) history[idx] = entry;
+    else history.push(entry);
+    
+    // Keep only last 90 days
+    const cutoff = history.length > 90 ? history.length - 90 : 0;
+    localStorage.setItem(WELLNESS_HISTORY_KEY, JSON.stringify(history.slice(cutoff)));
+  } catch (e) {
+    console.warn('Failed to save wellness history:', e);
+  }
+}
+
+export function getWellnessHistory() {
+  try {
+    return JSON.parse(localStorage.getItem(WELLNESS_HISTORY_KEY) || '[]');
+  } catch { return []; }
+}
+
+// ── Readiness Score (inspirat Joe Friel + Matt Dixon) ─────────────────────────
+// Scor 1-100 bazat pe: Sleep (40%), HRV trend (25%), Resting HR (20%), Recovery (15%)
+export function computeReadinessScore(wellness, history = []) {
+  if (!wellness) return null;
+  
+  let score = 0;
+  let weights = 0;
+  
+  // 1. Sleep Score (40% weight) — Coros dă scor 0-100
+  if (wellness.sleepScore != null) {
+    score += (wellness.sleepScore / 100) * 40;
+    weights += 40;
+  } else if (wellness.sleepSecs != null) {
+    // Fallback: 7-9h = ideal
+    const hours = wellness.sleepSecs / 3600;
+    const sleepPct = hours >= 8 ? 100 : hours >= 7 ? 85 : hours >= 6 ? 60 : 30;
+    score += (sleepPct / 100) * 40;
+    weights += 40;
+  }
+  
+  // 2. HRV Trend (25% weight) — compare today vs 7-day avg
+  if (wellness.hrv != null && history.length >= 3) {
+    const recentHrv = history.slice(-7).filter(h => h.hrv != null).map(h => h.hrv);
+    if (recentHrv.length >= 3) {
+      const avgHrv = recentHrv.reduce((a, b) => a + b, 0) / recentHrv.length;
+      const ratio = wellness.hrv / avgHrv; // >1 = better than avg, <1 = worse
+      const hrvScore = Math.min(100, Math.max(0, ratio * 80));
+      score += (hrvScore / 100) * 25;
+      weights += 25;
+    }
+  } else if (wellness.hrv != null) {
+    // No history yet, use absolute value (50ms = ok, 70+ = great)
+    const hrvScore = Math.min(100, Math.max(0, (wellness.hrv - 20) * 1.5));
+    score += (hrvScore / 100) * 25;
+    weights += 25;
+  }
+  
+  // 3. Resting HR (20% weight) — lower is better, compare to baseline
+  if (wellness.restingHR != null) {
+    const recentRhr = history.slice(-14).filter(h => h.restingHR != null).map(h => h.restingHR);
+    let baseline = 55; // Default for athletic male
+    if (recentRhr.length >= 5) {
+      baseline = recentRhr.reduce((a, b) => a + b, 0) / recentRhr.length;
+    }
+    const deviation = wellness.restingHR - baseline;
+    // Each bpm above baseline = -8 points, below = +4 points  
+    const rhrScore = Math.min(100, Math.max(0, 80 - deviation * 8));
+    score += (rhrScore / 100) * 20;
+    weights += 20;
+  }
+  
+  // 4. Recovery % from Coros (15% weight)
+  if (wellness.recovery != null) {
+    score += (wellness.recovery / 100) * 15;
+    weights += 15;
+  }
+  
+  if (weights === 0) return null;
+  return Math.round((score / weights) * 100);
+}
+
+// ── Trend Alerts ──────────────────────────────────────────────────────────────
+export function getWellnessAlerts(wellness, history = []) {
+  const alerts = [];
+  if (!wellness || history.length < 3) return alerts;
+  
+  const last3 = history.slice(-3);
+  
+  // HRV declining for 3+ days
+  const hrvVals = last3.filter(h => h.hrv != null).map(h => h.hrv);
+  if (hrvVals.length >= 3 && hrvVals[0] > hrvVals[1] && hrvVals[1] > hrvVals[2]) {
+    alerts.push({ type: 'warning', icon: '📉', text: `HRV-ul tău scade de ${hrvVals.length} zile consecutiv (${hrvVals.join(' → ')} ms). Posibil semn de oboseală acumulată.` });
+  }
+  
+  // Resting HR rising for 3+ days
+  const rhrVals = last3.filter(h => h.restingHR != null).map(h => h.restingHR);
+  if (rhrVals.length >= 3 && rhrVals[0] < rhrVals[1] && rhrVals[1] < rhrVals[2]) {
+    alerts.push({ type: 'warning', icon: '💓', text: `Pulsul de repaus crește de ${rhrVals.length} zile (${rhrVals.join(' → ')} bpm). Corpul tău poate fi stresat sau bolnav.` });
+  }
+  
+  // Bad sleep
+  if (wellness.sleepSecs && wellness.sleepSecs < 6 * 3600) {
+    alerts.push({ type: 'caution', icon: '😴', text: `Ai dormit sub 6 ore. Antrenamentul greu de azi nu va produce adaptare fără somn adecvat.` });
+  }
+  
+  // Great recovery
+  if (wellness.recovery != null && wellness.recovery >= 85) {
+    alerts.push({ type: 'success', icon: '🟢', text: `Recuperare excelentă (${Math.round(wellness.recovery)}%). Zi perfectă pentru antrenament de calitate!` });
+  }
+  
+  return alerts;
 }
 
 function extractHrvHistory(str) {
