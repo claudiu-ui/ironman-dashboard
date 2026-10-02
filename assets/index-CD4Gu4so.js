@@ -384,16 +384,16 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
           </div>
         `).join(``)}
       </div>
-    </div>`}async function Xe(e){let t=e.querySelector(`#fitness-widget-container`);if(t)try{let n=await he(),r=null,i=null;if(Ue())try{r=await ze()}catch(e){i=e.message||String(e),console.warn(`COROS wellness fetch failed:`,e)}if(i||Ue()&&!r){t.innerHTML=`<div style="padding:20px; background:#ef4444; color:white;">COROS ERROR: ${i||`fetch returned null`}</div>`;return}if(!n){t.innerHTML=`
+    </div>`}async function Xe(e){let t=e.querySelector(`#fitness-widget-container`);if(t)try{let n=await he(),r=null,i=null;if(Ue())try{r=await ze()}catch(e){i=e.message||String(e),console.warn(`COROS wellness fetch failed:`,e)}if(i||Ue()&&!r){t.innerHTML=`<div style="padding:20px; background:#ef4444; color:white;">COROS ERROR: ${i||`fetch returned null`}</div>`;return}let a=n||{ctl:30,atl:30,tsb:0,weeklyTSS:0,prevWeeklyTSS:0,ctlDelta:0,atlDelta:0,tsbDelta:0,ctlMonthDelta:0,source:`local`,sleepSecs:null,restingHR:null,hrv:null,readiness:null};if(!n&&!r&&!Ue()){t.innerHTML=`
         <div class="card" style="background:linear-gradient(145deg,#1a1a1a,#111);border:1px solid var(--border-subtle);margin-bottom:var(--space-md);padding:16px 20px;">
           <div style="display:flex;align-items:center;gap:10px;">
             <span style="font-size:20px;">📊</span>
             <div>
               <div style="font-weight:600;font-size:14px;">Nicio activitate logată încă</div>
-              <div style="font-size:12px;color:var(--text-tertiary);margin-top:2px;">Loghează primul antrenament sau conectează Intervals.icu din Setări</div>
+              <div style="font-size:12px;color:var(--text-tertiary);margin-top:2px;">Loghează primul antrenament sau conectează COROS / Intervals.icu din Setări</div>
             </div>
           </div>
-        </div>`;return}let{ctl:a,atl:o,tsb:c,weeklyTSS:l,prevWeeklyTSS:u,ctlDelta:d,atlDelta:f,tsbDelta:p,ctlMonthDelta:m,source:h}=n,g=r?.sleepSecs??n.sleepSecs,_=r?.restingHR??n.restingHR,v=r?.hrv??n.hrv;r?.sleepScore;let y=r?.recovery??null,b=n.readiness,x=c<=-20?`Overreaching`:c<=-10?`Productive`:c<=5?`Optimized`:`Peak Form`,S=c<=-20?`#ef4444`:c<=-10?`#f97316`:c<=5?`#2ed573`:`#3b82f6`,C=c<=-20?`Oboseala acută îți depășește masiv baza. Ești la risc de supra-antrenament. Fără efort intens azi.`:c<=-10?`Te antrenezi consistent și fitness-ul crește rapid. Menține rutina pentru a mări Baza Aerobă.`:c<=5?`Echilibru perfect. Ești pregătit pentru antrenamente de calitate.`:`Oboseala a dispărut, ești în formă maximă (Taper). Perfect pentru cursă.`,w=`—`;g&&(w=`${Math.floor(g/3600)}h ${Math.floor(g%3600/60)}m`);let T=_?Math.round(_):`—`,E=v?Math.round(v):`—`,D=y==null?b==null?null:Math.round(b):Math.round(y),O=y==null?b==null?null:`calc`:`COROS`;function k(e){return e==null?``:`
+        </div>`;return}let{ctl:o,atl:c,tsb:l,weeklyTSS:u,prevWeeklyTSS:d,ctlDelta:f,atlDelta:p,tsbDelta:m,ctlMonthDelta:h,source:g}=a,_=r?.sleepSecs??a.sleepSecs,v=r?.restingHR??a.restingHR,y=r?.hrv??a.hrv;r?.sleepScore;let b=r?.recovery??null,x=a.readiness,S=l<=-20?`Overreaching`:l<=-10?`Productive`:l<=5?`Optimized`:`Peak Form`,C=l<=-20?`#ef4444`:l<=-10?`#f97316`:l<=5?`#2ed573`:`#3b82f6`,w=l<=-20?`Oboseala acută îți depășește masiv baza. Ești la risc de supra-antrenament. Fără efort intens azi.`:l<=-10?`Te antrenezi consistent și fitness-ul crește rapid. Menține rutina pentru a mări Baza Aerobă.`:l<=5?`Echilibru perfect. Ești pregătit pentru antrenamente de calitate.`:`Oboseala a dispărut, ești în formă maximă (Taper). Perfect pentru cursă.`,T=`—`;_&&(T=`${Math.floor(_/3600)}h ${Math.floor(_%3600/60)}m`);let E=v?Math.round(v):`—`,D=y?Math.round(y):`—`,O=b==null?x==null?null:Math.round(x):Math.round(b),k=b==null?x==null?null:`calc`:`COROS`;function A(e){return e==null?``:`
         <div style="position: relative; margin-top: auto; padding-top: 16px;">
           <div style="position: absolute; left: ${e}%; top: 4px; transform: translateX(-50%); width: 0; height: 0; border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 5px solid #fff; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5)); transition: left 1s ease-out;"></div>
           <div style="display: flex; height: 4px; border-radius: 2px; overflow: hidden; background: #333;">
@@ -407,7 +407,7 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
             <span>Fresh</span>
           </div>
         </div>
-      `}function A(e){if(!e||e.length===0)return``;let t=e.map(e=>e.value),n=Math.min(...t)-5,r=Math.max(...t)+5,i=r-n||1,a=100/(e.length>1?e.length-1:1),o=e.map((e,t)=>({x:t*a,y:100-(e.value-n)/i*100,val:e.value,label:e.label})),s=`M${o[0].x},${o[0].y}`;for(let e=1;e<o.length;e++)s+=` L${o[e].x},${o[e].y}`;let c=`${s} L100,100 L0,100 Z`,l=o.map(e=>`<span style="position:absolute;left:${e.x}%;bottom:-16px;transform:translateX(-50%);font-size:9px;color:#6b7280;">${e.label}</span>`).join(``);return`
+      `}function ee(e){if(!e||e.length===0)return``;let t=e.map(e=>e.value),n=Math.min(...t)-5,r=Math.max(...t)+5,i=r-n||1,a=100/(e.length>1?e.length-1:1),o=e.map((e,t)=>({x:t*a,y:100-(e.value-n)/i*100,val:e.value,label:e.label})),s=`M${o[0].x},${o[0].y}`;for(let e=1;e<o.length;e++)s+=` L${o[e].x},${o[e].y}`;let c=`${s} L100,100 L0,100 Z`,l=o.map(e=>`<span style="position:absolute;left:${e.x}%;bottom:-16px;transform:translateX(-50%);font-size:9px;color:#6b7280;">${e.label}</span>`).join(``);return`
         <div style="position:relative; width:100%; height:120px; padding-bottom: 20px; margin-top: 8px; padding-left: 24px; box-sizing: border-box;">
           <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none" style="overflow:visible;">
             <defs>
@@ -435,11 +435,11 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
             ${l}
           </div>
         </div>
-      `}let ee=r&&(r.steps||r.calories||r.stress)?`
+      `}let te=r&&(r.steps||r.calories||r.stress)?`
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:1px;background:var(--border-subtle);border-bottom:1px solid var(--border-subtle);">
         <div style="background:#0f0f0f;padding:12px 14px;text-align:center;">
           <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">💤 Somn</div>
-          <div style="font-size:16px;font-weight:600;color:var(--text-primary);">${w}</div>
+          <div style="font-size:16px;font-weight:600;color:var(--text-primary);">${T}</div>
         </div>
         <div style="background:#0f0f0f;padding:12px 14px;text-align:center;">
           <div style="font-size:10px;color:var(--text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:2px;">🚶‍♂️ Pași</div>
@@ -460,9 +460,9 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
         <!-- Header -->
         <div style="display:flex;justify-content:space-between;align-items:center;padding:0 0 12px 0;">
           <div style="display:flex;align-items:center;gap:8px;">
-            <div style="width:6px;height:6px;border-radius:50%;background:${h===`intervals`?`var(--success)`:`#3b82f6`};box-shadow:0 0 6px ${h===`intervals`?`var(--success)`:`#3b82f6`};"></div>
+            <div style="width:6px;height:6px;border-radius:50%;background:${g===`intervals`?`var(--success)`:`#3b82f6`};box-shadow:0 0 6px ${g===`intervals`?`var(--success)`:`#3b82f6`};"></div>
             <span style="font-size:11px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;color:var(--text-secondary);">
-              ${h===`intervals`?`Intervals.icu / EvoLab`:`EvoLab Metrics`}
+              ${g===`intervals`?`Intervals.icu / EvoLab`:`EvoLab Metrics`}
             </span>
           </div>
           <button onclick="window._refreshFitnessWidget()" style="background:none;border:none;color:var(--text-tertiary);font-size:10px;cursor:pointer;padding:4px 8px;border-radius:4px;border:1px solid rgba(255,255,255,0.1);transition:background 0.2s;">
@@ -487,39 +487,39 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
           
           <!-- Training Status -->
           <div class="coros-card">
-            <div class="coros-title">Training Status <span style="font-size:12px;color:#6b7280;cursor:help;" title="${C}">ℹ️</span></div>
-            <div style="font-size: 18px; font-weight: 500; color: ${S}; margin-bottom: 6px; letter-spacing: -0.02em;">${x}</div>
+            <div class="coros-title">Training Status <span style="font-size:12px;color:#6b7280;cursor:help;" title="${w}">ℹ️</span></div>
+            <div style="font-size: 18px; font-weight: 500; color: ${C}; margin-bottom: 6px; letter-spacing: -0.02em;">${S}</div>
             <div style="font-size: 11px; color: #9ca3af; margin-bottom: 12px; line-height: 1.5;">
-              ${C}
+              ${w}
             </div>
             
             <!-- Intensity Trend Legend -->
             <div style="display: flex; gap: 4px; margin-bottom: 20px; font-size: 9px; text-transform: uppercase; text-align: center; color: #6b7280; letter-spacing: 0.05em;">
-              <div style="flex: 1; border-top: 2px solid #ef4444; padding-top: 4px; opacity: ${c<=-20?`1`:`0.4`};">Overreach<br>< -20</div>
-              <div style="flex: 1; border-top: 2px solid #f97316; padding-top: 4px; opacity: ${c<=-10&&c>-20?`1`:`0.4`};">Productiv<br>-20 la -10</div>
-              <div style="flex: 1; border-top: 2px solid #2ed573; padding-top: 4px; opacity: ${c<=5&&c>-10?`1`:`0.4`};">Optim<br>-10 la +5</div>
-              <div style="flex: 1; border-top: 2px solid #3b82f6; padding-top: 4px; opacity: ${c>5?`1`:`0.4`};">Peak<br>> +5</div>
+              <div style="flex: 1; border-top: 2px solid #ef4444; padding-top: 4px; opacity: ${l<=-20?`1`:`0.4`};">Overreach<br>< -20</div>
+              <div style="flex: 1; border-top: 2px solid #f97316; padding-top: 4px; opacity: ${l<=-10&&l>-20?`1`:`0.4`};">Productiv<br>-20 la -10</div>
+              <div style="flex: 1; border-top: 2px solid #2ed573; padding-top: 4px; opacity: ${l<=5&&l>-10?`1`:`0.4`};">Optim<br>-10 la +5</div>
+              <div style="flex: 1; border-top: 2px solid #3b82f6; padding-top: 4px; opacity: ${l>5?`1`:`0.4`};">Peak<br>> +5</div>
             </div>
 
             <div style="display: flex; justify-content: space-between; margin-top: auto; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px;">
               <div>
                 <div class="coros-label">Load Impact</div>
-                <div class="coros-val">${o}</div>
+                <div class="coros-val">${c}</div>
               </div>
               <div>
                 <div class="coros-label">Base Fitness</div>
-                <div class="coros-val">${a}</div>
+                <div class="coros-val">${o}</div>
               </div>
               <div>
                 <div class="coros-label">Intensity Trend</div>
-                <div class="coros-val">${c>0?`+`:``}${c}</div>
+                <div class="coros-val">${l>0?`+`:``}${l}</div>
               </div>
             </div>
           </div>
 
           <!-- Recovery -->
           <div class="coros-card">
-            <div class="coros-title">Recovery <span style="font-size:12px;color:#6b7280;cursor:help;" title="via ${O||`calc`}">ℹ️</span></div>
+            <div class="coros-title">Recovery <span style="font-size:12px;color:#6b7280;cursor:help;" title="via ${k||`calc`}">ℹ️</span></div>
             <div style="display: flex; align-items: center; justify-content: center; height: 80px;">
                <!-- Redesigned figure SVG -->
                <svg width="40" height="50" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 16px;">
@@ -529,11 +529,11 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
                  <path d="M10 21l2-5 2 5"></path>
                </svg>
                <div style="text-align: left;">
-                 <div style="font-size: 36px; font-weight: 600; color: #fff; line-height: 1; letter-spacing: -0.03em;">${D??`—`}<span style="font-size: 16px; font-weight: 400; margin-left: 2px;">%</span></div>
-                 <div style="font-size: 11px; color: #9ca3af; margin-top: 4px;">RHR: <span style="color:#e5e7eb;">${T} bpm</span></div>
+                 <div style="font-size: 36px; font-weight: 600; color: #fff; line-height: 1; letter-spacing: -0.03em;">${O??`—`}<span style="font-size: 16px; font-weight: 400; margin-left: 2px;">%</span></div>
+                 <div style="font-size: 11px; color: #9ca3af; margin-top: 4px;">RHR: <span style="color:#e5e7eb;">${E} bpm</span></div>
                </div>
             </div>
-            ${k(D)}
+            ${A(O)}
           </div>
 
           <!-- Overnight HRV -->
@@ -541,16 +541,16 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
           <div class="coros-card">
             <div class="coros-title" style="margin-bottom:0;">
               <div>Overnight HRV <span style="font-size:11px;color:#6b7280;font-weight:normal;">(7 Days)</span></div>
-              <div style="color: #e5e7eb; font-size: 11px;">Avg: <span style="font-weight: 600; font-size: 13px; color:#fff;">${E}</span> ms</div>
+              <div style="color: #e5e7eb; font-size: 11px;">Avg: <span style="font-weight: 600; font-size: 13px; color:#fff;">${D}</span> ms</div>
             </div>
-            ${A(r.hrvHistory)}
+            ${ee(r.hrvHistory)}
           </div>
           `:``}
           
         </div>
 
         <div style="border:1px solid var(--border-subtle); border-radius: 8px; overflow: hidden;">
-          ${ee}
+          ${te}
           ${r&&r._raw?`
             <div style="padding:12px 16px;background:#111;">
               <details style="font-size:10px;color:var(--text-tertiary);">
