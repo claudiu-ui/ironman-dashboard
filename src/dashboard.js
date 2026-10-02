@@ -864,29 +864,33 @@ async function loadAndRenderFitnessWidget(page) {
       return;
     }
 
-    if (!m) {
+    // If no fitness metrics from workouts, use defaults but STILL show Coros wellness
+    const m_defaults = { ctl: 30, atl: 30, tsb: 0, weeklyTSS: 0, prevWeeklyTSS: 0, ctlDelta: 0, atlDelta: 0, tsbDelta: 0, ctlMonthDelta: 0, source: 'local', sleepSecs: null, restingHR: null, hrv: null, readiness: null };
+    const mFinal = m || m_defaults;
+
+    if (!m && !corosData && !isCorosConnected()) {
       container.innerHTML = `
         <div class="card" style="background:linear-gradient(145deg,#1a1a1a,#111);border:1px solid var(--border-subtle);margin-bottom:var(--space-md);padding:16px 20px;">
           <div style="display:flex;align-items:center;gap:10px;">
             <span style="font-size:20px;">📊</span>
             <div>
               <div style="font-weight:600;font-size:14px;">Nicio activitate logată încă</div>
-              <div style="font-size:12px;color:var(--text-tertiary);margin-top:2px;">Loghează primul antrenament sau conectează Intervals.icu din Setări</div>
+              <div style="font-size:12px;color:var(--text-tertiary);margin-top:2px;">Loghează primul antrenament sau conectează COROS / Intervals.icu din Setări</div>
             </div>
           </div>
         </div>`;
       return;
     }
 
-    const { ctl, atl, tsb, weeklyTSS, prevWeeklyTSS, ctlDelta, atlDelta, tsbDelta, ctlMonthDelta, source } = m;
+    const { ctl, atl, tsb, weeklyTSS, prevWeeklyTSS, ctlDelta, atlDelta, tsbDelta, ctlMonthDelta, source } = mFinal;
 
     // Merge wellness: COROS takes priority over Intervals
-    const sleepSecs = corosData?.sleepSecs ?? m.sleepSecs;
-    const restingHR = corosData?.restingHR ?? m.restingHR;
-    const hrv = corosData?.hrv ?? m.hrv;
+    const sleepSecs = corosData?.sleepSecs ?? mFinal.sleepSecs;
+    const restingHR = corosData?.restingHR ?? mFinal.restingHR;
+    const hrv = corosData?.hrv ?? mFinal.hrv;
     const sleepScore = corosData?.sleepScore ?? null;
     const corosRecovery = corosData?.recovery ?? null;
-    const readiness = m.readiness; // computed from Intervals data
+    const readiness = mFinal.readiness; // computed from Intervals data
 
     const tsbLabel = tsb <= -20 ? 'Overreaching'
       : tsb <= -10 ? 'Productive'
