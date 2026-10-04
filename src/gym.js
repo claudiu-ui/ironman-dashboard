@@ -101,9 +101,6 @@ export function renderGymPage(forceDateStr = null) {
             const exNameLower = exerciseName.toLowerCase();
             ex = exercisesArr.find(e => e.name && (e.name.toLowerCase().includes(exNameLower) || exNameLower.includes(e.name.toLowerCase())));
           }
-          if (!ex && exercisesArr.length > exerciseIndex) {
-            ex = exercisesArr[exerciseIndex];
-          }
 
           if (ex && ex.sets && ex.sets.length > 0) {
             console.log(`Found past session for ${exerciseName} on date ${date}:`, ex);
