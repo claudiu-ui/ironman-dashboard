@@ -496,11 +496,14 @@ export function renderGymPage(forceDateStr = null) {
         const lastData = getLastSessionData(sessionType, ex.name, ei, dateStr);
         
         const sets = [];
-        const targetSetsCount = loggedEx && loggedEx.sets ? Math.max(numSets, loggedEx.sets.length) : numSets;
+        const targetSetsCount = ex._tempSets ? ex._tempSets.length : (loggedEx && loggedEx.sets ? Math.max(numSets, loggedEx.sets.length) : numSets);
         
         for (let i = 0; i < targetSetsCount; i++) {
           let w = '', r = '';
-          if (loggedEx && loggedEx.sets && loggedEx.sets[i]) {
+          if (ex._tempSets && ex._tempSets[i]) {
+            w = ex._tempSets[i].weight;
+            r = ex._tempSets[i].reps;
+          } else if (loggedEx && loggedEx.sets && loggedEx.sets[i]) {
             w = loggedEx.sets[i].weight;
             r = loggedEx.sets[i].reps;
           } else if (!currentLog) {
@@ -582,8 +585,8 @@ export function renderGymPage(forceDateStr = null) {
 
       // Add Exercise
       modal.querySelector('#gym-log-add-exercise')?.addEventListener('click', () => {
-        // Save current name edits before rebuilding
-        syncNameEdits();
+        // Save current name and set edits before rebuilding
+        syncEdits();
         workingExercises.push({ name: 'Exercițiu Nou', sets: '3 × 10', rest: '60s', notes: '' });
         rebuildModal();
       });
@@ -600,7 +603,7 @@ export function renderGymPage(forceDateStr = null) {
             if (window.showToast) window.showToast('⚠️ Nu poți șterge ultimul exercițiu!');
             return;
           }
-          syncNameEdits();
+          syncEdits();
           workingExercises.splice(idx, 1);
           rebuildModal();
         }
@@ -645,6 +648,16 @@ export function renderGymPage(forceDateStr = null) {
 
       modal.addEventListener('dragover', (e) => {
         e.preventDefault();
+        
+        // Auto-scroll when dragging near top/bottom
+        const scrollContainer = modal.querySelector('.modal');
+        if (scrollContainer) {
+          const rect = scrollContainer.getBoundingClientRect();
+          const threshold = 60;
+          if (e.clientY < rect.top + threshold) scrollContainer.scrollTop -= 15;
+          else if (e.clientY > rect.bottom - threshold) scrollContainer.scrollTop += 15;
+        }
+
         const exCard = e.target.closest('.gym-log-exercise');
         if (exCard && draggedIdx !== null) {
           const bounding = exCard.getBoundingClientRect();
@@ -673,7 +686,7 @@ export function renderGymPage(forceDateStr = null) {
         if (exCard && draggedIdx !== null) {
           const targetIdx = parseInt(exCard.dataset.index);
           if (targetIdx !== draggedIdx) {
-            syncNameEdits();
+            syncEdits();
             const bounding = exCard.getBoundingClientRect();
             const offset = bounding.y + (bounding.height / 2);
             let finalIdx = targetIdx;
@@ -720,7 +733,7 @@ export function renderGymPage(forceDateStr = null) {
 
       // Save handler
       modal.querySelector('#gym-log-save').addEventListener('click', () => {
-        syncNameEdits();
+        syncEdits();
         
         // Save updated program structure
         if (currentPrograms[sessionType]) {
@@ -782,11 +795,24 @@ export function renderGymPage(forceDateStr = null) {
       });
     }
 
-    function syncNameEdits() {
+    function syncEdits() {
+      // sync names
       modal.querySelectorAll('.gym-log-ex-name').forEach(input => {
         const idx = parseInt(input.dataset.idx);
         if (workingExercises[idx]) {
           workingExercises[idx].name = input.value;
+        }
+      });
+      // sync sets (weights & reps)
+      modal.querySelectorAll('.gym-log-exercise').forEach(exCard => {
+        const idx = parseInt(exCard.dataset.index);
+        if (workingExercises[idx]) {
+          workingExercises[idx]._tempSets = [];
+          exCard.querySelectorAll('.gym-log-set-row').forEach(row => {
+            const w = row.querySelector('.gym-log-weight').value;
+            const r = row.querySelector('.gym-log-reps').value;
+            workingExercises[idx]._tempSets.push({ weight: w, reps: r });
+          });
         }
       });
     }
