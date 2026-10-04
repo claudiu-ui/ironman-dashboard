@@ -526,11 +526,10 @@ export function renderGymPage(forceDateStr = null) {
               const isFirst = ei === 0;
               const isLast = ei === exercisesWithSets.length - 1;
               return `
-              <div class="gym-log-exercise" data-index="${ei}" style="position: relative; padding: 12px; margin-bottom: 12px; background: rgba(255,255,255,0.02); border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.06);">
+              <div class="gym-log-exercise" data-index="${ei}" draggable="true" style="position: relative; padding: 12px; margin-bottom: 12px; background: rgba(255,255,255,0.02); border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.06); cursor: grab;">
                 <div style="display: flex; align-items: center; gap: 8px; margin-bottom: ${hasLastData ? '4px' : 'var(--space-md)'};">
-                  <div style="display: flex; flex-direction: column; gap: 2px;">
-                    <button class="gym-log-move-btn" data-dir="up" data-idx="${ei}" ${isFirst ? 'disabled' : ''} style="background: none; border: none; cursor: ${isFirst ? 'default' : 'pointer'}; font-size: 14px; padding: 0; line-height: 1; opacity: ${isFirst ? '0.2' : '0.7'};" title="Mută sus">⬆️</button>
-                    <button class="gym-log-move-btn" data-dir="down" data-idx="${ei}" ${isLast ? 'disabled' : ''} style="background: none; border: none; cursor: ${isLast ? 'default' : 'pointer'}; font-size: 14px; padding: 0; line-height: 1; opacity: ${isLast ? '0.2' : '0.7'};" title="Mută jos">⬇️</button>
+                  <div style="display: flex; flex-direction: column; gap: 2px; cursor: grab;" class="drag-handle" title="Trage pentru a reordona">
+                    <span style="font-size: 16px; opacity: 0.5;">↕️</span>
                   </div>
                   <input type="text" class="form-input gym-log-ex-name" data-idx="${ei}" value="${ex.name}" style="flex: 1; font-weight: 700; color: var(--accent); background: transparent; border: 1px solid transparent; padding: 4px 8px; font-size: 14px; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='transparent'" />
                   <button class="gym-log-delete-ex-btn" data-idx="${ei}" style="background: none; border: none; cursor: pointer; font-size: 16px; padding: 4px; opacity: 0.6; transition: opacity 0.2s;" title="Șterge exercițiul" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">🗑️</button>
@@ -606,21 +605,6 @@ export function renderGymPage(forceDateStr = null) {
           rebuildModal();
         }
 
-        // Move exercise up/down
-        if (target.classList.contains('gym-log-move-btn') || target.closest('.gym-log-move-btn')) {
-          const btn = target.classList.contains('gym-log-move-btn') ? target : target.closest('.gym-log-move-btn');
-          if (btn.disabled) return;
-          const idx = parseInt(btn.dataset.idx);
-          const dir = btn.dataset.dir;
-          syncNameEdits();
-          if (dir === 'up' && idx > 0) {
-            [workingExercises[idx - 1], workingExercises[idx]] = [workingExercises[idx], workingExercises[idx - 1]];
-          } else if (dir === 'down' && idx < workingExercises.length - 1) {
-            [workingExercises[idx], workingExercises[idx + 1]] = [workingExercises[idx + 1], workingExercises[idx]];
-          }
-          rebuildModal();
-        }
-
         // Remove set
         if (target.classList.contains('remove-set-btn')) {
           const row = target.closest('.gym-log-set-row');
@@ -633,6 +617,88 @@ export function renderGymPage(forceDateStr = null) {
           });
         }
       });
+
+      // Drag and Drop reordering logic
+      let draggedIdx = null;
+      
+      modal.addEventListener('dragstart', (e) => {
+        const exCard = e.target.closest('.gym-log-exercise');
+        if (exCard) {
+          draggedIdx = parseInt(exCard.dataset.index);
+          e.dataTransfer.effectAllowed = 'move';
+          setTimeout(() => exCard.style.opacity = '0.4', 0);
+        }
+      });
+
+      modal.addEventListener('dragend', (e) => {
+        const exCard = e.target.closest('.gym-log-exercise');
+        if (exCard) {
+          exCard.style.opacity = '1';
+          draggedIdx = null;
+          
+          modal.querySelectorAll('.gym-log-exercise').forEach(el => {
+            el.style.borderTop = '1px solid rgba(255,255,255,0.06)';
+            el.style.borderBottom = '1px solid rgba(255,255,255,0.06)';
+          });
+        }
+      });
+
+      modal.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        const exCard = e.target.closest('.gym-log-exercise');
+        if (exCard && draggedIdx !== null) {
+          const bounding = exCard.getBoundingClientRect();
+          const offset = bounding.y + (bounding.height / 2);
+          if (e.clientY - offset > 0) {
+            exCard.style.borderBottom = '2px solid var(--accent)';
+            exCard.style.borderTop = '1px solid rgba(255,255,255,0.06)';
+          } else {
+            exCard.style.borderTop = '2px solid var(--accent)';
+            exCard.style.borderBottom = '1px solid rgba(255,255,255,0.06)';
+          }
+        }
+      });
+
+      modal.addEventListener('dragleave', (e) => {
+        const exCard = e.target.closest('.gym-log-exercise');
+        if (exCard) {
+          exCard.style.borderTop = '1px solid rgba(255,255,255,0.06)';
+          exCard.style.borderBottom = '1px solid rgba(255,255,255,0.06)';
+        }
+      });
+
+      modal.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const exCard = e.target.closest('.gym-log-exercise');
+        if (exCard && draggedIdx !== null) {
+          const targetIdx = parseInt(exCard.dataset.index);
+          if (targetIdx !== draggedIdx) {
+            syncNameEdits();
+            const bounding = exCard.getBoundingClientRect();
+            const offset = bounding.y + (bounding.height / 2);
+            let finalIdx = targetIdx;
+            
+            // If dropping on the bottom half, insert after
+            if (e.clientY - offset > 0) {
+               finalIdx = targetIdx > draggedIdx ? targetIdx : targetIdx + 1;
+            } else {
+               // dropping on top half, insert before
+               finalIdx = targetIdx > draggedIdx ? targetIdx - 1 : targetIdx;
+            }
+            
+            const movedItem = workingExercises.splice(draggedIdx, 1)[0];
+            workingExercises.splice(finalIdx, 0, movedItem);
+            rebuildModal();
+          }
+        }
+        
+        modal.querySelectorAll('.gym-log-exercise').forEach(el => {
+          el.style.borderTop = '1px solid rgba(255,255,255,0.06)';
+          el.style.borderBottom = '1px solid rgba(255,255,255,0.06)';
+        });
+      });
+
+
 
       // Add Set buttons
       modal.querySelectorAll('.gym-add-set-btn').forEach(btn => {
