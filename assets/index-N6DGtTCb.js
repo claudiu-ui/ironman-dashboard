@@ -702,8 +702,8 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
                   
                   ${o&&o.sets?`
                     <div class="gym-today-session">
-                      ${o.sets.map((e,t)=>{let n=a?.sets?.[t],r=n&&(e.weight>n.weight||e.weight===n.weight&&e.reps>n.reps);return`<span class="today-session-set ${r?`improved`:``}">${e.weight}kg × ${e.reps}${r?` 📈`:``}</span>`}).join(``)}
-                      ${o.totalVolume?`<span class="today-session-volume">Vol: ${o.totalVolume}kg</span>`:``}
+                      ${o.sets.map((e,t)=>{let n=a?.sets?.[t],r=n&&(e.weight>n.weight||e.weight===n.weight&&e.reps>n.reps),i=n&&(e.weight<n.weight||e.weight===n.weight&&e.reps<n.reps),o=r?`improved`:i?`declined`:n&&!r&&!i?`same-perf`:``,s=r?` 📈`:i?` 📉`:``;return`<span class="today-session-set ${o}">${e.weight}kg × ${e.reps}${s}</span>`}).join(``)}
+                      ${(()=>{let e=o.totalVolume,t=a?.totalVolume;return e?t&&e>t?`<span class="today-session-volume improved">Vol: ${e}kg 📈</span>`:t&&e<t?`<span class="today-session-volume declined">Vol: ${e}kg 📉</span>`:`<span class="today-session-volume">Vol: ${e}kg</span>`:``})()}
                     </div>
                   `:``}
                 </div>
