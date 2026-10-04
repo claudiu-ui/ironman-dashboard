@@ -2,7 +2,7 @@
 // Nutrition & Lifestyle Page
 // ============================================
 
-import { NUTRITION, getDailyNutritionTargets } from './data.js';
+import { NUTRITION, getDailyNutritionTargets, getCurrentWeek, getDynamicWeekSchedule } from './data.js';
 import { storage } from './storage.js';
 import { estimateTSS } from './fitness.js';
 
@@ -26,8 +26,45 @@ export function renderNutritionPage() {
     const activeCalories = workouts.reduce((sum, w) => sum + (parseInt(w.calories) || 0), 0);
     const totalTSS = workouts.reduce((sum, w) => sum + (w.isSkipped ? 0 : estimateTSS(w)), 0);
     
+    // Get planned schedule for the day to estimate calories
+    const dateObj = new Date(currentDate);
+    const weekNum = getCurrentWeek(currentDate);
+    const plannedSchedule = storage.get(`week_schedule_${weekNum}`) || getDynamicWeekSchedule(weekNum);
+    
+    // JS getDay() is 0=Sun, 1=Mon, ..., 6=Sat. Our schedule array is Luni(0) to Duminică(6)
+    const dayMap = { 1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 0: 6 };
+    const dayIdx = dayMap[dateObj.getDay()];
+    const todaysPlan = plannedSchedule[dayIdx]?.sessions || [];
+    
+    let plannedCalories = 0;
+    let plannedTSS = 0;
+
+    todaysPlan.forEach(s => {
+      if (s.type === 'rest' || s.type === 'other') return;
+      
+      let durationMin = 60;
+      const durMatch = (s.detail || '').match(/(\d+)min/);
+      if (durMatch) durationMin = parseInt(durMatch[1]);
+      else {
+         const distMatch = (s.detail || '').match(/(\d+(?:\.\d+)?)km/);
+         if (distMatch) {
+            const dist = parseFloat(distMatch[1]);
+            if (s.type === 'run') durationMin = dist * 6; // 6min/km
+            if (s.type === 'bike') durationMin = dist * 2.5; // 24km/h
+         }
+      }
+
+      if (s.type === 'swim') { plannedCalories += (durationMin * 11); plannedTSS += (durationMin * 0.8); }
+      else if (s.type === 'bike') { plannedCalories += (durationMin * 12); plannedTSS += (durationMin * 0.9); }
+      else if (s.type === 'run') { plannedCalories += (durationMin * 16); plannedTSS += (durationMin * 1.1); }
+      else if (s.type === 'gym' || s.type === 'conditioning') { plannedCalories += (durationMin * 6); plannedTSS += (durationMin * 0.7); }
+    });
+
+    const finalActiveCalories = Math.max(activeCalories, Math.round(plannedCalories));
+    const finalTSS = Math.max(totalTSS, Math.round(plannedTSS));
+
     // Get dynamic targets
-    const targets = getDailyNutritionTargets(activeCalories, totalTSS);
+    const targets = getDailyNutritionTargets(finalActiveCalories, finalTSS);
 
     const dayTypeLabel = targets.dayType === 'high' ? 'High Carb Day' : targets.dayType === 'low' ? 'Low Carb Day' : 'Moderate Day';
     const dayTypeDesc = targets.dayType === 'high' 
@@ -51,7 +88,9 @@ export function renderNutritionPage() {
           <div>
             <div style="font-weight: 600; color: ${dayTypeColor};">${dayTypeLabel}</div>
             <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">${dayTypeDesc}</div>
-            ${activeCalories > 0 ? `<div style="font-size: 11px; margin-top: 4px; color: var(--text-tertiary);">Calorii active din antrenamente: +${activeCalories} kcal | TSS estimat: ${totalTSS}</div>` : ''}
+            <div style="font-size: 11px; margin-top: 4px; color: var(--text-tertiary);">
+              Calorii antrenament: +${finalActiveCalories} kcal (estimat/logat) | TSS: ${finalTSS}
+            </div>
           </div>
         </div>
 
