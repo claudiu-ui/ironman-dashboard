@@ -467,187 +467,265 @@ export function renderGymPage(forceDateStr = null) {
     }
   }
 
-  // Gym Log Modal — per exercise, per set, weight + reps
+  // Gym Log Modal — per exercise, per set, weight + reps + INLINE EDIT
   function openGymLogModal(sessionType, exercises, dateStr) {
-    const currentLog = storage.getGymSession(dateStr, sessionType);
-    const currentLogExercises = currentLog && Array.isArray(currentLog.exercises) ? currentLog.exercises 
-                              : (currentLog && currentLog.exercises && Array.isArray(currentLog.exercises.exercises) ? currentLog.exercises.exercises : []);
+    // Work on a mutable copy of exercises so we can add/remove/reorder
+    let workingExercises = exercises.map(ex => ({ ...ex }));
+    
+    function buildModal() {
+      const currentLog = storage.getGymSession(dateStr, sessionType);
+      const currentLogExercises = currentLog && Array.isArray(currentLog.exercises) ? currentLog.exercises 
+                                : (currentLog && currentLog.exercises && Array.isArray(currentLog.exercises.exercises) ? currentLog.exercises.exercises : []);
 
-    const exercisesWithSets = exercises.map((ex, ei) => {
-      const setsMatch = (ex.sets || '3').match(/(\d+)\s*[×x]/i);
-      const numSets = setsMatch ? parseInt(setsMatch[1]) : 3;
-      
-      const loggedEx = currentLogExercises.find(e => e.name === ex.name);
-      const lastData = getLastSessionData(sessionType, ex.name, ei, dateStr);
-      
-      const sets = [];
-      const targetSetsCount = loggedEx && loggedEx.sets ? Math.max(numSets, loggedEx.sets.length) : numSets;
-      
-      for (let i = 0; i < targetSetsCount; i++) {
-        let w = '', r = '';
-        if (loggedEx && loggedEx.sets && loggedEx.sets[i]) {
-          w = loggedEx.sets[i].weight;
-          r = loggedEx.sets[i].reps;
-        } else if (!currentLog) { // Only pre-fill from last session if not currently editing an existing log
-          w = lastData?.sets?.[i]?.weight || '';
-          r = lastData?.sets?.[i]?.reps || '';
+      const exercisesWithSets = workingExercises.map((ex, ei) => {
+        const setsMatch = (ex.sets || '3').match(/(\d+)\s*[×x]/i);
+        const numSets = setsMatch ? parseInt(setsMatch[1]) : 3;
+        
+        const loggedEx = currentLogExercises.find(e => e.name === ex.name);
+        const lastData = getLastSessionData(sessionType, ex.name, ei, dateStr);
+        
+        const sets = [];
+        const targetSetsCount = loggedEx && loggedEx.sets ? Math.max(numSets, loggedEx.sets.length) : numSets;
+        
+        for (let i = 0; i < targetSetsCount; i++) {
+          let w = '', r = '';
+          if (loggedEx && loggedEx.sets && loggedEx.sets[i]) {
+            w = loggedEx.sets[i].weight;
+            r = loggedEx.sets[i].reps;
+          } else if (!currentLog) {
+            w = lastData?.sets?.[i]?.weight || '';
+            r = lastData?.sets?.[i]?.reps || '';
+          }
+          sets.push({ weight: w, reps: r });
         }
-        sets.push({ weight: w, reps: r });
-      }
-      return { name: ex.name, sets, numSets };
-    });
+        return { name: ex.name, sets, numSets };
+      });
+
+      return `
+        <div class="modal" style="max-width: 620px; max-height: 85vh; overflow-y: auto;">
+          <div class="modal-title">📝 Loghează: ${currentPrograms[sessionType]?.name || 'Sesiune'}</div>
+          <div style="font-size: 12px; color: var(--text-tertiary); margin-bottom: var(--space-lg);">
+            Introdu greutatea și repetările. Poți și <b>șterge</b>, <b>reordona</b> sau <b>adăuga</b> exerciții.
+          </div>
+          
+          <div id="gym-log-exercises">
+            ${exercisesWithSets.map((ex, ei) => {
+              const hasLastData = ex.sets.some(s => s.weight || s.reps);
+              const lastDataStr = hasLastData ? ex.sets.map(s => s.weight && s.reps ? `<b>${s.weight}</b>kg × <b>${s.reps}</b>` : '-').join(' | ') : '';
+              const isFirst = ei === 0;
+              const isLast = ei === exercisesWithSets.length - 1;
+              return `
+              <div class="gym-log-exercise" data-index="${ei}" style="position: relative; padding: 12px; margin-bottom: 12px; background: rgba(255,255,255,0.02); border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.06);">
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: ${hasLastData ? '4px' : 'var(--space-md)'};">
+                  <div style="display: flex; flex-direction: column; gap: 2px;">
+                    <button class="gym-log-move-btn" data-dir="up" data-idx="${ei}" ${isFirst ? 'disabled' : ''} style="background: none; border: none; cursor: ${isFirst ? 'default' : 'pointer'}; font-size: 14px; padding: 0; line-height: 1; opacity: ${isFirst ? '0.2' : '0.7'};" title="Mută sus">⬆️</button>
+                    <button class="gym-log-move-btn" data-dir="down" data-idx="${ei}" ${isLast ? 'disabled' : ''} style="background: none; border: none; cursor: ${isLast ? 'default' : 'pointer'}; font-size: 14px; padding: 0; line-height: 1; opacity: ${isLast ? '0.2' : '0.7'};" title="Mută jos">⬇️</button>
+                  </div>
+                  <input type="text" class="form-input gym-log-ex-name" data-idx="${ei}" value="${ex.name}" style="flex: 1; font-weight: 700; color: var(--accent); background: transparent; border: 1px solid transparent; padding: 4px 8px; font-size: 14px; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='transparent'" />
+                  <button class="gym-log-delete-ex-btn" data-idx="${ei}" style="background: none; border: none; cursor: pointer; font-size: 16px; padding: 4px; opacity: 0.6; transition: opacity 0.2s;" title="Șterge exercițiul" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">🗑️</button>
+                </div>
+                ${hasLastData ? `<div style="font-size: 12px; color: var(--text-secondary); margin-bottom: var(--space-md); padding: 6px 10px; background: rgba(59, 130, 246, 0.1); border-left: 2px solid var(--info); border-radius: 4px;">📈 Țintă (tura trecută): <span style="color: var(--text-primary);">${lastDataStr}</span></div>` : ''}
+                <div class="gym-log-sets">
+                  <div class="gym-log-sets-header">
+                    <span style="width: 30px; text-align: center; font-size: 11px; color: var(--text-tertiary);">Set</span>
+                    <span style="flex: 1; text-align: center; font-size: 11px; color: var(--text-tertiary);">Greutate (kg)</span>
+                    <span style="flex: 1; text-align: center; font-size: 11px; color: var(--text-tertiary);">Repetări</span>
+                    <span style="width: 24px;"></span>
+                  </div>
+                  ${ex.sets.map((s, si) => `
+                    <div class="gym-log-set-row">
+                      <span class="gym-log-set-num" style="width: 30px;">${si + 1}</span>
+                      <input type="number" class="form-input gym-log-weight" data-ex="${ei}" data-set="${si}" value="${s.weight}" placeholder="kg" step="0.5" style="flex: 1; text-align: center; padding: 6px;" />
+                      <input type="number" class="form-input gym-log-reps" data-ex="${ei}" data-set="${si}" value="${s.reps}" placeholder="reps" style="flex: 1; text-align: center; padding: 6px;" />
+                      <button class="btn btn-ghost btn-sm remove-set-btn" data-ex="${ei}" data-set="${si}" style="color: var(--danger); width: 24px; padding: 0;">❌</button>
+                    </div>
+                  `).join('')}
+                  <button class="btn btn-ghost btn-sm gym-add-set-btn" data-ex="${ei}" style="width: 100%; margin-top: 4px; font-size: 11px; border-style: dashed;">+ Set</button>
+                </div>
+              </div>
+              `;
+            }).join('')}
+          </div>
+
+          <button type="button" class="btn btn-ghost" id="gym-log-add-exercise" style="width: 100%; border-style: dashed; margin-bottom: var(--space-lg); color: var(--success); border-color: rgba(46,213,115,0.3);">
+            ➕ Adaugă Exercițiu Nou
+          </button>
+
+          <div style="display: flex; gap: 12px; justify-content: flex-end; padding-top: var(--space-md); border-top: 1px solid var(--border-subtle); flex-wrap: wrap;">
+            <button type="button" class="btn btn-ghost" id="gym-log-cancel">Anulează</button>
+            <button type="button" class="btn btn-primary" id="gym-log-save">💾 Salvează Sesiunea</button>
+          </div>
+        </div>
+      `;
+    }
 
     // Create modal
     const modal = document.createElement('div');
     modal.className = 'modal-overlay active';
     modal.id = 'gym-log-modal';
-    modal.innerHTML = `
-      <div class="modal" style="max-width: 600px; max-height: 85vh; overflow-y: auto;">
-        <div class="modal-title">📝 Loghează: ${currentPrograms[sessionType]?.name || 'Conditioning'}</div>
-        <div style="font-size: 12px; color: var(--text-tertiary); margin-bottom: var(--space-lg);">
-          Introdu greutatea (kg) și repetările pentru fiecare set. Datele din sesiunea anterioară sunt pre-completate.
-        </div>
-        
-        <div id="gym-log-exercises">
-          ${exercisesWithSets.map((ex, ei) => {
-            const hasLastData = ex.sets.some(s => s.weight || s.reps);
-            const lastDataStr = hasLastData ? ex.sets.map(s => s.weight && s.reps ? `<b>${s.weight}</b>kg × <b>${s.reps}</b>` : '-').join(' | ') : '';
-            return `
-            <div class="gym-log-exercise" data-index="${ei}">
-              <div class="gym-log-exercise-name" style="margin-bottom: ${hasLastData ? '4px' : 'var(--space-md)'};">${ex.name}</div>
-              ${hasLastData ? `<div style="font-size: 12px; color: var(--text-secondary); margin-bottom: var(--space-md); padding: 6px 10px; background: rgba(59, 130, 246, 0.1); border-left: 2px solid var(--info); border-radius: 4px;">📈 Țintă (tura trecută): <span style="color: var(--text-primary);">${lastDataStr}</span></div>` : ''}
-              <div class="gym-log-sets">
-                <div class="gym-log-sets-header">
-                  <span style="width: 30px; text-align: center; font-size: 11px; color: var(--text-tertiary);">Set</span>
-                  <span style="flex: 1; text-align: center; font-size: 11px; color: var(--text-tertiary);">Greutate (kg)</span>
-                  <span style="flex: 1; text-align: center; font-size: 11px; color: var(--text-tertiary);">Repetări</span>
-                  <span style="width: 24px;"></span>
-                </div>
-                ${ex.sets.map((s, si) => `
-                  <div class="gym-log-set-row">
-                    <span class="gym-log-set-num" style="width: 30px;">${si + 1}</span>
-                    <input type="number" class="form-input gym-log-weight" data-ex="${ei}" data-set="${si}" value="${s.weight}" placeholder="kg" step="0.5" style="flex: 1; text-align: center; padding: 6px;" />
-                    <input type="number" class="form-input gym-log-reps" data-ex="${ei}" data-set="${si}" value="${s.reps}" placeholder="reps" style="flex: 1; text-align: center; padding: 6px;" />
-                    <button class="btn btn-ghost btn-sm remove-set-btn" data-ex="${ei}" data-set="${si}" style="color: var(--danger); width: 24px; padding: 0;">❌</button>
-                  </div>
-                `).join('')}
-                <button class="btn btn-ghost btn-sm gym-add-set-btn" data-ex="${ei}" style="width: 100%; margin-top: 4px; font-size: 11px; border-style: dashed;">+ Set</button>
-              </div>
-            </div>
-            `;
-          }).join('')}
-        </div>
-
-        <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: var(--space-lg); padding-top: var(--space-md); border-top: 1px solid var(--border-subtle); flex-wrap: wrap;">
-          <button type="button" class="btn btn-ghost" id="gym-log-edit-prog" style="margin-right: auto; color: var(--accent);">⚙️ Modifică Structura Programului</button>
-          <button type="button" class="btn btn-ghost" id="gym-log-cancel">Anulează</button>
-          <button type="button" class="btn btn-primary" id="gym-log-save">💾 Salvează Sesiunea</button>
-        </div>
-      </div>
-    `;
-
+    modal.innerHTML = buildModal();
     document.body.appendChild(modal);
 
-    // Close handlers
-    modal.querySelector('#gym-log-cancel').addEventListener('click', () => modal.remove());
-    modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
-    
-    // Edit program structure handler
-    modal.querySelector('#gym-log-edit-prog').addEventListener('click', () => {
-      // Close all modals
-      document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
-      modal.remove();
-      
-      // Navigate to gym page and trigger edit mode
-      window.location.hash = '#/gym';
-      setTimeout(() => {
-        const toggleEditBtn = document.getElementById('toggle-edit-mode');
-        if (toggleEditBtn && !toggleEditBtn.innerHTML.includes('Salvează')) {
-          toggleEditBtn.click();
-        }
-      }, 150);
-    });
+    function attachModalEvents() {
+      // Close handlers
+      modal.querySelector('#gym-log-cancel').addEventListener('click', () => modal.remove());
 
-    // Add Set buttons
-    modal.querySelectorAll('.gym-add-set-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const exIdx = parseInt(btn.dataset.ex);
-        const setsContainer = btn.closest('.gym-log-sets');
-        const existingSets = setsContainer.querySelectorAll('.gym-log-set-row').length;
-        const newRow = document.createElement('div');
-        newRow.className = 'gym-log-set-row';
-        newRow.innerHTML = `
-          <span class="gym-log-set-num" style="width: 30px;">${existingSets + 1}</span>
-          <input type="number" class="form-input gym-log-weight" data-ex="${exIdx}" data-set="${existingSets}" value="" placeholder="kg" step="0.5" style="flex: 1; text-align: center; padding: 6px;" />
-          <input type="number" class="form-input gym-log-reps" data-ex="${exIdx}" data-set="${existingSets}" value="" placeholder="reps" style="flex: 1; text-align: center; padding: 6px;" />
-          <button class="btn btn-ghost btn-sm remove-set-btn" style="color: var(--danger); width: 24px; padding: 0;">❌</button>
-        `;
-        btn.before(newRow);
+      // Add Exercise
+      modal.querySelector('#gym-log-add-exercise')?.addEventListener('click', () => {
+        // Save current name edits before rebuilding
+        syncNameEdits();
+        workingExercises.push({ name: 'Exercițiu Nou', sets: '3 × 10', rest: '60s', notes: '' });
+        rebuildModal();
       });
-    });
 
-    // Remove Set buttons (Event Delegation)
-    modal.addEventListener('click', (e) => {
-      if (e.target.classList.contains('remove-set-btn')) {
-        const row = e.target.closest('.gym-log-set-row');
-        const container = row.closest('.gym-log-sets');
-        row.remove();
-        
-        // Re-number remaining sets
-        container.querySelectorAll('.gym-log-set-row').forEach((r, i) => {
-          r.querySelector('.gym-log-set-num').textContent = i + 1;
-          r.querySelector('.gym-log-weight').dataset.set = i;
-          r.querySelector('.gym-log-reps').dataset.set = i;
-        });
-      }
-    });
+      // Event delegation for all dynamic buttons
+      modal.addEventListener('click', (e) => {
+        const target = e.target;
 
-    // Save handler
-    modal.querySelector('#gym-log-save').addEventListener('click', () => {
-      const logExercises = exercisesWithSets.map((ex, ei) => {
-        const setRows = modal.querySelectorAll(`.gym-log-weight[data-ex="${ei}"]`);
-        const sets = [];
-        let totalVolume = 0;
-        
-        setRows.forEach((weightInput, si) => {
-          const repsInput = modal.querySelector(`.gym-log-reps[data-ex="${ei}"][data-set="${si}"]`);
-          const weight = parseFloat(weightInput.value) || 0;
-          const reps = parseInt(repsInput?.value) || 0;
-          if (weight > 0 || reps > 0) {
-            sets.push({ weight, reps });
-            totalVolume += weight * reps;
+        // Delete exercise
+        if (target.classList.contains('gym-log-delete-ex-btn') || target.closest('.gym-log-delete-ex-btn')) {
+          const btn = target.classList.contains('gym-log-delete-ex-btn') ? target : target.closest('.gym-log-delete-ex-btn');
+          const idx = parseInt(btn.dataset.idx);
+          if (workingExercises.length <= 1) {
+            if (window.showToast) window.showToast('⚠️ Nu poți șterge ultimul exercițiu!');
+            return;
           }
+          syncNameEdits();
+          workingExercises.splice(idx, 1);
+          rebuildModal();
+        }
+
+        // Move exercise up/down
+        if (target.classList.contains('gym-log-move-btn') || target.closest('.gym-log-move-btn')) {
+          const btn = target.classList.contains('gym-log-move-btn') ? target : target.closest('.gym-log-move-btn');
+          if (btn.disabled) return;
+          const idx = parseInt(btn.dataset.idx);
+          const dir = btn.dataset.dir;
+          syncNameEdits();
+          if (dir === 'up' && idx > 0) {
+            [workingExercises[idx - 1], workingExercises[idx]] = [workingExercises[idx], workingExercises[idx - 1]];
+          } else if (dir === 'down' && idx < workingExercises.length - 1) {
+            [workingExercises[idx], workingExercises[idx + 1]] = [workingExercises[idx + 1], workingExercises[idx]];
+          }
+          rebuildModal();
+        }
+
+        // Remove set
+        if (target.classList.contains('remove-set-btn')) {
+          const row = target.closest('.gym-log-set-row');
+          const container = row.closest('.gym-log-sets');
+          row.remove();
+          container.querySelectorAll('.gym-log-set-row').forEach((r, i) => {
+            r.querySelector('.gym-log-set-num').textContent = i + 1;
+            r.querySelector('.gym-log-weight').dataset.set = i;
+            r.querySelector('.gym-log-reps').dataset.set = i;
+          });
+        }
+      });
+
+      // Add Set buttons
+      modal.querySelectorAll('.gym-add-set-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const exIdx = parseInt(btn.dataset.ex);
+          const setsContainer = btn.closest('.gym-log-sets');
+          const existingSets = setsContainer.querySelectorAll('.gym-log-set-row').length;
+          const newRow = document.createElement('div');
+          newRow.className = 'gym-log-set-row';
+          newRow.innerHTML = `
+            <span class="gym-log-set-num" style="width: 30px;">${existingSets + 1}</span>
+            <input type="number" class="form-input gym-log-weight" data-ex="${exIdx}" data-set="${existingSets}" value="" placeholder="kg" step="0.5" style="flex: 1; text-align: center; padding: 6px;" />
+            <input type="number" class="form-input gym-log-reps" data-ex="${exIdx}" data-set="${existingSets}" value="" placeholder="reps" style="flex: 1; text-align: center; padding: 6px;" />
+            <button class="btn btn-ghost btn-sm remove-set-btn" style="color: var(--danger); width: 24px; padding: 0;">❌</button>
+          `;
+          btn.before(newRow);
+        });
+      });
+
+      // Save handler
+      modal.querySelector('#gym-log-save').addEventListener('click', () => {
+        syncNameEdits();
+        
+        // Save updated program structure
+        if (currentPrograms[sessionType]) {
+          currentPrograms[sessionType].exercises = workingExercises.map(ex => ({
+            name: ex.name,
+            sets: ex.sets || '3 × 10',
+            rest: ex.rest || '60s',
+            notes: ex.notes || ''
+          }));
+          storage.saveCustomGymPrograms(currentPrograms);
+        }
+
+        // Collect logged data
+        const exBlocks = modal.querySelectorAll('.gym-log-exercise');
+        const logExercises = [];
+        exBlocks.forEach((block) => {
+          const nameInput = block.querySelector('.gym-log-ex-name');
+          const name = nameInput ? nameInput.value : 'Unknown';
+          const weightInputs = block.querySelectorAll('.gym-log-weight');
+          const sets = [];
+          let totalVolume = 0;
+          
+          weightInputs.forEach((weightInput) => {
+            const setIdx = weightInput.dataset.set;
+            const repsInput = block.querySelector(`.gym-log-reps[data-set="${setIdx}"]`);
+            const weight = parseFloat(weightInput.value) || 0;
+            const reps = parseInt(repsInput?.value) || 0;
+            if (weight > 0 || reps > 0) {
+              sets.push({ weight, reps });
+              totalVolume += weight * reps;
+            }
+          });
+
+          logExercises.push({
+            name,
+            sets,
+            totalVolume,
+            plannedSets: workingExercises.find(e => e.name === name)?.sets || '',
+            completed: sets.length > 0
+          });
         });
 
-        return {
-          name: ex.name,
-          sets,
-          totalVolume,
-          plannedSets: exercises[ei]?.sets || '',
-          completed: sets.length > 0
-        };
-      });
+        storage.saveGymSession(dateStr, sessionType, logExercises);
+        
+        storage.saveWorkout(dateStr, {
+          type: sessionType === 'conditioning' ? 'conditioning' : 'gym',
+          distance: 0,
+          duration: 0,
+          hr: 0,
+          rpe: 0,
+          notes: `${currentPrograms[sessionType]?.name || 'Conditioning'} — ${logExercises.filter(e => e.completed).length} exerciții completate`,
+          source: 'manual'
+        });
 
-      storage.saveGymSession(dateStr, sessionType, logExercises);
-      
-      // Also save as a workout log for the dashboard tracking
-      storage.saveWorkout(dateStr, {
-        type: sessionType === 'conditioning' ? 'conditioning' : 'gym',
-        distance: 0,
-        duration: 0,
-        hr: 0,
-        rpe: 0,
-        notes: `${currentPrograms[sessionType]?.name || 'Conditioning'} — ${logExercises.filter(e => e.completed).length} exerciții completate`,
-        source: 'manual'
+        modal.remove();
+        if (window.showToast) window.showToast('🏋️ Sesiune de sală salvată!');
+        render();
+        import('./router.js').then(({ renderCurrentRoute }) => renderCurrentRoute());
       });
+    }
 
-      modal.remove();
-      if (window.showToast) window.showToast('🏋️ Sesiune de sală salvată!');
-      render(); // Re-render to show logged data
-      
-      // If we are in the dashboard modal, re-render the current route to reflect changes
-      import('./router.js').then(({ renderCurrentRoute }) => renderCurrentRoute());
-    });
+    function syncNameEdits() {
+      modal.querySelectorAll('.gym-log-ex-name').forEach(input => {
+        const idx = parseInt(input.dataset.idx);
+        if (workingExercises[idx]) {
+          workingExercises[idx].name = input.value;
+        }
+      });
+    }
+
+    function rebuildModal() {
+      const scrollTop = modal.querySelector('.modal')?.scrollTop || 0;
+      modal.innerHTML = buildModal();
+      attachModalEvents();
+      const modalDiv = modal.querySelector('.modal');
+      if (modalDiv) modalDiv.scrollTop = scrollTop;
+    }
+
+    // Overlay click to close
+    modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+
+    attachModalEvents();
   }
 
   // ── Conditioning Log Modal — station-appropriate metrics ──────────────────
