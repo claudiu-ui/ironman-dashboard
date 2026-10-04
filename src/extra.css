@@ -627,8 +627,22 @@
 
 .today-session-set.improved {
   background: rgba(34, 197, 94, 0.2);
-  border: 1px solid rgba(34, 197, 94, 0.3);
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  color: #2ed573;
   font-weight: 700;
+}
+
+.today-session-set.declined {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #ef4444;
+  font-weight: 700;
+}
+
+.today-session-set.same-perf {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
 }
 
 .today-session-volume {
@@ -636,6 +650,16 @@
   font-family: var(--font-mono);
   color: var(--text-tertiary);
   margin-left: auto;
+}
+
+.today-session-volume.improved {
+  color: #2ed573;
+  font-weight: 700;
+}
+
+.today-session-volume.declined {
+  color: #ef4444;
+  font-weight: 700;
 }
 
 /* ============================================

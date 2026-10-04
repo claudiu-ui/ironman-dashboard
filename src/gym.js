@@ -200,9 +200,20 @@ export function renderGymPage(forceDateStr = null) {
                       ${loggedEx.sets.map((s, si) => {
                         const lastSet = lastSession?.sets?.[si];
                         const improved = lastSet && (s.weight > lastSet.weight || (s.weight === lastSet.weight && s.reps > lastSet.reps));
-                        return `<span class="today-session-set ${improved ? 'improved' : ''}">${s.weight}kg × ${s.reps}${improved ? ' 📈' : ''}</span>`;
+                        const declined = lastSet && (s.weight < lastSet.weight || (s.weight === lastSet.weight && s.reps < lastSet.reps));
+                        const same = lastSet && !improved && !declined;
+                        const cls = improved ? 'improved' : declined ? 'declined' : same ? 'same-perf' : '';
+                        const emoji = improved ? ' 📈' : declined ? ' 📉' : same ? '' : '';
+                        return `<span class="today-session-set ${cls}">${s.weight}kg × ${s.reps}${emoji}</span>`;
                       }).join('')}
-                      ${loggedEx.totalVolume ? `<span class="today-session-volume">Vol: ${loggedEx.totalVolume}kg</span>` : ''}
+                      ${(() => {
+                        const todayVol = loggedEx.totalVolume;
+                        const lastVol = lastSession?.totalVolume;
+                        if (!todayVol) return '';
+                        if (lastVol && todayVol > lastVol) return `<span class="today-session-volume improved">Vol: ${todayVol}kg 📈</span>`;
+                        if (lastVol && todayVol < lastVol) return `<span class="today-session-volume declined">Vol: ${todayVol}kg 📉</span>`;
+                        return `<span class="today-session-volume">Vol: ${todayVol}kg</span>`;
+                      })()}
                     </div>
                   ` : ''}
                 </div>
