@@ -96,11 +96,16 @@ export function renderGymPage(forceDateStr = null) {
           : (session.exercises && Array.isArray(session.exercises.exercises) ? session.exercises.exercises : null);
           
         if (exercisesArr) {
-          let ex = exercisesArr.find(e => e.name === exerciseName);
-          if (!ex) {
-            const exNameLower = exerciseName.toLowerCase();
-            ex = exercisesArr.find(e => e.name && (e.name.toLowerCase().includes(exNameLower) || exNameLower.includes(e.name.toLowerCase())));
-          }
+          const normalize = (n) => {
+            if (!n) return '';
+            return n.toLowerCase()
+                    .replace(/\(superset.*?\)/gi, '')
+                    .replace(/\([^)]*\)/g, '') // remove anything in parentheses
+                    .replace(/\s+/g, ' ')
+                    .trim();
+          };
+          const targetNorm = normalize(exerciseName);
+          let ex = exercisesArr.find(e => normalize(e.name) === targetNorm);
 
           if (ex && ex.sets && ex.sets.length > 0) {
             console.log(`Found past session for ${exerciseName} on date ${date}:`, ex);
