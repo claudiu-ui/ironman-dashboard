@@ -314,7 +314,8 @@ export function getBMR() {
 // Get dynamic nutrition targets based on daily active calories (from Coros) and TSS
 export function getDailyNutritionTargets(activeCalories = 0, totalTSS = 0) {
   const bmr = getBMR();
-  const neat = bmr * 1.2; // Sedentary/office multiplier for base day
+  // Base multiplier set to 1.75 for a highly active athlete (Ironman baseline) instead of sedentary 1.2
+  const neat = bmr * 1.75; 
   const targetCalories = Math.round(neat + activeCalories);
   
   let dayType = 'moderate';
