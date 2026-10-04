@@ -442,8 +442,9 @@ function buildApp() {
           // Hide default log button if it's a gym session (gym card has its own)
           if (type === 'gym' || type === 'conditioning') {
             document.getElementById('wd-log-btn').style.display = 'none';
+            // Keep skip button visible for gym sessions too
             const skipBtn = document.getElementById('wd-skip-btn');
-            if (skipBtn) skipBtn.style.display = 'none';
+            if (skipBtn) skipBtn.style.display = '';
             
             // Add custom edit program button for gym sessions
             const editProgBtn = document.createElement('button');
@@ -632,17 +633,69 @@ function buildApp() {
   });
 
   document.getElementById('wd-skip-btn')?.addEventListener('click', () => {
-    import('./storage.js').then(({ storage }) => {
-      storage.saveWorkout(currentWdDate, {
-        type: currentWdType,
-        isSkipped: true,
-        notes: 'Sesiune Skipped ⏭️',
-        distance: 0,
-        duration: 0,
-        hr: 0
+    // Show a skip reason modal instead of silent skip
+    const skipModal = document.createElement('div');
+    skipModal.className = 'modal-overlay active';
+    skipModal.style.zIndex = '9999';
+    skipModal.innerHTML = `
+      <div class="modal" style="max-width: 420px;">
+        <div class="modal-title">⏭️ Marchează ca Sărit</div>
+        <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: var(--space-lg);">
+          De ce ai sărit această sesiune? (opțional, ajută la analiza pattern-urilor)
+        </p>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: var(--space-md);">
+          ${['😴 Prea obosit', '🤕 Accidentat / durere', '⏰ Lipsă de timp', '😷 Bolnav', '🌧️ Condiții nefavorabile', '🧠 Zi grea mentală', '✈️ Deplasare / călătorie'].map(reason => `
+            <button class="skip-reason-chip" data-reason="${reason}" style="
+              padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border-subtle);
+              background: var(--bg-glass); color: var(--text-secondary); cursor: pointer;
+              font-size: 12px; transition: all 0.15s;
+            ">${reason}</button>
+          `).join('')}
+        </div>
+        <textarea id="skip-reason-input" class="form-input" rows="2" placeholder="Sau scrie motivul tău..." style="width: 100%; margin-bottom: var(--space-lg);"></textarea>
+        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+          <button class="btn btn-ghost" id="skip-cancel">Anulează</button>
+          <button class="btn btn-primary" id="skip-confirm" style="background: var(--warning); border-color: var(--warning);">⏭️ Marchează Sărit</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(skipModal);
+
+    // Chip selection
+    skipModal.querySelectorAll('.skip-reason-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        skipModal.querySelectorAll('.skip-reason-chip').forEach(c => {
+          c.style.background = 'var(--bg-glass)';
+          c.style.color = 'var(--text-secondary)';
+          c.style.borderColor = 'var(--border-subtle)';
+        });
+        chip.style.background = 'rgba(234, 179, 8, 0.15)';
+        chip.style.color = 'var(--warning)';
+        chip.style.borderColor = 'var(--warning)';
+        const input = skipModal.querySelector('#skip-reason-input');
+        input.value = chip.dataset.reason;
       });
-      wdModal.classList.remove('active');
-      renderCurrentRoute();
+    });
+
+    skipModal.querySelector('#skip-cancel').addEventListener('click', () => skipModal.remove());
+    skipModal.addEventListener('click', e => { if (e.target === skipModal) skipModal.remove(); });
+
+    skipModal.querySelector('#skip-confirm').addEventListener('click', () => {
+      const reason = skipModal.querySelector('#skip-reason-input').value || 'Sesiune sărită ⏭️';
+      import('./storage.js').then(({ storage }) => {
+        storage.saveWorkout(currentWdDate, {
+          type: currentWdType,
+          isSkipped: true,
+          notes: reason,
+          distance: 0,
+          duration: 0,
+          hr: 0
+        });
+        skipModal.remove();
+        wdModal.classList.remove('active');
+        renderCurrentRoute();
+        if (window.showToast) window.showToast('⏭️ Sesiune marcată ca sărită');
+      });
     });
   });
 

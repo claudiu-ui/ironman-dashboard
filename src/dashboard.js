@@ -397,13 +397,13 @@ export function renderDashboard() {
                   hrZoneLabel = zone ? `Z${zone.zone}` : '';
                 }
 
-                // Skipped styles
+                // Skipped styles - amber/orange instead of gray so it stands out
                 const blockStyle = isSkipped 
-                  ? `opacity: 0.4; filter: grayscale(100%); cursor: grab; transition: transform 0.2s; border: 1px dashed var(--border-subtle);`
+                  ? `opacity: 0.75; background: rgba(234,179,8,0.08); border: 1px dashed rgba(234,179,8,0.5); cursor: pointer; transition: transform 0.2s;`
                   : `${isRestDay ? 'opacity: 0.4;' : ''} cursor: grab; transition: transform 0.2s, filter 0.2s; ${isCompleted ? 'border-color: var(--success); box-shadow: 0 0 8px rgba(34, 197, 94, 0.15);' : ''} ${s._morphedTo ? 'border-style: dashed; border-color: var(--warning);' : ''}`;
                 
                 const badgeHtml = isSkipped 
-                  ? `<span class="session-completed-badge" style="background: var(--danger); font-size: 10px; padding: 2px 4px; border-radius: 4px;">Skipped</span>`
+                  ? `<span class="session-completed-badge" style="background: rgba(234,179,8,0.8); color: #000; font-size: 10px; padding: 2px 5px; border-radius: 4px; font-weight: 700;">⏭️ SĂRIT</span>`
                   : (isCompleted ? `<span class="session-completed-badge" ${s._morphedTo ? 'style="background: var(--warning);"' : ''}>${s._morphedTo ? '⚠️' : '✅'}</span>` : '');
 
                 return `
@@ -419,6 +419,9 @@ export function renderDashboard() {
                   ${s.time ? `<span class="session-time">${s.time}</span>` : ''}
                   <span class="session-title">${renderIcon} ${isSkipped ? `<del>${renderTitle}</del>` : renderTitle}</span>
                   <span class="session-detail">${displayDetail}</span>
+                  ${isSkipped && completed?.notes && completed.notes !== 'Sesiune Skipped ⏭️' && completed.notes !== 'Sesiune sărită ⏭️' ? `
+                    <span style="font-size: 10px; color: rgba(234,179,8,0.8); display: block; margin-top: 2px; line-height: 1.3; white-space: normal;">${completed.notes}</span>
+                  ` : ''}
                   ${isCompleted && !isSkipped ? `
                     <div class="session-actual-data">
                       ${actualDist > 0 ? `<span class="actual-metric">${actualDist.toFixed(1)}km</span>` : ''}
