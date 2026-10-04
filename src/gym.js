@@ -538,7 +538,8 @@ export function renderGymPage(forceDateStr = null) {
           }).join('')}
         </div>
 
-        <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: var(--space-lg); padding-top: var(--space-md); border-top: 1px solid var(--border-subtle);">
+        <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: var(--space-lg); padding-top: var(--space-md); border-top: 1px solid var(--border-subtle); flex-wrap: wrap;">
+          <button type="button" class="btn btn-ghost" id="gym-log-edit-prog" style="margin-right: auto; color: var(--accent);">⚙️ Modifică Structura Programului</button>
           <button type="button" class="btn btn-ghost" id="gym-log-cancel">Anulează</button>
           <button type="button" class="btn btn-primary" id="gym-log-save">💾 Salvează Sesiunea</button>
         </div>
@@ -550,6 +551,22 @@ export function renderGymPage(forceDateStr = null) {
     // Close handlers
     modal.querySelector('#gym-log-cancel').addEventListener('click', () => modal.remove());
     modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+    
+    // Edit program structure handler
+    modal.querySelector('#gym-log-edit-prog').addEventListener('click', () => {
+      // Close all modals
+      document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+      modal.remove();
+      
+      // Navigate to gym page and trigger edit mode
+      window.location.hash = '#/gym';
+      setTimeout(() => {
+        const toggleEditBtn = document.getElementById('toggle-edit-mode');
+        if (toggleEditBtn && !toggleEditBtn.innerHTML.includes('Salvează')) {
+          toggleEditBtn.click();
+        }
+      }, 150);
+    });
 
     // Add Set buttons
     modal.querySelectorAll('.gym-add-set-btn').forEach(btn => {
