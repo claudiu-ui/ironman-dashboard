@@ -325,8 +325,9 @@ export function renderGymPage(forceDateStr = null) {
       page.querySelectorAll('.gym-card-toggle').forEach(el => {
         el.addEventListener('click', () => {
           const key = el.dataset.key;
-          const container = page.querySelector(`#exercises-container-${key}`);
-          const icon = page.querySelector(`#toggle-icon-${key}`);
+          // Use document.getElementById or relative query so it works even if detached from page
+          const container = document.getElementById(`exercises-container-${key}`);
+          const icon = document.getElementById(`toggle-icon-${key}`);
           if (container && icon) {
             const isCollapsed = container.style.display === 'none';
             if (isCollapsed) {

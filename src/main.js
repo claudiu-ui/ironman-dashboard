@@ -440,9 +440,43 @@ function buildApp() {
           document.getElementById('wd-results-content').innerHTML = '<p style="color: var(--text-tertiary); text-align: center; padding: var(--space-xl);">Acest antrenament nu a fost încă completat. Finalizează-l mai întâi!</p>';
           
           // Hide default log button if it's a gym session (gym card has its own)
-          document.getElementById('wd-log-btn').style.display = (type === 'gym' || type === 'conditioning') ? 'none' : '';
-          const skipBtn = document.getElementById('wd-skip-btn');
-          if (skipBtn) skipBtn.style.display = (type === 'gym' || type === 'conditioning') ? 'none' : '';
+          if (type === 'gym' || type === 'conditioning') {
+            document.getElementById('wd-log-btn').style.display = 'none';
+            const skipBtn = document.getElementById('wd-skip-btn');
+            if (skipBtn) skipBtn.style.display = 'none';
+            
+            // Add custom edit program button for gym sessions
+            const editProgBtn = document.createElement('button');
+            editProgBtn.className = 'btn btn-ghost';
+            editProgBtn.innerHTML = '⚙️ Personalizează Programul';
+            editProgBtn.style.marginRight = 'auto';
+            editProgBtn.onclick = () => {
+              wdModal.classList.remove('active');
+              window.location.hash = '#/gym';
+              setTimeout(() => {
+                const toggleEditBtn = document.getElementById('toggle-edit-mode');
+                if (toggleEditBtn && !toggleEditBtn.innerHTML.includes('Salvează')) {
+                  toggleEditBtn.click();
+                }
+              }, 100);
+            };
+            
+            // Insert it at the start of the footer buttons
+            const footer = document.getElementById('wd-log-btn').parentElement;
+            // Remove any existing one first to avoid duplicates
+            const existingBtn = footer.querySelector('.edit-gym-prog-btn');
+            if (existingBtn) existingBtn.remove();
+            
+            editProgBtn.classList.add('edit-gym-prog-btn');
+            footer.insertBefore(editProgBtn, footer.firstChild);
+          } else {
+            document.getElementById('wd-log-btn').style.display = '';
+            const skipBtn = document.getElementById('wd-skip-btn');
+            if (skipBtn) skipBtn.style.display = '';
+            
+            const existingBtn = document.getElementById('wd-log-btn').parentElement.querySelector('.edit-gym-prog-btn');
+            if (existingBtn) existingBtn.remove();
+          }
         }
       });
       
