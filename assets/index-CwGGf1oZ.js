@@ -825,12 +825,13 @@ var e=Object.defineProperty,t=(t,n)=>{let r={};for(var i in t)e(r,i,{get:t[i],en
             `}).join(``)}
         </div>
 
-        <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: var(--space-lg); padding-top: var(--space-md); border-top: 1px solid var(--border-subtle);">
+        <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: var(--space-lg); padding-top: var(--space-md); border-top: 1px solid var(--border-subtle); flex-wrap: wrap;">
+          <button type="button" class="btn btn-ghost" id="gym-log-edit-prog" style="margin-right: auto; color: var(--accent);">⚙️ Modifică Structura Programului</button>
           <button type="button" class="btn btn-ghost" id="gym-log-cancel">Anulează</button>
           <button type="button" class="btn btn-primary" id="gym-log-save">💾 Salvează Sesiunea</button>
         </div>
       </div>
-    `,document.body.appendChild(s),s.querySelector(`#gym-log-cancel`).addEventListener(`click`,()=>s.remove()),s.addEventListener(`click`,e=>{e.target===s&&s.remove()}),s.querySelectorAll(`.gym-add-set-btn`).forEach(e=>{e.addEventListener(`click`,()=>{let t=parseInt(e.dataset.ex),n=e.closest(`.gym-log-sets`).querySelectorAll(`.gym-log-set-row`).length,r=document.createElement(`div`);r.className=`gym-log-set-row`,r.innerHTML=`
+    `,document.body.appendChild(s),s.querySelector(`#gym-log-cancel`).addEventListener(`click`,()=>s.remove()),s.addEventListener(`click`,e=>{e.target===s&&s.remove()}),s.querySelector(`#gym-log-edit-prog`).addEventListener(`click`,()=>{document.querySelectorAll(`.modal-overlay`).forEach(e=>e.classList.remove(`active`)),s.remove(),window.location.hash=`#/gym`,setTimeout(()=>{let e=document.getElementById(`toggle-edit-mode`);e&&!e.innerHTML.includes(`Salvează`)&&e.click()},150)}),s.querySelectorAll(`.gym-add-set-btn`).forEach(e=>{e.addEventListener(`click`,()=>{let t=parseInt(e.dataset.ex),n=e.closest(`.gym-log-sets`).querySelectorAll(`.gym-log-set-row`).length,r=document.createElement(`div`);r.className=`gym-log-set-row`,r.innerHTML=`
           <span class="gym-log-set-num" style="width: 30px;">${n+1}</span>
           <input type="number" class="form-input gym-log-weight" data-ex="${t}" data-set="${n}" value="" placeholder="kg" step="0.5" style="flex: 1; text-align: center; padding: 6px;" />
           <input type="number" class="form-input gym-log-reps" data-ex="${t}" data-set="${n}" value="" placeholder="reps" style="flex: 1; text-align: center; padding: 6px;" />
