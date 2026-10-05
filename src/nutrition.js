@@ -36,11 +36,21 @@ export function renderNutritionPage() {
     const dayIdx = dayMap[dateObj.getDay()];
     const todaysPlan = plannedSchedule[dayIdx]?.sessions || [];
     
+    const loggedTypes = workouts.map(w => w.type);
+    
     let plannedCalories = 0;
     let plannedTSS = 0;
 
     todaysPlan.forEach(s => {
       if (s.type === 'rest' || s.type === 'other') return;
+      
+      // If we already logged a workout of this type, we don't need its estimated calories
+      // because we already have its REAL calories in `activeCalories`.
+      const loggedIdx = loggedTypes.indexOf(s.type);
+      if (loggedIdx !== -1) {
+         loggedTypes.splice(loggedIdx, 1);
+         return; // Skip estimate for this session
+      }
       
       let durationMin = 60;
       const durMatch = (s.detail || '').match(/(\d+)min/);
@@ -60,8 +70,8 @@ export function renderNutritionPage() {
       else if (s.type === 'gym' || s.type === 'conditioning') { plannedCalories += (durationMin * 6); plannedTSS += (durationMin * 0.7); }
     });
 
-    const finalActiveCalories = Math.max(activeCalories, Math.round(plannedCalories));
-    const finalTSS = Math.max(totalTSS, Math.round(plannedTSS));
+    const finalActiveCalories = Math.round(activeCalories + plannedCalories);
+    const finalTSS = Math.round(totalTSS + plannedTSS);
 
     // Get dynamic targets
     const targets = getDailyNutritionTargets(finalActiveCalories, finalTSS);
