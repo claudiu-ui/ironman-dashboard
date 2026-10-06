@@ -346,7 +346,12 @@ export function renderDashboard() {
               
               // 3. First pass: exact type match
               renderSessions.forEach(s => {
-                const matchIdx = dayLogs.findIndex(log => log.type === s.type);
+                const matchIdx = dayLogs.findIndex(log => {
+                  if (log.type === s.type) return true;
+                  // Treat gym and conditioning as interchangeable for matching
+                  if ((log.type === 'gym' || log.type === 'conditioning') && (s.type === 'gym' || s.type === 'conditioning')) return true;
+                  return false;
+                });
                 if (matchIdx !== -1) {
                   s._log = dayLogs[matchIdx];
                   dayLogs.splice(matchIdx, 1); // consumed
