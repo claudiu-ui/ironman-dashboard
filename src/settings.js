@@ -234,13 +234,13 @@ export async function syncIntervalsWorkouts(athleteId, apiKey) {
     if (t.includes('run')) type = 'run';
     else if (t.includes('ride') || t.includes('bike') || t.includes('virtualride')) type = 'bike';
     else if (t.includes('swim')) type = 'swim';
-    else if (t.includes('weight') || t.includes('strength')) type = 'gym';
+    else if (t.includes('weight') || t.includes('strength') || t.includes('workout') || t.includes('fitness') || t.includes('crossfit') || t.includes('hiit')) type = 'gym';
 
     // Extract ALL relevant metrics
     const workout = {
       type: type,
       distance: activity.distance ? (activity.distance / 1000).toFixed(2) : 0,
-      duration: activity.moving_time ? Math.round(activity.moving_time / 60) : 0,
+      duration: activity.moving_time ? Math.round(activity.moving_time / 60) : (activity.elapsed_time ? Math.round(activity.elapsed_time / 60) : 0),
       hr: activity.average_heartrate ? Math.round(activity.average_heartrate) : 0,
       hrMax: activity.max_heartrate ? Math.round(activity.max_heartrate) : 0,
       rpe: activity.rpe || 0,
